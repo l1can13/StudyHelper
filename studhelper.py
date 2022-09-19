@@ -1,5 +1,23 @@
 import telebot
+import pymysql.cursors
+from config import host, user, password, db_name
 from telebot import types
+
+
+def connect_to_db():
+    try:
+        connection = pymysql.connect(
+            host=host,
+            port=1500,
+            user=user,
+            password=password,
+            database=db_name,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+        print("Connected successfully!")
+        return connection
+    except Exception as ex:
+        print("Connection error!", ex)
 
 
 token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
@@ -7,6 +25,7 @@ bot = telebot.TeleBot(token)
 markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 markup_after_creating_team = types.ReplyKeyboardMarkup(resize_keyboard=True)
 markup_yes_no = types.ReplyKeyboardMarkup(resize_keyboard=True)
+connection = connect_to_db()
 
 
 @bot.message_handler(commands=['start'])
@@ -26,7 +45,7 @@ def message_reply(message):
     if message.text == "Регистрация команды":
         bot.send_message(message.chat.id, "Заполните форму ниже")
         msg = bot.send_message(message.chat.id, "Введите имя команды: ")
-        bot.register_next_step_handler(msg, after_name_of_team_text) # после сообщения от юзера переходим в функцию
+        bot.register_next_step_handler(msg, after_name_of_team_text)  # после сообщения от юзера переходим в функцию
 
 
 def after_name_of_team_text(message):
@@ -37,7 +56,7 @@ def after_name_of_team_text(message):
     item3 = types.KeyboardButton("Удалить участника")
     markup_after_creating_team.add(item3)
     msg = bot.send_message(message.chat.id, "Имя вашей команды - " + message.text,
-                     reply_markup=markup_after_creating_team) # в message.text хранится то, что написал чел
+                           reply_markup=markup_after_creating_team)  # в message.text хранится то, что написал чел
     bot.register_next_step_handler(msg, after_team_registered_text)
 
 
@@ -51,6 +70,7 @@ def after_team_registered_text(message):
     elif message.text == "Удалить участника":
         msg = bot.send_message(message.chat.id, "Выберите участника которого хотите удалить")
         bot.register_next_step_handler(msg, delete_team_member)
+
 
 def after_team_delete_text(message):
     if message.text == "Да":
@@ -71,5 +91,3 @@ def delete_team_member(message):
 
 
 bot.infinity_polling()
-
-
