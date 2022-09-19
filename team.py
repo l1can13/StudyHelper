@@ -6,7 +6,7 @@ from config import host, user, password, db_name
 def connect_to_db():
     try:
         connection = pymysql.connect(
-            host=host,
+            host=host, # данные берем из файла config (в принципе менять их не нужно)
             port=3306,
             user=user,
             password=password,
@@ -20,6 +20,7 @@ def connect_to_db():
 
 
 class Team:
+    # Конструктор
     def __init__(self, *args):
         if len(args) == 2:
             self.teamname = args[0]
@@ -33,7 +34,7 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`) VALUES (%s, %s)"
+                sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`) VALUES (%s, %s)" # строка для SQL-запроса
                 cursor.execute(sql_request, (self.teamname, self.admin))
                 connection.commit()
         finally:
@@ -44,12 +45,13 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "DELETE FROM `Команды` WHERE `Название` = %s"
+                sql_request = "DELETE FROM `Команды` WHERE `Название` = %s" # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 connection.commit()
         finally:
             connection.close()
 
+    # Getters/Setters
     def set_admin(self, admin):
         self.admin = admin
 
