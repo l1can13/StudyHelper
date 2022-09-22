@@ -19,6 +19,7 @@ class StudHelperBot:
     def start():
         StudHelperBot.bot.infinity_polling()
 
+
     def start_message(self, message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1 = types.KeyboardButton("Регистрация команды")
