@@ -28,6 +28,8 @@ class Team:
         else:
             self.teamname = None
             self.admin = None
+            self.size_of_team = None
+            self.counter_of_people = None
 
     # Метод для вставки новой команды в базу данных
     def add(self):
@@ -63,3 +65,15 @@ class Team:
 
     def get_name(self):
         return self.teamname
+
+    def get_size_of_team(self):
+        return self.size_of_team
+
+    def set_size_of_team(self, size):
+        self.size_of_team = size
+
+    def get_counter_of_people(self):
+        return self.counter_of_people
+
+    def set_counter_of_people(self, counter):
+        self.counter_of_people = counter

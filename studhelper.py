@@ -10,7 +10,7 @@ class StudHelperBot:
 
     def __init__(self):
         self.start_message = self.bot.message_handler(commands=['start'])(self.start_message)
-        self.button_message = self.bot.message_handler(commands=['button'])(self.button_message)
+        #self.button_message = self.bot.message_handler(commands=['button'])(self.button_message)
         self.message_reply = self.bot.message_handler(content_types='text')(self.message_reply)
         self.user = None
         self.team = None
@@ -19,7 +19,6 @@ class StudHelperBot:
     def start():
         StudHelperBot.bot.infinity_polling()
 
-
     def start_message(self, message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1 = types.KeyboardButton("Регистрация команды")
@@ -27,18 +26,54 @@ class StudHelperBot:
         markup.add(item1)
         self.bot.send_message(message.chat.id, "Привет " + self.user.get_username(), reply_markup=markup)
 
-    def button_message(self, message):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item1 = types.KeyboardButton("Регистрация команды")
-        markup.add(item1)
-        self.bot.send_message(message.chat.id, 'Выберите что вам надо', reply_markup=markup)
+    #def button_message(self, message):
+     #   markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+      #  item1 = types.KeyboardButton("Регистрация команды")
+       # markup.add(item1)
+        #self.bot.send_message(message.chat.id, 'Выберите что вам надо', reply_markup=markup)
 
     def message_reply(self, message):
         if message.text == "Регистрация команды":
             self.bot.send_message(message.chat.id, "Заполните форму ниже")
             msg = self.bot.send_message(message.chat.id, "Введите имя команды: ")
-            self.bot.register_next_step_handler(msg,
-                                                self.after_name_of_team_text)  # после сообщения от юзера переходим в функцию
+
+            self.bot.register_next_step_handler(msg, self.size_of_team)
+
+            #self.bot.register_next_step_handler(msg,
+             #                                   self.after_name_of_team_text)  # после сообщения от юзера переходим в функцию
+
+    def size_of_team(self, message):
+        name_of_team = message.text
+        self.bot.send_message(message.chat.id, "Имя команды: " + name_of_team)
+        msg = self.bot.send_message(message.chat.id, "Введите количество человек в команде: ")
+        self.bot.register_next_step_handler(msg, self.name_of_player)
+    def name_of_player(self, message):
+        self.team.set_size_of_team(int(message.text))
+        self.bot.send_message(message.chat.id, "Размер команды: " + self.team.get_size_of_team())
+        msg = self.bot.send_message(message.chat.id, "Введите имя участника")
+        self.bot.register_next_step_handler(msg, self.surname_of_player)
+    def name_of_player2(self, message):
+        msg = self.bot.send_message(message.chat.id, "Введите имя участника")
+        self.bot.register_next_step_handler(msg, self.surname_of_player)
+    def surname_of_player(self, message):
+        self.team.set_counter_of_people(self.team.get_counter_of_people() + 1)
+        nm_of_player = message.text
+        self.bot.send_message(message.chat.id, "Имя участника: " + nm_of_player)
+        msg = self.bot.send_message(message.chat.id, "Введите фамилию участника")
+        self.bot.register_next_step_handler(msg, self.role_of_player)
+    def role_of_player(self, message):
+        surnm_of_player = message.text
+        self.bot.send_message(message.chat.id, "Фамилия участника: " + surnm_of_player)
+        msg = self.bot.send_message(message.chat.id, "Введите роль участника")
+        self.bot.register_next_step_handler(msg, self.end_of_info_about_one_player)
+    def end_of_info_about_one_player(self, message):
+        rl_of_player = message.text
+        self.bot.send_message(message.chat.id, "Роль участника: " + rl_of_player)
+        msg = self.bot.send_message(message.chat.id, "Конец заполнения человека")
+        if self.team.get_counter_of_people() == self.team.get_size_of_team():
+            self.bot.register_next_step_handler(msg, self.after_name_of_team_text)
+        else:
+            self.bot.register_next_step_handler(msg, self.name_of_player2)
 
     def after_name_of_team_text(self, message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
