@@ -25,11 +25,13 @@ class Team:
         if len(args) == 2:
             self.teamname = args[0]
             self.admin = args[1]
+            self.size_of_team = None
+            self.counter_of_people = 0
         else:
             self.teamname = None
             self.admin = None
             self.size_of_team = None
-            self.counter_of_people = None
+            self.counter_of_people = 0
 
     # Метод для вставки новой команды в базу данных
     def add(self):
