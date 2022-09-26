@@ -71,7 +71,10 @@ class StudHelperBot:
     def end_of_info_about_one_player(self, message): # тут есть ветки, прыгаем в одну, если ввели всех участников, и в другую, если еще не всех
         rl_of_player = message.text
         self.user.set_role(rl_of_player)
-        msg = self.bot.send_message(message.chat.id, "Конец заполнения человека! Введите далее, чтобы продолжить")
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1 = types.KeyboardButton("Далее")
+        markup.add(item1)
+        msg = self.bot.send_message(message.chat.id, "Конец заполнения человека! Нажмите далее, чтобы продолжить", reply_markup=markup)
         self.user.set_teamname(self.team.get_name())
         self.user.add_user()
         if self.team.get_counter_of_people() == self.team.get_size_of_team():
