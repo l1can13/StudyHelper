@@ -1,8 +1,8 @@
 import telebot
 from team import Team
 from user import User
-from telebot import types
 
+from telebot import types
 
 class StudHelperBot:
     token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
