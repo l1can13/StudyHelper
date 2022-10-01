@@ -94,3 +94,18 @@ class User:
                 connection.commit()
         finally:
             connection.close()
+
+    # Метод для проверки наличия пользователя в команде
+    def is_in_team(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                user_from_db = "SELECT `Команда` FROM `Пользователи` WHERE `User_name` = %s"
+                cursor.execute(user_from_db, self.username)
+                connection.commit()
+        finally:
+            connection.close()
+
+        if user_from_db != "":
+            return True
+        return False
