@@ -46,7 +46,7 @@ class Team:
         finally:
             connection.close()
 
-
+    #Метод для заполнения поля 'Продукты'
     def add_product(self):
         connection = connect_to_db()
         try:
