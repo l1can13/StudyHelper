@@ -36,11 +36,17 @@ class StudHelperBot:
         if message.text == "Регистрация команды":
             self.bot.send_message(message.chat.id, "Заполните форму ниже")
             msg = self.bot.send_message(message.chat.id, "Введите имя команды: ")
-            self.bot.register_next_step_handler(msg, self.size_of_team)
-    def size_of_team(self, message): # функция, где сохраняется в бд имя команды и запрашивается количество человек в команде
+            self.bot.register_next_step_handler(msg, self.product)
+
+    def product(self, message): # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
         self.team = Team(name_of_team, self.user.get_username())
         self.team.add()
+        msg = self.bot.send_message(message.chat.id, "Введите название продукта: ")
+        self.bot.register_next_step_handler(msg, self.size_of_team)
+    def size_of_team(self, message): # функция, где сохраняется название продукта и запрашивается количество человек в команде
+        self.team.set_product(message.text)
+        self.team.add_product()
         msg = self.bot.send_message(message.chat.id, "Введите количество человек в команде: ")
         self.bot.register_next_step_handler(msg, self.name_of_player)
     def name_of_player(self, message): # функция, где сохраняется в бд количество человек в команде и запрашивается имя участника команды

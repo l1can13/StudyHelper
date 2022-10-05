@@ -26,11 +26,13 @@ class Team:
             self.teamname = args[0]
             self.admin = args[1]
             self.size_of_team = None
+            self.product = None
             self.counter_of_people = 0
         else:
             self.teamname = None
             self.admin = None
             self.size_of_team = None
+            self.product = None
             self.counter_of_people = 0
 
     # Метод для вставки новой команды в базу данных
@@ -44,6 +46,16 @@ class Team:
         finally:
             connection.close()
 
+    #Метод для заполнения поля 'Продукты'
+    def add_product(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "UPDATE `Команды` SET Продукт = (%s) WHERE Название = (%s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.product, self.teamname))
+                connection.commit()
+        finally:
+            connection.close()
     # Метод для удаления определенной команды из базы данных
     def delete(self):
         connection = connect_to_db()
@@ -68,6 +80,10 @@ class Team:
     def get_name(self):
         return self.teamname
 
+    def set_product(self,product):
+        self.product = product
+    def get_product(self):
+        return self.product
     def get_size_of_team(self):
         return self.size_of_team
 
