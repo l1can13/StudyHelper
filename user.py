@@ -98,14 +98,30 @@ class User:
     # Метод для проверки наличия пользователя в команде
     def is_in_team(self):
         connection = connect_to_db()
+        check = ''
         try:
             with connection.cursor() as cursor:
                 user_from_db = "SELECT `Команда` FROM `Пользователи` WHERE `User_name` = %s"
                 cursor.execute(user_from_db, self.username)
+                check = cursor.fetchall()
                 connection.commit()
         finally:
             connection.close()
+        if not check:
+            return False
+        return True
 
-        if user_from_db != "":
-            return True
-        return False
+    def is_admin(self):
+        connection = connect_to_db()
+        check = ''
+        try:
+            with connection.cursor() as cursor:
+                user_from_db = "SELECT `Администратор` FROM `Команды` WHERE `Администратор` = %s"
+                cursor.execute(user_from_db, self.username)
+                check = cursor.fetchall()
+                connection.commit()
+        finally:
+            connection.close()
+        if not check:
+            return False
+        return True

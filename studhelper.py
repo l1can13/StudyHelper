@@ -24,14 +24,17 @@ class StudHelperBot:
         StudHelperBot.bot.infinity_polling()
 
     def start_message(self, message):
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item1 = types.KeyboardButton("Регистрация команды")
-        item2 = types.KeyboardButton("Создать код-приглашение")
-        item3 = types.KeyboardButton("Ввести код-приглашение")
+
         self.user = User(None, None, message.from_user.username)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1 = 0
+        if self.user.is_admin():
+            item1 = types.KeyboardButton("Создать код-приглашение")
+        else:
+            item1 = types.KeyboardButton("Регистрация команды")
+        item2 = types.KeyboardButton("Ввести код-приглашение")
         markup.add(item1)
         markup.add(item2)
-        markup.add(item3)
         self.bot.send_message(message.chat.id, "Привет " + self.user.get_username(), reply_markup=markup)
 
     #def button_message(self, message):
@@ -46,8 +49,6 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Введите имя команды: ")
             self.bot.register_next_step_handler(msg, self.product)
         elif message.text == "Создать код-приглашение":
-            # if (current_user == 'admin'):
-            # проверка на то, является ли чел админом
             msg = self.bot.send_message(message.chat.id, "Введите роль того, кого хотите пригласить: ")
             self.role_of_user = message.text
             self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
@@ -88,7 +89,6 @@ class StudHelperBot:
         return ans
 
     def accept_invitation(self, message):
-        print(self.user.get_username())
         if message.text == self.transfer_str_int(self.user.get_username()): # успешно принимаем в команду
             self.user.set_role(self.role_of_user)
             self.user.set_username(self.tg_name_of_user)
