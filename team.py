@@ -6,7 +6,7 @@ from config import host, user, password, db_name
 def connect_to_db():
     try:
         connection = pymysql.connect(
-            host=host, # данные берем из файла config (в принципе менять их не нужно)
+            host=host,  # данные берем из файла config (в принципе менять их не нужно)
             port=3306,
             user=user,
             password=password,
@@ -40,13 +40,13 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`) VALUES (%s, %s)" # строка для SQL-запроса
+                sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`) VALUES (%s, %s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.teamname, self.admin))
                 connection.commit()
         finally:
             connection.close()
 
-    #Метод для заполнения поля 'Продукты'
+    # Метод для заполнения поля 'Продукты'
     def add_product(self):
         connection = connect_to_db()
         try:
@@ -56,12 +56,17 @@ class Team:
                 connection.commit()
         finally:
             connection.close()
+
     # Метод для удаления определенной команды из базы данных
     def delete(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "DELETE FROM `Команды` WHERE `Название` = %s" # строка для SQL-запроса
+                sql_request = "DELETE FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.teamname)
+                connection.commit()
+
+                sql_request = "DELETE FROM `Пользователи` WHERE `Команда` = %s"
                 cursor.execute(sql_request, self.teamname)
                 connection.commit()
         finally:
@@ -80,10 +85,12 @@ class Team:
     def get_name(self):
         return self.teamname
 
-    def set_product(self,product):
+    def set_product(self, product):
         self.product = product
+
     def get_product(self):
         return self.product
+
     def get_size_of_team(self):
         return self.size_of_team
 
