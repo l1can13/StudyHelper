@@ -53,14 +53,15 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ")
             self.bot.register_next_step_handler(msg, self.accept_invitation)
         elif message.text == "Удалить команду":
-            self.team.delete()
             item1 = types.KeyboardButton("Регистрация команды")
             item2 = types.KeyboardButton("Присоединиться к команде")
+
+            self.team.delete()
 
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(item1)
             markup.add(item2)
-            self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!")
+            msg = self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
 
     def get_role_to_create_invitation(self, message):
         self.bot.send_message(message.chat.id, "Привет " + message.text)
