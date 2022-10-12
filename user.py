@@ -1,10 +1,11 @@
 from config import host, user, password, db_name
 import pymysql.cursors
 
+
 def connect_to_db():
     try:
         connection = pymysql.connect(
-            host=host, # данные берем из файла config (в принципе менять их не нужно)
+            host=host,  # данные берем из файла config (в принципе менять их не нужно)
             port=3306,
             user=user,
             password=password,
@@ -15,6 +16,7 @@ def connect_to_db():
         return connection
     except Exception as ex:
         print("Connection error!", ex)
+
 
 class User:
     def __init__(self, *args):
@@ -80,7 +82,8 @@ class User:
         try:
             with connection.cursor() as cursor:
                 insert_user = "INSERT INTO `Пользователи` (`Имя`, `Фамилия`, `User_name`, `Команда`, `Роль`) VALUES (%s, %s, %s, %s, %s);"
-                cursor.execute(insert_user, (self.name, self.surname, self.username, self.teamname, self.role)) # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                cursor.execute(insert_user, (self.name, self.surname, self.username, self.teamname,
+                                             self.role))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
         finally:
             connection.close()
