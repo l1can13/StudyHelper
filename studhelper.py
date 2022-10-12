@@ -16,6 +16,7 @@ class StudHelperBot:
         self.message_reply = self.bot.message_handler(content_types='text')(self.message_reply)
         self.user = None
         self.team = None
+        self.invited_user = None
         self.role_of_user = ''
         self.tg_name_of_user = ''
 
@@ -47,7 +48,6 @@ class StudHelperBot:
             self.bot.register_next_step_handler(msg, self.product)
         elif message.text == "Добавить участника":
             msg = self.bot.send_message(message.chat.id, "Введите роль того, кого хотите пригласить: ")
-            self.role_of_user = message.text
             self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
         elif message.text == "Присоединиться к команде":
             msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ")
@@ -64,12 +64,17 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
 
     def get_role_to_create_invitation(self, message):
-        self.bot.send_message(message.chat.id, "Привет " + message.text)
+        self.invited_user = User()
+        self.role_of_user = message.text
         msg = self.bot.send_message(message.chat.id, "Введите имя пользователя этого человека: ")
-        self.tg_name_of_user = message.text
         self.bot.register_next_step_handler(msg, self.create_invitation)
 
     def create_invitation(self, message):
+        self.tg_name_of_user = message.text
+        self.invited_user.set_role(self.role_of_user)
+        self.invited_user.set_username(self.tg_name_of_user)
+        self.invited_user.set_teamname(self.user.get_teamname())
+        self.invited_user.add_user()
         self.bot.send_message(message.chat.id, str(self.transfer_str_int(message.text)))
 
     def transfer_str_int(self, arg):
@@ -99,6 +104,7 @@ class StudHelperBot:
         if message.text == self.transfer_str_int(self.user.get_username()):  # успешно принимаем в команду
             self.user.set_role(self.role_of_user)
             self.user.set_username(self.tg_name_of_user)
+            self.user.add_user()
             self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
         else:
             self.bot.send_message(message.chat.id, "Проверьте правильность кода")
@@ -113,6 +119,9 @@ class StudHelperBot:
     def after_product(self, message):
         self.team.set_product(message.text)
         self.team.add_product()
+        self.user.set_teamname(self.team.get_name())
+        self.user.set_role("Product Owner")
+        self.user.add_user()
 
         item = types.KeyboardButton("Добавить участника")
         item1 = types.KeyboardButton("Удалить команду")
