@@ -65,6 +65,10 @@ class Team:
                 sql_request = "DELETE FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 connection.commit()
+
+                sql_request = "DELETE FROM `Пользователи` WHERE `Команда` = %s"
+                cursor.execute(sql_request, self.teamname)
+                connection.commit()
         finally:
             connection.close()
 
