@@ -102,9 +102,6 @@ class StudHelperBot:
 
     def accept_invitation(self, message):
         if message.text == self.transfer_str_int(self.user.get_username()):  # успешно принимаем в команду
-            self.user.set_role(self.role_of_user)
-            self.user.set_username(self.tg_name_of_user)
-            self.user.add_user()
             self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
             self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
             msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
