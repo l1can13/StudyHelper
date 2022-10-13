@@ -22,24 +22,29 @@ class User:
     def __init__(self, *args):
         if len(args) == 1:
             self.name = args[0]
+            self.counter_of_people = 0
         elif len(args) == 2:
             self.name = args[0]
             self.surname = args[1]
+            self.counter_of_people = 0
         elif len(args) == 3:
             self.name = args[0]
             self.surname = args[1]
             self.group = args[2]
+            self.counter_of_people = 0
         elif len(args) == 4:
             self.name = args[0]
             self.surname = args[1]
             self.group = args[2]
             self.username = args[3]
+            self.counter_of_people = 0
         elif len(args) == 5:
             self.name = args[0]
             self.surname = args[1]
             self.group = args[2]
             self.username = args[3]
             self.teamname = args[4]
+            self.counter_of_people = 0
         elif len(args) == 6:
             self.name = args[0]
             self.surname = args[1]
@@ -47,6 +52,7 @@ class User:
             self.username = args[3]
             self.teamname = args[4]
             self.role = args[5]
+            self.counter_of_people = 0
         else:
             self.name = None
             self.surname = None
@@ -54,7 +60,14 @@ class User:
             self.username = None
             self.teamname = None
             self.role = None
+            self.counter_of_people = 0
 
+
+    def get_counter_of_people(self):
+        return self.counter_of_people
+
+    def set_counter_of_people(self, counter):
+        self.counter_of_people = counter
     def set_name(self, name):
         self.name = name
 
@@ -139,6 +152,41 @@ class User:
                 sql_request = "UPDATE `Пользователи` SET `Группа` = %s WHERE `User_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.group, self.username))
                 connection.commit()
+        finally:
+            connection.close()
+    def get_role_from_bd(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `Роль` FROM `Пользователи` WHERE `User_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.username)
+                role = cursor.fetchone()
+                connection.commit()
+                return role
+        finally:
+            connection.close()
+
+    def get_teamname_from_bd(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `Команда` FROM `Пользователи` WHERE `User_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.username)
+                tmnm = cursor.fetchone()
+                connection.commit()
+                return tmnm
+        finally:
+            connection.close()
+
+    def get_name_people_of_team(self): # функция для получения фамилий из бд для определенной группы
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `Фамилия` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.teamname)
+                surnames = cursor.fetchall()
+                connection.commit()
+                return surnames
         finally:
             connection.close()
 
