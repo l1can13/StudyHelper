@@ -28,21 +28,29 @@ class User:
         elif len(args) == 3:
             self.name = args[0]
             self.surname = args[1]
-            self.username = args[2]
+            self.group = args[2]
         elif len(args) == 4:
             self.name = args[0]
             self.surname = args[1]
-            self.username = args[2]
-            self.teamname = args[3]
+            self.group = args[2]
+            self.username = args[3]
         elif len(args) == 5:
             self.name = args[0]
             self.surname = args[1]
-            self.username = args[2]
-            self.teamname = args[3]
-            self.role = args[4]
+            self.group = args[2]
+            self.username = args[3]
+            self.teamname = args[4]
+        elif len(args) == 6:
+            self.name = args[0]
+            self.surname = args[1]
+            self.group = args[2]
+            self.username = args[3]
+            self.teamname = args[4]
+            self.role = args[5]
         else:
             self.name = None
             self.surname = None
+            self.group = None
             self.username = None
             self.teamname = None
             self.role = None
@@ -58,6 +66,12 @@ class User:
 
     def get_surname(self):
         return self.surname
+
+    def set_group(self, group):
+        self.group = group
+
+    def get_group(self):
+        return self.group
 
     def set_username(self, username):
         self.username = username
@@ -81,8 +95,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                insert_user = "INSERT INTO `Пользователи` (`Имя`, `Фамилия`, `User_name`, `Команда`, `Роль`) VALUES (%s, %s, %s, %s, %s);"
-                cursor.execute(insert_user, (self.name, self.surname, self.username, self.teamname,
+                insert_user = "INSERT INTO `Пользователи` (`Имя`, `Фамилия`, `Группа`, `User_name`, `Команда`, `Роль`) VALUES (%s, %s, %s, %s, %s, %s);"
+                cursor.execute(insert_user, (self.name, self.surname, self.group, self.username, self.teamname,
                                              self.role))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
         finally:
@@ -94,6 +108,36 @@ class User:
             with connection.cursor() as cursor:
                 delete_user = "DELETE FROM `Пользователи` WHERE `User_name` = %s"
                 cursor.execute(delete_user, self.username)
+                connection.commit()
+        finally:
+            connection.close()
+
+    def add_name(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "UPDATE `Пользователи` SET `Имя` = %s WHERE `User_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.name, self.username))
+                connection.commit()
+        finally:
+            connection.close()
+
+    def add_surname(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "UPDATE `Пользователи` SET `Фамилия` = %s WHERE `User_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.surname, self.username))
+                connection.commit()
+        finally:
+            connection.close()
+
+    def add_group(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "UPDATE `Пользователи` SET `Группа` = %s WHERE `User_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.group, self.username))
                 connection.commit()
         finally:
             connection.close()

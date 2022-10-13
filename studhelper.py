@@ -25,7 +25,7 @@ class StudHelperBot:
         StudHelperBot.bot.infinity_polling()
 
     def start_message(self, message):
-        self.user = User(None, None, message.from_user.username)
+        self.user = User(None, None, None, message.from_user.username)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1 = 0
         item2 = 0
@@ -106,8 +106,30 @@ class StudHelperBot:
             self.user.set_username(self.tg_name_of_user)
             self.user.add_user()
             self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
+            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
+            self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.bot.send_message(message.chat.id, "Проверьте правильность кода")
+
+    def after_name(self, message):
+        name = message.text
+        self.user.set_name(name)
+        self.user.add_name()
+        msg = self.bot.send_message(message.chat.id, "Введите Вашу фамилию:")
+        self.bot.register_next_step_handler(msg, self.after_surname)
+
+    def after_surname(self, message):
+        surname = message.text
+        self.user.set_surname(surname)
+        self.user.add_surname()
+        msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
+        self.bot.register_next_step_handler(msg, self.after_group)
+
+    def after_group(self, message):
+        group = message.text
+        self.user.set_group(group)
+        self.user.add_group()
 
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
@@ -137,3 +159,4 @@ class StudHelperBot:
 
 bot = StudHelperBot()
 bot.start()
+
