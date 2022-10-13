@@ -49,6 +49,12 @@ class StudHelperBot:
         elif message.text == "Добавить участника":
             msg = self.bot.send_message(message.chat.id, "Введите роль того, кого хотите пригласить: ")
             self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
+        elif message.text == "Оценить участников команды":
+            item = types.KeyboardButton("Хорошо")
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(item)
+            msg = self.bot.send_message(message.chat.id, 'Нужно будет поставить оценки всем участникам команды и написать про них отзывы', reply_markup=markup)
+            self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Присоединиться к команде":
             msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ")
             self.bot.register_next_step_handler(msg, self.accept_invitation)
@@ -110,6 +116,8 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Проверьте правильность кода")
 
     def after_name(self, message):
+        self.user.set_role((self.user.get_role_from_bd())['Роль'])
+        self.user.set_teamname((self.user.get_teamname_from_bd())['Команда'])
         name = message.text
         self.user.set_name(name)
         self.user.add_name()
@@ -127,7 +135,15 @@ class StudHelperBot:
         group = message.text
         self.user.set_group(group)
         self.user.add_group()
-        self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!")
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        if self.user.get_role() == 'Product Owner':
+            item1 = types.KeyboardButton("Добавить участника")
+            item2 = types.KeyboardButton("Удалить команду")
+            markup.add(item1, item2)
+        item = types.KeyboardButton("Оценить участников команды")
+        markup.add(item)
+        msg = self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!", reply_markup=markup)
+        self.bot.register_next_step_handler(msg, self.message_reply)
 
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
@@ -142,21 +158,56 @@ class StudHelperBot:
         self.user.set_teamname(self.team.get_name())
         self.user.set_role("Product Owner")
         self.user.add_user()
-
-        item = types.KeyboardButton("Добавить участника")
-        item1 = types.KeyboardButton("Удалить команду")
-
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(item)
-        markup.add(item1)
-
         self.bot.send_message(message.chat.id,
-                                    "Команда " + self.team.get_name() + " успешно зарегистрирована!",
-                                    reply_markup=markup)  # в message.text хранится то, что написал человек
-
+                                    "Команда " + self.team.get_name() + " успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
         msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
         self.bot.register_next_step_handler(msg, self.after_name)
+
+    def evaluation(self, message): # функция для оценки участников команды
+        temp = self.user.get_name_people_of_team() # temp - список словарей, где ключ - Фамилия, а значения - реальные фамилии
+        arr_of_name = []
+        for i in temp:
+            arr_of_name.append(i['Фамилия']) # в arr_of_name(список) кладем только сами фамилии
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item0 = types.KeyboardButton("0")
+        item1 = types.KeyboardButton("1")
+        item2 = types.KeyboardButton("2")
+        item3 = types.KeyboardButton("3")
+        item4 = types.KeyboardButton("4")
+        item5 = types.KeyboardButton("5")
+        self.team.set_size_of_team(len(arr_of_name))
+        markup.add(item0, item1, item2, item3, item4, item5)
+        print(self.user.get_counter_of_people())
+        estimation = self.bot.send_message(message.chat.id, "Оцените участника команды - " +
+                                           arr_of_name[self.user.get_counter_of_people()], reply_markup=markup)
+        self.bot.register_next_step_handler(estimation, self.get_estimation)
+
+
+        #for i in arr_of_name:  # i-ый элемент - фамилия участника, которого оценивают
+         #   estimation = self.bot.send_message(message.chat.id, "Оцените участника команды - " + i,
+          #                                     reply_markup=markup)
+           # self.bot.register_next_step_handler(estimation, self.get_estimation)
+
+    def get_estimation(self, message): # функция, где участникам ставят цифры от 0 до 5
+        estimation = int(message.text)  # в estimation лежит интовская оценка участника, ее и можно кинуть в бд
+        feedback = self.bot.send_message(message.chat.id, "Напишите отзыв об этом участнике команды")
+        self.bot.register_next_step_handler(feedback, self.get_feedback)
+
+    def get_feedback(self, message): # функция, где пишутся отзывы об участниках команды
+        feedback = message.text  # в feedback лежит текстовый отзыв об участике команды, его и можно кинуть в бд
+        self.user.set_counter_of_people(self.user.get_counter_of_people() + 1)
+        if self.user.get_counter_of_people() < self.team.get_size_of_team(): # условный цикл, чтоб оценить всех
+            self.evaluation(message)
+        self.user.set_counter_of_people(0)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item = types.KeyboardButton("Ура")
+        markup.add(item)
+        msg = self.bot.send_message(message.chat.id, "Конец оценивания однокомандников!", reply_markup=markup)
+        self.bot.register_next_step_handler(msg, self.end_of_evalutation)
+
+    def end_of_evalutation(self, message):
+        self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!")
 
 bot = StudHelperBot()
 bot.start()
