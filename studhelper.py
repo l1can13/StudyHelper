@@ -39,7 +39,7 @@ class StudHelperBot:
 
         markup.add(item1)
         markup.add(item2)
-        self.bot.send_message(message.chat.id, "Привет " + self.user.get_username(), reply_markup=markup)
+        self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
 
     def message_reply(self, message):
         if message.text == "Регистрация команды":
@@ -127,6 +127,7 @@ class StudHelperBot:
         group = message.text
         self.user.set_group(group)
         self.user.add_group()
+        self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!")
 
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
@@ -153,6 +154,9 @@ class StudHelperBot:
                                     "Команда " + self.team.get_name() + " успешно зарегистрирована!",
                                     reply_markup=markup)  # в message.text хранится то, что написал человек
 
+        self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+        msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
+        self.bot.register_next_step_handler(msg, self.after_name)
 
 bot = StudHelperBot()
 bot.start()
