@@ -62,12 +62,12 @@ class User:
             self.role = None
             self.counter_of_people = 0
 
-
     def get_counter_of_people(self):
         return self.counter_of_people
 
     def set_counter_of_people(self, counter):
         self.counter_of_people = counter
+
     def set_name(self, name):
         self.name = name
 
@@ -154,6 +154,7 @@ class User:
                 connection.commit()
         finally:
             connection.close()
+
     def get_role_from_bd(self):
         connection = connect_to_db()
         try:
@@ -161,8 +162,9 @@ class User:
                 sql_request = "SELECT `Роль` FROM `Пользователи` WHERE `User_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.username)
                 role = cursor.fetchone()
+                print(type(role))
                 connection.commit()
-                return role
+                return role['Роль']
         finally:
             connection.close()
 
@@ -174,19 +176,7 @@ class User:
                 cursor.execute(sql_request, self.username)
                 tmnm = cursor.fetchone()
                 connection.commit()
-                return tmnm
-        finally:
-            connection.close()
-
-    def get_name_people_of_team(self): # функция для получения фамилий из бд для определенной группы
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                sql_request = "SELECT `Фамилия` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, self.teamname)
-                surnames = cursor.fetchall()
-                connection.commit()
-                return surnames
+                return tmnm['Команда']
         finally:
             connection.close()
 

@@ -1,8 +1,7 @@
 import telebot
-import random
 from team import Team
 from user import User
-
+from review import Review
 from telebot import types
 
 
@@ -16,7 +15,9 @@ class StudHelperBot:
         self.message_reply = self.bot.message_handler(content_types='text')(self.message_reply)
         self.user = None
         self.team = None
+        self.temp_username = None
         self.invited_user = None
+        self.review = None
         self.role_of_user = ''
         self.tg_name_of_user = ''
 
@@ -53,7 +54,9 @@ class StudHelperBot:
             item = types.KeyboardButton("Хорошо")
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(item)
-            msg = self.bot.send_message(message.chat.id, 'Нужно будет поставить оценки всем участникам команды и написать про них отзывы', reply_markup=markup)
+            msg = self.bot.send_message(message.chat.id,
+                                        'Нужно будет поставить оценки всем участникам команды и написать про них отзывы',
+                                        reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Присоединиться к команде":
             msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ")
@@ -116,8 +119,8 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Проверьте правильность кода")
 
     def after_name(self, message):
-        self.user.set_role((self.user.get_role_from_bd())['Роль'])
-        self.user.set_teamname((self.user.get_teamname_from_bd())['Команда'])
+        self.user.set_role((self.user.get_role_from_bd()))
+        self.user.set_teamname((self.user.get_teamname_from_bd()))
         name = message.text
         self.user.set_name(name)
         self.user.add_name()
@@ -159,56 +162,75 @@ class StudHelperBot:
         self.user.set_role("Product Owner")
         self.user.add_user()
         self.bot.send_message(message.chat.id,
-                                    "Команда " + self.team.get_name() + " успешно зарегистрирована!")  # в message.text хранится то, что написал человек
+                              "Команда " + self.team.get_name() + " успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
         msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
         self.bot.register_next_step_handler(msg, self.after_name)
 
-    def evaluation(self, message): # функция для оценки участников команды
-        temp = self.user.get_name_people_of_team() # temp - список словарей, где ключ - Фамилия, а значения - реальные фамилии
-        arr_of_name = []
-        for i in temp:
-            arr_of_name.append(i['Фамилия']) # в arr_of_name(список) кладем только сами фамилии
+    def evaluation(self, message):  # функция для оценки участников команды
+        team_members = self.team.get_team_members()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
+        arr_of_names = []
+        for elem in team_members:
+            arr_of_names.append(elem['Фамилия'])  # в arr_of_name(список) кладем только сами фамилии
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item0 = types.KeyboardButton("0")
-        item1 = types.KeyboardButton("1")
-        item2 = types.KeyboardButton("2")
-        item3 = types.KeyboardButton("3")
-        item4 = types.KeyboardButton("4")
-        item5 = types.KeyboardButton("5")
-        self.team.set_size_of_team(len(arr_of_name))
-        markup.add(item0, item1, item2, item3, item4, item5)
-        print(self.user.get_counter_of_people())
-        estimation = self.bot.send_message(message.chat.id, "Оцените участника команды - " +
-                                           arr_of_name[self.user.get_counter_of_people()], reply_markup=markup)
-        self.bot.register_next_step_handler(estimation, self.get_estimation)
 
+        for elem in arr_of_names:
+            print(elem)
+            item = types.KeyboardButton(elem)
+            markup.add(item)
 
-        #for i in arr_of_name:  # i-ый элемент - фамилия участника, которого оценивают
-         #   estimation = self.bot.send_message(message.chat.id, "Оцените участника команды - " + i,
-          #                                     reply_markup=markup)
-           # self.bot.register_next_step_handler(estimation, self.get_estimation)
-
-    def get_estimation(self, message): # функция, где участникам ставят цифры от 0 до 5
-        estimation = int(message.text)  # в estimation лежит интовская оценка участника, ее и можно кинуть в бд
-        feedback = self.bot.send_message(message.chat.id, "Напишите отзыв об этом участнике команды")
-        self.bot.register_next_step_handler(feedback, self.get_feedback)
-
-    def get_feedback(self, message): # функция, где пишутся отзывы об участниках команды
-        feedback = message.text  # в feedback лежит текстовый отзыв об участике команды, его и можно кинуть в бд
-        self.user.set_counter_of_people(self.user.get_counter_of_people() + 1)
-        if self.user.get_counter_of_people() < self.team.get_size_of_team(): # условный цикл, чтоб оценить всех
-            self.evaluation(message)
-        self.user.set_counter_of_people(0)
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item = types.KeyboardButton("Ура")
+        item = types.KeyboardButton("Отмена")
         markup.add(item)
-        msg = self.bot.send_message(message.chat.id, "Конец оценивания однокомандников!", reply_markup=markup)
-        self.bot.register_next_step_handler(msg, self.end_of_evalutation)
 
-    def end_of_evalutation(self, message):
-        self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!")
+        msg = self.bot.send_message(message.chat.id, "Выберите члена команды, которого хотите оценить",
+                                    reply_markup=markup)
+        self.bot.register_next_step_handler(msg, self.after_evaluation)
+
+    def after_evaluation(self, message):  # функция, где участникам ставят цифры от 0 до 5
+        surname = message.text  # в surname лежит фамилия текущего пользователя
+
+        self.temp_username = self.team.find_username_by_surname(
+            surname)  # находим User_name по фамилии (возможно переписать в один запрос, когда ищем фамилию в бд)
+        self.review = Review()
+        self.review.set_username(self.temp_username)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+
+        if surname != "Отмена":
+            for i in range(0, 6):
+                item = types.KeyboardButton(str(i))
+                markup.add(item)
+
+            estimation = self.bot.send_message(message.chat.id, "Оцените участника команды - " +
+                                               surname, reply_markup=markup)
+            self.bot.register_next_step_handler(estimation, self.get_mark)
+        else:
+            self.user.set_role((self.user.get_role_from_bd()))
+            self.user.set_teamname((self.user.get_teamname_from_bd()))
+
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            if self.user.get_role() == "Product Owner":
+                item1 = types.KeyboardButton("Добавить участника")
+                item2 = types.KeyboardButton("Удалить команду")
+                markup.add(item1, item2)
+            item = types.KeyboardButton("Оценить участников команды")
+            markup.add(item)
+            msg = self.bot.send_message(message.chat.id, "Возврат в основное меню...",
+                                        reply_markup=markup)
+            self.bot.register_next_step_handler(msg, self.message_reply)
+
+    def get_mark(self, message):  # функция, где пишутся отзывы об участниках команды
+        mark = message.text  # в mark лежит оценка пользователя
+        self.review.set_mark(mark)
+        feedback = self.bot.send_message(message.chat.id, "Напишите отзыв об этом участнике команды")
+        self.bot.register_next_step_handler(feedback, self.end_of_evaluation)
+
+    def end_of_evaluation(self, message):
+        feedback = message.text  # в feedback лежит комментарий
+        self.review.set_feedback(feedback)
+        self.review.add_review()
+        msg = self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!")
+        self.bot.register_next_step_handler(msg, self.message_reply)
+
 
 bot = StudHelperBot()
 bot.start()
-

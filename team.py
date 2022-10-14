@@ -1,5 +1,6 @@
 import pymysql.cursors
 from config import host, user, password, db_name
+from user import User
 
 
 # Функция для подключения к базе данных
@@ -34,6 +35,32 @@ class Team:
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
+
+    @staticmethod
+    def find_username_by_surname(surname):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql_request = "SELECT `User_name` FROM `Пользователи` WHERE `Фамилия` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, surname)
+                result = cursor.fetchone()
+                connection.commit()
+                return result['User_name']
+        finally:
+            connection.close()
+
+    # функция для получения фамилий из бд для определенной группы
+    def get_team_members(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql_request = "SELECT `Фамилия` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.teamname)
+                result = cursor.fetchall()
+                connection.commit()
+                return result
+        finally:
+            connection.close()
 
     # Метод для вставки новой команды в базу данных
     def add(self):
