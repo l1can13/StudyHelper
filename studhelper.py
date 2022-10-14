@@ -177,6 +177,20 @@ class StudHelperBot:
             arr_of_names.append(elem['Фамилия'])  # в arr_of_name(список) кладем только сами фамилии
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
+        if (len(arr_of_names) == 0):
+            self.user.set_username(message.from_user.username)
+            self.user.set_role((self.user.get_role_from_bd()))
+            self.user.set_teamname((self.user.get_teamname_from_bd()))
+
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            if self.user.get_role() == "Product Owner":
+                item1 = types.KeyboardButton("Добавить участника")
+                item2 = types.KeyboardButton("Удалить команду")
+                markup.add(item1, item2)
+            item = types.KeyboardButton("Оценить участников команды")
+            markup.add(item)
+            msg = self.bot.send_message(message.chat.id, "У вас нет сокомандников :(", reply_markup=markup)
+            self.bot.register_next_step_handler(msg, self.message_reply)
         for elem in arr_of_names:
             print(elem)
             item = types.KeyboardButton(elem)
