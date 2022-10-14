@@ -70,7 +70,7 @@ class StudHelperBot:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(item1)
             markup.add(item2)
-            msg = self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
+            self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
 
     def get_role_to_create_invitation(self, message):
         self.invited_user = User()
@@ -84,7 +84,10 @@ class StudHelperBot:
         self.invited_user.set_username(self.tg_name_of_user)
         self.invited_user.set_teamname(self.user.get_teamname())
         self.invited_user.add_user()
-        self.bot.send_message(message.chat.id, str(self.transfer_str_int(message.text)))
+        self.bot.send_message(message.chat.id, "Код для приглашения пользователя " +
+                              self.invited_user.get_username() + ": " +
+                              str(self.transfer_str_int(message.text)) +
+                              ". \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
 
     def transfer_str_int(self, arg):
         ans = ''
@@ -204,6 +207,7 @@ class StudHelperBot:
                                                surname, reply_markup=markup)
             self.bot.register_next_step_handler(estimation, self.get_mark)
         else:
+            self.user.set_username(message.from_user.username)
             self.user.set_role((self.user.get_role_from_bd()))
             self.user.set_teamname((self.user.get_teamname_from_bd()))
 
@@ -228,7 +232,19 @@ class StudHelperBot:
         feedback = message.text  # в feedback лежит комментарий
         self.review.set_feedback(feedback)
         self.review.add_review()
-        msg = self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!")
+
+        self.user.set_username(message.from_user.username)
+        self.user.set_role((self.user.get_role_from_bd()))
+        self.user.set_teamname((self.user.get_teamname_from_bd()))
+
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        if self.user.get_role() == "Product Owner":
+            item1 = types.KeyboardButton("Добавить участника")
+            item2 = types.KeyboardButton("Удалить команду")
+            markup.add(item1, item2)
+        item = types.KeyboardButton("Оценить участников команды")
+        markup.add(item)
+        msg = self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!", reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.message_reply)
 
 
