@@ -61,6 +61,9 @@ class StudHelperBot:
         elif message.text == "Присоединиться к команде":
             msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ")
             self.bot.register_next_step_handler(msg, self.accept_invitation)
+        elif message.text == "Отправить отчёт о проделанной работе":
+            msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ")
+            self.bot.register_next_step_handler(msg, self.report_of_people)
         elif message.text == "Удалить команду":
             item1 = types.KeyboardButton("Регистрация команды")
             item2 = types.KeyboardButton("Присоединиться к команде")
@@ -146,8 +149,9 @@ class StudHelperBot:
             item1 = types.KeyboardButton("Добавить участника")
             item2 = types.KeyboardButton("Удалить команду")
             markup.add(item1, item2)
-        item = types.KeyboardButton("Оценить участников команды")
-        markup.add(item)
+        item3 = types.KeyboardButton("Оценить участников команды")
+        item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+        markup.add(item3, item4)
         msg = self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!", reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.message_reply)
 
@@ -187,8 +191,9 @@ class StudHelperBot:
                 item1 = types.KeyboardButton("Добавить участника")
                 item2 = types.KeyboardButton("Удалить команду")
                 markup.add(item1, item2)
-            item = types.KeyboardButton("Оценить участников команды")
-            markup.add(item)
+            item3 = types.KeyboardButton("Оценить участников команды")
+            item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+            markup.add(item3, item4)
             msg = self.bot.send_message(message.chat.id, "У вас нет сокомандников :(", reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.message_reply)
         for elem in arr_of_names:
@@ -230,8 +235,9 @@ class StudHelperBot:
                 item1 = types.KeyboardButton("Добавить участника")
                 item2 = types.KeyboardButton("Удалить команду")
                 markup.add(item1, item2)
-            item = types.KeyboardButton("Оценить участников команды")
-            markup.add(item)
+            item3 = types.KeyboardButton("Оценить участников команды")
+            item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+            markup.add(item3, item4)
             msg = self.bot.send_message(message.chat.id, "Возврат в основное меню...",
                                         reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.message_reply)
@@ -256,11 +262,24 @@ class StudHelperBot:
             item1 = types.KeyboardButton("Добавить участника")
             item2 = types.KeyboardButton("Удалить команду")
             markup.add(item1, item2)
-        item = types.KeyboardButton("Оценить участников команды")
-        markup.add(item)
+        item3 = types.KeyboardButton("Оценить участников команды")
+        item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+        markup.add(item3, item4)
         msg = self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!", reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.message_reply)
 
+    def report_of_people(self, message):
+        report = message.text # в report лежит отчет о проделанной работе
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        if self.user.get_role() == "Product Owner":
+            item1 = types.KeyboardButton("Добавить участника")
+            item2 = types.KeyboardButton("Удалить команду")
+            markup.add(item1, item2)
+        item3 = types.KeyboardButton("Оценить участников команды")
+        item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+        markup.add(item3, item4)
+        msg = self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!", reply_markup=markup)
+        self.bot.register_next_step_handler(msg, self.message_reply)
 
 bot = StudHelperBot()
 bot.start()
