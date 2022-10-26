@@ -21,16 +21,19 @@ def connect_to_db():
 class Review:
 
     def __init__(self):
-        self.mark = ''
-        self.feedback = ''
+        self.general_mark = ''
+        self.tech_tasks = ''
+        self.teamwork = ''
+        self.responsibility = ''
+        self.tech_help = ''
         self.user = ''
 
     def add_review(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                insert_user = "INSERT INTO `Оценки` (`Оценка`, `Комментарий`, `User_name`) VALUES (%s, %s, %s);"
-                cursor.execute(insert_user, (self.mark, self.feedback, self.user))
+                insert_user = "INSERT INTO `Оценки` (`Общая оценка`, `Решение технических задач`, `Командная работа`, `Ответственность`, `Помощь в решении технических задач`, `User_name`) VALUES (%s, %s, %s, %s, %s, %s);"
+                cursor.execute(insert_user, (self.general_mark, self.tech_tasks, self.teamwork, self.responsibility, self.tech_help, self.user))
                 connection.commit()
         finally:
             connection.close()
@@ -38,17 +41,35 @@ class Review:
     def set_username(self, username):
         self.user = username
 
-    def set_mark(self, mark):
-        self.mark = mark
+    def set_general_mark(self, general_mark):
+        self.general_mark = general_mark
 
-    def set_feedback(self, feedback):
-        self.feedback = feedback
+    def set_tech_tasks(self, tech_tasks):
+        self.tech_tasks = tech_tasks
+
+    def set_teamwork(self, teamwork):
+        self.teamwork = teamwork
+
+    def set_responsibility(self, responsibility):
+        self.responsibility = responsibility
+
+    def set_tech_help(self, tech_help):
+        self.tech_help = tech_help
 
     def get_user(self):
         return self.user
 
-    def get_mark(self):
-        return self.mark
+    def get_general_mark(self):
+        return self.general_mark
 
-    def get_feedback(self):
-        return self.feedback
+    def get_tech_tasks(self):
+        return self.tech_tasks
+
+    def get_teamwork(self):
+        return self.teamwork
+
+    def get_responsibility(self):
+        return self.responsibility
+
+    def get_tech_help(self):
+        return self.tech_help
