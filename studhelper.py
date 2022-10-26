@@ -55,7 +55,7 @@ class StudHelperBot:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             markup.add(item)
             msg = self.bot.send_message(message.chat.id,
-                                        'Нужно будет поставить оценки всем участникам команды и написать про них отзывы',
+                                        'Нужно будет поставить оценки участнику команды и написать про него отзывы',
                                         reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Присоединиться к команде":
@@ -208,7 +208,7 @@ class StudHelperBot:
                                     reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.after_evaluation)
 
-    def after_evaluation(self, message):  # функция, где участникам ставят цифры от 0 до 5
+    def after_evaluation(self, message):  # функция, где участникам ставят общую оценку от 0 до 10
         surname = message.text  # в surname лежит фамилия текущего пользователя
 
         self.temp_username = self.team.find_username_by_surname(
@@ -218,13 +218,13 @@ class StudHelperBot:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
         if surname != "Отмена":
-            for i in range(0, 6):
+            for i in range(0, 11):
                 item = types.KeyboardButton(str(i))
                 markup.add(item)
 
-            estimation = self.bot.send_message(message.chat.id, "Оцените участника команды - " +
-                                               surname, reply_markup=markup)
-            self.bot.register_next_step_handler(estimation, self.get_mark)
+            self.bot.send_message(message.chat.id, "Оцените участника команды - " + surname)
+            estimation = self.bot.send_message(message.chat.id, "Общая оценка: ", reply_markup=markup)
+            self.bot.register_next_step_handler(estimation, self.get_gen_mark)
         else:
             self.user.set_username(message.from_user.username)
             self.user.set_role((self.user.get_role_from_bd()))
@@ -242,15 +242,33 @@ class StudHelperBot:
                                         reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.message_reply)
 
-    def get_mark(self, message):  # функция, где пишутся отзывы об участниках команды
-        mark = message.text  # в mark лежит оценка пользователя
-        self.review.set_mark(mark)
-        feedback = self.bot.send_message(message.chat.id, "Напишите отзыв об этом участнике команды")
-        self.bot.register_next_step_handler(feedback, self.end_of_evaluation)
+    def get_gen_mark(self, message):  # функция, где участникам ставят оценку за решение технических задач от 0 до 10
+        general_mark = message.text  # в general_mark лежит общая оценка пользователя
+        self.review.set_general_mark(general_mark)
+        estimation2 = self.bot.send_message(message.chat.id, "Решение технических задач: ")
+        self.bot.register_next_step_handler(estimation2, self.get_t_tasks)
+
+    def get_t_tasks(self, message):  # функция, где участникам ставят оценку за командную работу от 0 до 10
+        tech_tasks = message.text  # в tech_tasks лежит оценка пользователя за решение технических задач
+        self.review.set_tech_tasks(tech_tasks)
+        estimation3 = self.bot.send_message(message.chat.id, "Командная работа: ")
+        self.bot.register_next_step_handler(estimation3, self.get_tmwork)
+
+    def get_tmwork(self, message):  # функция, где участникам пишут отзыв об их ответственности
+        teamwork = message.text  # в teamwork лежит оценка пользователя за командную работу
+        self.review.set_teamwork(teamwork)
+        feedback = self.bot.send_message(message.chat.id, "Напишите отзыв о том, насколько был ответственен этот участник команды: ")
+        self.bot.register_next_step_handler(feedback, self.get_feedback)
+
+    def get_feedback(self, message):  # функция, где участникам пишут отзыв об их помощи в решении технических задач
+        responsibility = message.text  # в responsibility лежит отзыв об ответственности пользователя
+        self.review.set_responsibility(responsibility)
+        feedback2 = self.bot.send_message(message.chat.id, "Напишите отзыв о том, насколько этот участник команды помогал в решении технических задач: ")
+        self.bot.register_next_step_handler(feedback2, self.end_of_evaluation)
 
     def end_of_evaluation(self, message):
-        feedback = message.text  # в feedback лежит комментарий
-        self.review.set_feedback(feedback)
+        tech_help = message.text  # в tech_help лежит отзыв о помощи пользователя в решении технических задач
+        self.review.set_tech_help(tech_help)
         self.review.add_review()
 
         self.user.set_username(message.from_user.username)
