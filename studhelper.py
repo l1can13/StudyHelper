@@ -51,7 +51,7 @@ class StudHelperBot:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1 = types.KeyboardButton("Scrum Master")
             item2 = types.KeyboardButton("Разработчик")
-            item3 = types.KeyboardButton("Свой вариант")
+            item3 = types.KeyboardButton("Участник команды")
             markup.add(item1)
             markup.add(item2)
             markup.add(item3)
@@ -83,14 +83,10 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
 
     def get_role_to_create_invitation(self, message):
-        if message.text == 'Свой вариант':
-            msg = self.bot.send_message(message.chat.id, "Введите свой вариант: ")
-            self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
-        else:
-            self.invited_user = User()
-            self.role_of_user = message.text
-            msg = self.bot.send_message(message.chat.id, "Введите имя пользователя этого человека: ")
-            self.bot.register_next_step_handler(msg, self.create_invitation)
+        self.invited_user = User()
+        self.role_of_user = message.text
+        msg = self.bot.send_message(message.chat.id, "Введите имя пользователя этого человека: ")
+        self.bot.register_next_step_handler(msg, self.create_invitation)
 
     def create_invitation(self, message):
         self.tg_name_of_user = message.text
