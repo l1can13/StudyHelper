@@ -27,19 +27,27 @@ class Review:
         self.responsibility = ''
         self.tech_help = ''
         self.user = ''
+        self.reviewer = ''
+        self.date = ''
 
     def add_review(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                insert_user = "INSERT INTO `Оценки` (`Общая оценка`, `Решение технических задач`, `Командная работа`, `Ответственность`, `Помощь в решении технических задач`, `User_name`) VALUES (%s, %s, %s, %s, %s, %s);"
-                cursor.execute(insert_user, (self.general_mark, self.tech_tasks, self.teamwork, self.responsibility, self.tech_help, self.user))
+                insert_user = "INSERT INTO `Оценки` (`Общая оценка`, `Решение технических задач`, `Командная работа`, `Ответственность`, `Помощь в решении технических задач`, `User_name`, `Автор отзыва`, `Дата`) VALUES (%s, %s, %s, %s, %s, %s, %s, %s);"
+                cursor.execute(insert_user, (self.general_mark, self.tech_tasks, self.teamwork, self.responsibility, self.tech_help, self.user, self.reviewer, self.date))
                 connection.commit()
         finally:
             connection.close()
 
     def set_username(self, username):
         self.user = username
+
+    def set_reviewer(self, reviewer):
+        self.reviewer = reviewer
+
+    def set_date(self, date):
+        self.date = date
 
     def set_general_mark(self, general_mark):
         self.general_mark = general_mark
@@ -67,6 +75,12 @@ class Review:
 
     def get_teamwork(self):
         return self.teamwork
+
+    def get_reviewer(self):
+        return self.reviewer
+
+    def get_date(self):
+        return self.date
 
     def get_responsibility(self):
         return self.responsibility
