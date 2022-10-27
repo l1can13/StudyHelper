@@ -48,7 +48,14 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Введите имя команды: ")
             self.bot.register_next_step_handler(msg, self.product)
         elif message.text == "Добавить участника":
-            msg = self.bot.send_message(message.chat.id, "Введите роль того, кого хотите пригласить: ")
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            item1 = types.KeyboardButton("Scrum Master")
+            item2 = types.KeyboardButton("Разработчик")
+            item3 = types.KeyboardButton("Участник команды")
+            markup.add(item1)
+            markup.add(item2)
+            markup.add(item3)
+            msg = self.bot.send_message(message.chat.id, "Введите роль того, кого хотите пригласить: ", reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
         elif message.text == "Оценить участников команды":
             item = types.KeyboardButton("Хорошо")
@@ -90,7 +97,7 @@ class StudHelperBot:
         self.bot.send_message(message.chat.id, "Код для приглашения пользователя " +
                               self.invited_user.get_username() + ": " +
                               str(self.transfer_str_int(message.text)) +
-                              ". \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
+                              " \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
 
     def transfer_str_int(self, arg):
         ans = ''
@@ -116,22 +123,40 @@ class StudHelperBot:
         return ans
 
     def accept_invitation(self, message):
-        if message.text == self.transfer_str_int(self.user.get_username()):  # успешно принимаем в команду
-            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
-            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
+        if message.text == self.transfer_str_int(self.user.get_username()) or self.user.get_role == self.user.get_role_from_bd():  # успешно принимаем в команду
+            if message.text == self.transfer_str_int(self.user.get_username()):
+                self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
+                self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.bot.send_message(message.chat.id, "Проверьте правильность кода")
+
+    def name_again(self, message):
+        msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+        self.bot.register_next_step_handler(msg, self.after_name)
 
     def after_name(self, message):
         self.user.set_role((self.user.get_role_from_bd()))
         self.user.set_teamname((self.user.get_teamname_from_bd()))
         name = message.text
-        self.user.set_name(name)
-        self.user.add_name()
-        msg = self.bot.send_message(message.chat.id, "Введите Вашу фамилию:")
-        self.bot.register_next_step_handler(msg, self.after_surname)
+        noSurname = False
+        isSpace = False
+        for index, val in enumerate(name):
+            if val == ' ':
+                isSpace = True
+                if index == len(name) - 1:
+                    noSurname = True
+        if noSurname or not isSpace:
+            msg = self.bot.send_message(message.chat.id, "Вы не ввели имя или фамилию, попробуйте еще раз:")
+            self.bot.register_next_step_handler(msg, self.after_name)
+        else:
+            self.user.set_name(name)
+            self.user.add_name()
+            msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
+            self.bot.register_next_step_handler(msg, self.after_group)
+            # msg = self.bot.send_message(message.chat.id, "Введите Вашу фамилию:")
+            # self.bot.register_next_step_handler(msg, self.after_surname)
 
     def after_surname(self, message):
         surname = message.text
@@ -169,9 +194,9 @@ class StudHelperBot:
         self.user.set_role("Product Owner")
         self.user.add_user()
         self.bot.send_message(message.chat.id,
-                              "Команда " + self.team.get_name() + " успешно зарегистрирована!")  # в message.text хранится то, что написал человек
+                              "Команда \"" + self.team.get_name() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-        msg = self.bot.send_message(message.chat.id, "Введите Ваше имя:")
+        msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
         self.bot.register_next_step_handler(msg, self.after_name)
 
     def evaluation(self, message):  # функция для оценки участников команды
