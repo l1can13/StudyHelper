@@ -29,7 +29,7 @@ class Team:
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
-            self.team_code = ''
+            self.team_codes = []
             self.admin_id = args[1]
         else:
             self.teamname = None
@@ -37,7 +37,7 @@ class Team:
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
-            self.team_code = ''
+            self.team_codes = []
             self.admin_id = 0
 
     @staticmethod
@@ -103,12 +103,12 @@ class Team:
             connection.close()
 
     #Метод для заполнения поля 'Код команды'
-    def add_team_code(self):
+    def add_team_code(self, team, role, code):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "UPDATE `Команды` SET Код = (%s) WHERE Название = (%s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.team_code, self.teamname))
+                sql_request = "INSERT INTO `Коды` (`Команда`, `Роль`, `Код`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (team, role, code))
                 connection.commit()
         finally:
             connection.close()
@@ -160,7 +160,7 @@ class Team:
         self.counter_of_people = counter
 
     def set_team_code(self, code):
-        self.team_code = code
+        self.team_codes.insert(0, code)
 
     def get_team_code(self):
-        return self.team_code
+        return self.team_codes[0]

@@ -230,7 +230,7 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Название` FROM `Команды` WHERE `Код` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchall()
                 connection.commit()
@@ -244,24 +244,48 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Название` FROM `Команды` WHERE `Код` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchall()
                 connection.commit()
-                return result
+                for row in result:
+                    return row['Команда']
         finally:
             connection.close()
 
-    def get_role_no_id(self, team):
+
+    def get_role_using_code(self, code):
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Роль` FROM `Пользователи` WHERE `Команда` = %s AND `Ид` = 0"  # строка для SQL-запроса
-                cursor.execute(sql_request, team)
+                sql_request = "SELECT `Роль` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, code)
                 result = cursor.fetchall()
                 connection.commit()
-                return result
+                for row in result:
+                    return row['Роль']
         finally:
             connection.close()
 
-    # def update_id(self, code, team, role):
+    def update_id_in_bd(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "UPDATE `Пользователи` SET `Ид` = %s WHERE `Команда` = %s AND `Роль` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.id, self.teamname, self.role))
+                connection.commit()
+        finally:
+            connection.close()
+
+    def get_name_from_bd(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Ид` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.id)
+                role = cursor.fetchone()
+                connection.commit()
+                return role['Имя']
+        finally:
+            connection.close()
+

@@ -42,6 +42,7 @@ class StudHelperBot:
         elif self.user.is_in_team():
             self.user.set_teamname(self.user.get_teamname_from_bd())
             self.user.set_role(self.user.get_role_from_bd())
+            self.user.set_name(self.user.get_name_from_bd())
             msg = self.bot.send_message(message.chat.id, "Вы в команде \"" + self.user.get_teamname_from_bd() + "\"")
             if self.user.get_name() is None:
                 msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
@@ -51,7 +52,10 @@ class StudHelperBot:
                 item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
                 markup.add(item1)
                 markup.add(item2)
-                self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+                if self.user.get_username() is not None:
+                    self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+                else:
+                    self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
         else:
             item1 = types.KeyboardButton("Регистрация команды")
             item2 = types.KeyboardButton("Присоединиться к команде")
@@ -106,6 +110,8 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Введите имя пользователя, соблюдая регистр: ")
             self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
         elif message.text == 'Нет':
+            self.team.set_team_code(self.create_unique_inv_code())
+            self.tg_name_of_user = 'Нет'
             self.bot.send_message(message.chat.id, "Уникальный код участника:  " + self.team.get_team_code())
             msg = self.bot.send_message(message.chat.id, "Этот код необходимо ввести новому участнику")
             # self.bot.send_message(message.chat.id, "Ссылка на бота: t.me/Helping_Student_bot")
@@ -116,7 +122,8 @@ class StudHelperBot:
 
     def get_role_to_create_invitation(self, message):
         self.invited_user = User()
-        self.tg_name_of_user = message.text
+        if self.tg_name_of_user != 'Нет':
+            self.tg_name_of_user = message.text
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1 = types.KeyboardButton("Scrum Master")
         item2 = types.KeyboardButton("Разработчик")
@@ -131,6 +138,7 @@ class StudHelperBot:
         self.invited_user.set_role(message.text)
         self.invited_user.set_username(self.tg_name_of_user)
         self.invited_user.set_teamname(self.user.get_teamname())
+        self.team.add_team_code(self.user.get_teamname(), message.text, self.team.get_team_code())
         self.invited_user.add_user()
         self.bot.send_message(message.chat.id, "Перешлите эту ссылку члену команды: ")
         self.bot.send_message(message.chat.id, "t.me/Helping_Student_bot")
@@ -146,6 +154,7 @@ class StudHelperBot:
     #                           str(self.transfer_str_int(message.text)) +
     #                           " \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
 
+
     def create_unique_inv_code(self):
         return str(uuid.uuid1())[:8]
 
@@ -156,7 +165,8 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
             self.user.set_id(message.from_user.id)
             self.user.set_teamname(self.user.get_team_using_code(message.text))
-            self.user.update_id(message.from_user.id)
+            self.user.set_role(self.user.get_role_using_code(message.text))
+            self.user.update_id_in_bd()
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.bot.send_message(message.chat.id, "Ваше имя ")
@@ -166,9 +176,7 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.after_name)
 
     def after_name(self, message):
-        if self.user.get_username() == "Нет":
-            self.user.set_role(self.user.get_role_no_id(self.user.get_teamname()))
-        else:
+        if self.user.get_username() is not None:
             self.user.set_role((self.user.get_role_from_bd()))
             self.user.set_teamname((self.user.get_teamname_from_bd()))
         name = message.text
@@ -225,8 +233,6 @@ class StudHelperBot:
         self.user.set_teamname(self.team.get_name())
         self.user.set_role("Product Owner")
         self.user.add_user()
-        self.team.set_team_code(self.create_unique_inv_code())
-        self.team.add_team_code()
         self.bot.send_message(message.chat.id,
                               "Команда \"" + self.team.get_name() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
@@ -256,7 +262,6 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "У вас нет сокомандников :(", reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.message_reply)
         for elem in arr_of_names:
-            print(elem)
             item = types.KeyboardButton(elem)
             markup.add(item)
 
