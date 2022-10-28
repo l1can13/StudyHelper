@@ -25,16 +25,20 @@ class Team:
     def __init__(self, *args):
         if len(args) == 2:
             self.teamname = args[0]
-            self.admin = args[1]
+            self.admin = ''
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
+            self.team_codes = []
+            self.admin_id = args[1]
         else:
             self.teamname = None
             self.admin = None
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
+            self.team_codes = []
+            self.admin_id = 0
 
     @staticmethod
     def find_username_by_surname(surname):
@@ -62,13 +66,27 @@ class Team:
         finally:
             connection.close()
 
+    def check_team_with_code(self, code):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql_request = "SELECT `Название` FROM `Команды` WHERE `Код` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, code)
+                result = cursor.fetchall()
+                connection.commit()
+                if result:
+                    return True
+                return False
+        finally:
+            connection.close()
+
     # Метод для вставки новой команды в базу данных
     def add(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`) VALUES (%s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.teamname, self.admin))
+                sql_request = "INSERT INTO `Команды` (`Название`, `Ид`) VALUES (%s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.teamname, self.admin_id))
                 connection.commit()
         finally:
             connection.close()
@@ -80,6 +98,17 @@ class Team:
             with connection.cursor() as cursor:
                 sql_request = "UPDATE `Команды` SET Продукт = (%s) WHERE Название = (%s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.product, self.teamname))
+                connection.commit()
+        finally:
+            connection.close()
+
+    #Метод для заполнения поля 'Код команды'
+    def add_team_code(self, team, role, code):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "INSERT INTO `Коды` (`Команда`, `Роль`, `Код`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (team, role, code))
                 connection.commit()
         finally:
             connection.close()
@@ -129,3 +158,9 @@ class Team:
 
     def set_counter_of_people(self, counter):
         self.counter_of_people = counter
+
+    def set_team_code(self, code):
+        self.team_codes.insert(0, code)
+
+    def get_team_code(self):
+        return self.team_codes[0]

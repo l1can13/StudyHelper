@@ -3,6 +3,7 @@ from team import Team
 from user import User
 from review import Review
 from telebot import types
+import uuid
 from datetime import datetime
 
 class StudHelperBot:
@@ -19,6 +20,7 @@ class StudHelperBot:
         self.invited_user = None
         self.review = None
         self.role_of_user = ''
+        self.id = 0
         self.tg_name_of_user = ''
 
     @staticmethod
@@ -26,21 +28,44 @@ class StudHelperBot:
         StudHelperBot.bot.infinity_polling()
 
     def start_message(self, message):
-        self.user = User(None, None, None, message.from_user.username)
+        self.user = User(None, None, None, message.from_user.username, None, None, message.from_user.id)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1 = 0
         item2 = 0
         if self.user.is_admin():
             item1 = types.KeyboardButton("Добавить участника")
             item2 = types.KeyboardButton("Удалить команду")
-            self.team = Team(self.user.get_teamname(), self.user.get_username())
+            markup.add(item1)
+            markup.add(item2)
+            self.team = Team(self.user.get_teamname(), self.user.get_id())
+            self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+        elif self.user.is_in_team():
+            self.user.set_teamname(self.user.get_teamname_from_bd())
+            self.user.set_role(self.user.get_role_from_bd())
+            self.user.set_name(self.user.get_name_from_bd())
+            msg = self.bot.send_message(message.chat.id, "Вы в команде \"" + self.user.get_teamname_from_bd() + "\"")
+            if self.user.get_name() is None:
+                msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+                self.bot.register_next_step_handler(msg, self.after_name)
+            else:
+                item1 = types.KeyboardButton("Оценить участников команды")
+                item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+                markup.add(item1)
+                markup.add(item2)
+                if self.user.get_username() is not None:
+                    self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+                else:
+                    self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
         else:
             item1 = types.KeyboardButton("Регистрация команды")
             item2 = types.KeyboardButton("Присоединиться к команде")
-
-        markup.add(item1)
-        markup.add(item2)
-        self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+            markup.add(item1)
+            markup.add(item2)
+            username = self.user.get_username()
+            if username is not None:
+                self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+            else:
+                self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
 
     def message_reply(self, message):
         if message.text == "Регистрация команды":
@@ -49,14 +74,12 @@ class StudHelperBot:
             self.bot.register_next_step_handler(msg, self.product)
         elif message.text == "Добавить участника":
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            item1 = types.KeyboardButton("Scrum Master")
-            item2 = types.KeyboardButton("Разработчик")
-            item3 = types.KeyboardButton("Участник команды")
+            item1 = types.KeyboardButton("Да")
+            item2 = types.KeyboardButton("Нет")
             markup.add(item1)
             markup.add(item2)
-            markup.add(item3)
-            msg = self.bot.send_message(message.chat.id, "Введите роль того, кого хотите пригласить: ", reply_markup=markup)
-            self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
+            msg = self.bot.send_message(message.chat.id, "Есть ли у вас имя пользователя нового члена команды? ", reply_markup=markup)
+            self.bot.register_next_step_handler(msg, self.get_username_to_create_invitation)
         elif message.text == "Оценить участников команды":
             item = types.KeyboardButton("Хорошо")
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -82,63 +105,80 @@ class StudHelperBot:
             markup.add(item2)
             self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
 
+    def get_username_to_create_invitation(self, message):
+        if message.text == 'Да':
+            msg = self.bot.send_message(message.chat.id, "Введите имя пользователя, соблюдая регистр: ")
+            self.bot.register_next_step_handler(msg, self.get_role_to_create_invitation)
+        elif message.text == 'Нет':
+            self.team.set_team_code(self.create_unique_inv_code())
+            self.tg_name_of_user = 'Нет'
+            self.bot.send_message(message.chat.id, "Уникальный код участника:  " + self.team.get_team_code())
+            msg = self.bot.send_message(message.chat.id, "Этот код необходимо ввести новому участнику")
+            # self.bot.send_message(message.chat.id, "Ссылка на бота: t.me/Helping_Student_bot")
+            self.get_role_to_create_invitation(message)
+        else:
+            pass
+            #вы написали хуйню
+
     def get_role_to_create_invitation(self, message):
         self.invited_user = User()
-        self.role_of_user = message.text
-        msg = self.bot.send_message(message.chat.id, "Введите имя пользователя этого человека: ")
-        self.bot.register_next_step_handler(msg, self.create_invitation)
+        if self.tg_name_of_user != 'Нет':
+            self.tg_name_of_user = message.text
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1 = types.KeyboardButton("Scrum Master")
+        item2 = types.KeyboardButton("Разработчик")
+        item3 = types.KeyboardButton("Участник команды")
+        markup.add(item1)
+        markup.add(item2)
+        markup.add(item3)
+        msg = self.bot.send_message(message.chat.id, "Выберите роль пользователя: ", reply_markup=markup)
+        self.bot.register_next_step_handler(msg, self.add_user_to_bd)
 
-    def create_invitation(self, message):
-        self.tg_name_of_user = message.text
-        self.invited_user.set_role(self.role_of_user)
+    def add_user_to_bd(self, message):
+        self.invited_user.set_role(message.text)
         self.invited_user.set_username(self.tg_name_of_user)
         self.invited_user.set_teamname(self.user.get_teamname())
+        self.team.add_team_code(self.user.get_teamname(), message.text, self.team.get_team_code())
         self.invited_user.add_user()
-        self.bot.send_message(message.chat.id, "Код для приглашения пользователя " +
-                              self.invited_user.get_username() + ": " +
-                              str(self.transfer_str_int(message.text)) +
-                              " \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
+        self.bot.send_message(message.chat.id, "Перешлите эту ссылку члену команды: ")
+        self.bot.send_message(message.chat.id, "t.me/Helping_Student_bot")
 
-    def transfer_str_int(self, arg):
-        ans = ''
-        temp = ''
-        if len(arg) % 2:
-            while len(arg) < 7:
-                arg += 'r'
-            for i in range(len(arg)):
-                temp += str(ord(arg[i]))
-            temp = str(temp)
-            for i in range(4):
-                ans += arg[-i]
-                ans += temp[i]
-        else:
-            while len(arg) < 7:
-                arg += 'l'
-            for i in range(len(arg)):
-                temp += str(ord(arg[-i]))
-            temp = str(temp)
-            for i in range(4):
-                ans += arg[i]
-                ans += temp[-i]
-        return ans
+    # def create_invitation(self, message):
+    #     self.tg_name_of_user = message.text
+    #     self.invited_user.set_role(self.role_of_user)
+    #     self.invited_user.set_username(self.tg_name_of_user)
+    #     self.invited_user.set_teamname(self.user.get_teamname())
+    #     self.invited_user.add_user()
+    #     self.bot.send_message(message.chat.id, "Код для приглашения пользователя " +
+    #                           self.invited_user.get_username() + ": " +
+    #                           str(self.transfer_str_int(message.text)) +
+    #                           " \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
+
+
+    def create_unique_inv_code(self):
+        return str(uuid.uuid1())[:8]
 
     def accept_invitation(self, message):
-        if message.text == self.transfer_str_int(self.user.get_username()) or self.user.get_role == self.user.get_role_from_bd():  # успешно принимаем в команду
-            if message.text == self.transfer_str_int(self.user.get_username()):
-                self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
-                self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+        if self.user.check_team_with_code(message.text):  # успешно принимаем в команду
+            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!")
+            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
             msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+            self.user.set_id(message.from_user.id)
+            self.user.set_teamname(self.user.get_team_using_code(message.text))
+            self.user.set_role(self.user.get_role_using_code(message.text))
+            self.user.update_id_in_bd()
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
-            self.bot.send_message(message.chat.id, "Проверьте правильность кода")
+            self.bot.send_message(message.chat.id, "Ваше имя ")
 
     def name_again(self, message):
         msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
         self.bot.register_next_step_handler(msg, self.after_name)
 
     def after_name(self, message):
-        self.user.set_role((self.user.get_role_from_bd()))
-        self.user.set_teamname((self.user.get_teamname_from_bd()))
+        if self.user.get_username() is not None:
+            self.user.set_role((self.user.get_role_from_bd()))
+            self.user.set_teamname((self.user.get_teamname_from_bd()))
         name = message.text
         noSurname = False
         isSpace = False
@@ -158,12 +198,12 @@ class StudHelperBot:
             # msg = self.bot.send_message(message.chat.id, "Введите Вашу фамилию:")
             # self.bot.register_next_step_handler(msg, self.after_surname)
 
-    def after_surname(self, message):
-        surname = message.text
-        self.user.set_surname(surname)
-        self.user.add_surname()
-        msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
-        self.bot.register_next_step_handler(msg, self.after_group)
+    # def after_surname(self, message):
+    #     surname = message.text
+    #     self.user.set_surname(surname)
+    #     self.user.add_surname()
+    #     msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
+    #     self.bot.register_next_step_handler(msg, self.after_group)
 
     def after_group(self, message):
         group = message.text
@@ -182,7 +222,7 @@ class StudHelperBot:
 
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
-        self.team = Team(name_of_team, self.user.get_username())
+        self.team = Team(name_of_team, self.user.get_id())
         self.team.add()
         msg = self.bot.send_message(message.chat.id, "Введите название продукта: ")
         self.bot.register_next_step_handler(msg, self.after_product)
@@ -222,7 +262,6 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "У вас нет сокомандников :(", reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.message_reply)
         for elem in arr_of_names:
-            print(elem)
             item = types.KeyboardButton(elem)
             markup.add(item)
 
