@@ -4,7 +4,7 @@ from user import User
 from review import Review
 from telebot import types
 import uuid
-
+from datetime import datetime
 
 class StudHelperBot:
     token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
@@ -333,6 +333,11 @@ class StudHelperBot:
     def end_of_evaluation(self, message):
         tech_help = message.text  # в tech_help лежит отзыв о помощи пользователя в решении технических задач
         self.review.set_tech_help(tech_help)
+
+        current_date = datetime.now()
+        self.review.set_date(current_date)
+        self.review.set_reviewer(self.user.get_username())
+
         self.review.add_review()
 
         self.user.set_username(message.from_user.username)
