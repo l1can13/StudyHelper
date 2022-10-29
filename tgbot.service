@@ -1,0 +1,14 @@
+[Unit]
+Description=Telegram Bot
+After=network.target
+
+[Service]
+User=aleksandr
+Group=aleksandr
+
+WorkingDirectory=/home/aleksandr/StudyHelper/
+Environment="PYTHONPATH=/home/aleksandr/StudyHelper/"
+ExecStart=/home/aleksandr/StudyHelper/.venv/bin/python /home/aleksandr/StudyHelper/studhelper.py
+
+[Install]
+WantedBy=multi-user.target

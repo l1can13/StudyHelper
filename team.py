@@ -85,8 +85,8 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `Команды` (`Название`, `Ид`) VALUES (%s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.teamname, self.admin_id))
+                sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`, `Ид`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.teamname, self.admin, self.admin_id))
                 connection.commit()
         finally:
             connection.close()

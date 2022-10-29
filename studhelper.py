@@ -30,13 +30,12 @@ class StudHelperBot:
     def start_message(self, message):
         self.user = User(None, None, None, message.from_user.username, None, None, message.from_user.id)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        print(self.user.get_username())
         item1 = 0
         item2 = 0
         if self.user.is_admin():
             item1 = types.KeyboardButton("Добавить участника")
-            item2 = types.KeyboardButton("Удалить команду")
             markup.add(item1)
-            markup.add(item2)
             self.team = Team(self.user.get_teamname(), self.user.get_id())
             self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
         elif self.user.is_in_team():
@@ -61,8 +60,7 @@ class StudHelperBot:
             item2 = types.KeyboardButton("Присоединиться к команде")
             markup.add(item1)
             markup.add(item2)
-            username = self.user.get_username()
-            if username is not None:
+            if self.user.get_username() is not None:
                 self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
             else:
                 self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
@@ -94,16 +92,6 @@ class StudHelperBot:
         elif message.text == "Отправить отчёт о проделанной работе":
             msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ")
             self.bot.register_next_step_handler(msg, self.report_of_people)
-        elif message.text == "Удалить команду":
-            item1 = types.KeyboardButton("Регистрация команды")
-            item2 = types.KeyboardButton("Присоединиться к команде")
-
-            self.team.delete()
-
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(item1)
-            markup.add(item2)
-            self.bot.send_message(message.chat.id, "Ваша команда успешно удалена!", reply_markup=markup)
 
     def get_username_to_create_invitation(self, message):
         if message.text == 'Да':
@@ -138,22 +126,11 @@ class StudHelperBot:
         self.invited_user.set_role(message.text)
         self.invited_user.set_username(self.tg_name_of_user)
         self.invited_user.set_teamname(self.user.get_teamname())
-        self.team.add_team_code(self.user.get_teamname(), message.text, self.team.get_team_code())
+        if self.tg_name_of_user == 'Нет':
+            self.team.add_team_code(self.user.get_teamname(), message.text, self.team.get_team_code())
         self.invited_user.add_user()
         self.bot.send_message(message.chat.id, "Перешлите эту ссылку члену команды: ")
         self.bot.send_message(message.chat.id, "t.me/Helping_Student_bot")
-
-    # def create_invitation(self, message):
-    #     self.tg_name_of_user = message.text
-    #     self.invited_user.set_role(self.role_of_user)
-    #     self.invited_user.set_username(self.tg_name_of_user)
-    #     self.invited_user.set_teamname(self.user.get_teamname())
-    #     self.invited_user.add_user()
-    #     self.bot.send_message(message.chat.id, "Код для приглашения пользователя " +
-    #                           self.invited_user.get_username() + ": " +
-    #                           str(self.transfer_str_int(message.text)) +
-    #                           " \nОтправьте код данному пользователю, чтобы он мог присоединиться к Вашей команде.")
-
 
     def create_unique_inv_code(self):
         return str(uuid.uuid1())[:8]
@@ -192,23 +169,17 @@ class StudHelperBot:
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.user.set_name(name)
-            self.user.add_name()
+            print(self.user.get_name())
             msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
             self.bot.register_next_step_handler(msg, self.after_group)
-            # msg = self.bot.send_message(message.chat.id, "Введите Вашу фамилию:")
-            # self.bot.register_next_step_handler(msg, self.after_surname)
-
-    # def after_surname(self, message):
-    #     surname = message.text
-    #     self.user.set_surname(surname)
-    #     self.user.add_surname()
-    #     msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
-    #     self.bot.register_next_step_handler(msg, self.after_group)
 
     def after_group(self, message):
         group = message.text
         self.user.set_group(group)
+        print(self.user.get_group())
+        self.user.update_id_in_bd()
         self.user.add_group()
+        self.user.add_name()
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         if self.user.get_role() == 'Product Owner':
             item1 = types.KeyboardButton("Добавить участника")
@@ -223,6 +194,8 @@ class StudHelperBot:
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
         self.team = Team(name_of_team, self.user.get_id())
+        if self.user.get_username() is not None:
+            self.team.set_admin(self.user.get_username())
         self.team.add()
         msg = self.bot.send_message(message.chat.id, "Введите название продукта: ")
         self.bot.register_next_step_handler(msg, self.after_product)
