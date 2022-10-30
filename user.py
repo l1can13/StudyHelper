@@ -309,8 +309,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `Отчеты` (`Автор отчета`, `Текст отчета`, `Дата отправки`) VALUES (%s, %s, %s);"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.id, self.report, self.departure_time))
+                sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`) VALUES (%s, %s, %s, %s);"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.username, self.id, self.report, self.departure_time))
                 connection.commit()
         finally:
             connection.close()
