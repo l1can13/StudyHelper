@@ -47,7 +47,8 @@ class StudHelperBot:
             markup.add(item2)
             markup.add(item3)
             markup.add(item4)
-            self.team = Team(self.user.get_teamname(), self.user.get_id())
+            self.team = Team(self.user.get_teamname_from_bd(), self.user.get_id())
+            self.user.set_teamname(self.team.get_teamname())
         elif self.user.is_in_team():
             self.user.set_teamname(self.user.get_teamname_from_bd())
             self.user.set_role(self.user.get_role_from_bd())
@@ -116,7 +117,8 @@ class StudHelperBot:
             self.get_role_to_create_invitation(message)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
-            self.start_message(message)
+            message.text = 'Добавить участника'
+            self.message_reply(message)
 
     def get_role_to_create_invitation(self, message):
         self.invited_user = User()
@@ -135,7 +137,8 @@ class StudHelperBot:
     def add_user_to_bd(self, message):
         if message.text not in self.roles:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
-            self.start_message(message)
+            self.get_role_to_create_invitation(message)
+            return
         self.invited_user.set_role(message.text)
         self.invited_user.set_username(self.tg_name_of_user)
         self.invited_user.set_teamname(self.user.get_teamname())
@@ -187,7 +190,6 @@ class StudHelperBot:
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.user.set_name(name)
-            print(self.user.get_name())
             msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
             self.bot.register_next_step_handler(msg, self.after_group)
 
@@ -212,11 +214,11 @@ class StudHelperBot:
     def after_product(self, message):
         self.team.set_product(message.text)
         self.team.add_product()
-        self.user.set_teamname(self.team.get_name())
+        self.user.set_teamname(self.team.get_teamname())
         self.user.set_role("Product Owner")
         self.user.add_user()
         self.bot.send_message(message.chat.id,
-                              "Команда \"" + self.team.get_name() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
+                              "Команда \"" + self.team.get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
         msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
         self.bot.register_next_step_handler(msg, self.after_name)
@@ -225,7 +227,7 @@ class StudHelperBot:
         team_members = self.team.get_team_members()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
         arr_of_names = []
         for elem in team_members:
-            arr_of_names.append(elem['Фамилия'])  # в arr_of_name(список) кладем только сами фамилии
+            arr_of_names.append(elem['Имя'])  # в arr_of_name(список) кладем только сами фамилии
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         if len(arr_of_names) == 0:
             self.user.set_username(message.from_user.username)

@@ -124,7 +124,7 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                insert_user = "INSERT INTO `Пользователи` (`Имя Фамилия`, `Группа`, `User_name`, `Команда`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
+                insert_user = "INSERT INTO `Пользователи` (`Имя`, `Группа`, `User_name`, `Команда`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
                 cursor.execute(insert_user, (self.name, self.group, self.username, self.teamname,
                                              self.role, self.id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
@@ -145,7 +145,7 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "UPDATE `Пользователи` SET `Имя Фамилия` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
+                sql_request = "UPDATE `Пользователи` SET `Имя` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.name, self.id))
                 connection.commit()
         finally:
@@ -190,8 +190,6 @@ class User:
                 sql_request = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.id, self.username))
                 tmnm = cursor.fetchone()
-                print(self.id)
-                print(tmnm)
                 connection.commit()
                 return tmnm['Команда']
         finally:
@@ -283,11 +281,11 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "SELECT `Имя Фамилия` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.id, self.username))
                 role = cursor.fetchone()
                 connection.commit()
-                return role['Имя Фамилия']
+                return role['Имя']
         finally:
             connection.close()
 
