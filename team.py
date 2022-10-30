@@ -45,7 +45,7 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `User_name` FROM `Пользователи` WHERE `Фамилия` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `User_name` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, surname)
                 result = cursor.fetchone()
                 connection.commit()
@@ -58,7 +58,7 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Фамилия` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 result = cursor.fetchall()
                 connection.commit()
@@ -135,10 +135,10 @@ class Team:
     def get_admin(self):
         return self.admin
 
-    def set_name(self, teamname):
+    def set_teamname(self, teamname):
         self.teamname = teamname
 
-    def get_name(self):
+    def get_teamname(self):
         return self.teamname
 
     def set_product(self, product):
