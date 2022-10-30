@@ -8,6 +8,7 @@ import uuid
 from datetime import datetime
 
 
+
 class StudHelperBot:
     token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
     bot = telebot.TeleBot(token)
@@ -309,7 +310,11 @@ class StudHelperBot:
         self.start_message(message)
 
     def report_of_people(self, message):
+        departure_time = datetime.now()
         report = message.text # в report лежит отчет о проделанной работе
+        self.user.set_report(report)
+        self.user.set_departure_time(departure_time)
+        self.user.add_report()
         self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!")
         self.start_message(message)
 
