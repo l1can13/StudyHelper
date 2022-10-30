@@ -41,10 +41,10 @@ class StudHelperBot:
         item4 = 0
         if self.user.is_admin():
             item1 = types.KeyboardButton("Добавить участника")
-            item3 = types.KeyboardButton("Оценить участников команды")
+            # item3 = types.KeyboardButton("Оценить участников команды")
             item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
             markup.add(item1)
-            markup.add(item3)
+            # markup.add(item3)
             markup.add(item4)
             self.team = Team(self.user.get_teamname_from_bd(), self.user.get_id())
             self.user.set_teamname(self.team.get_teamname())
@@ -58,9 +58,9 @@ class StudHelperBot:
                 self.bot.register_next_step_handler(msg, self.after_name)
                 return
             else:
-                item1 = types.KeyboardButton("Оценить участников команды")
+                # item1 = types.KeyboardButton("Оценить участников команды")
                 item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
-                markup.add(item1)
+                # markup.add(item1)
                 markup.add(item2)
         else:
             item1 = types.KeyboardButton("Регистрация команды")
@@ -89,14 +89,14 @@ class StudHelperBot:
             markup.add(item2)
             msg = self.bot.send_message(message.chat.id, "Есть ли у вас имя пользователя нового члена команды? ", reply_markup=markup)
             self.bot.register_next_step_handler(msg, self.get_username_to_create_invitation)
-        elif message.text == "Оценить участников команды":
-            item = types.KeyboardButton("Хорошо")
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(item)
-            msg = self.bot.send_message(message.chat.id,
-                                        'Нужно будет поставить оценки участнику команды и написать про него отзывы',
-                                        reply_markup=markup)
-            self.bot.register_next_step_handler(msg, self.evaluation)
+        # elif message.text == "Оценить участников команды":
+        #     item = types.KeyboardButton("Хорошо")
+        #     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        #     markup.add(item)
+        #     msg = self.bot.send_message(message.chat.id,
+        #                                 'Нужно будет поставить оценки участнику команды и написать про него отзывы',
+        #                                 reply_markup=markup)
+        #     self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Присоединиться к команде":
             msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ", reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(msg, self.accept_invitation)
