@@ -62,6 +62,7 @@ class User:
             self.role = args[5]
             self.id = args[6]
             self.counter_of_people = 0
+
         else:
             self.name = None
             self.surname = None
@@ -71,6 +72,8 @@ class User:
             self.role = None
             self.id = 0
             self.counter_of_people = 0
+        self.report = None
+        self.departure_time = None
 
     def get_counter_of_people(self):
         return self.counter_of_people
@@ -119,6 +122,18 @@ class User:
 
     def get_id(self):
         return self.id
+
+    def get_report(self):
+        return  self.report
+
+    def set_report(self,arg):
+        self.report = arg
+
+    def get_departure_time(self):
+        return self.departure_time
+
+    def set_departure_time(self, arg):
+        self.departure_time = arg
 
     def add_user(self):
         connection = connect_to_db()
@@ -289,3 +304,13 @@ class User:
         finally:
             connection.close()
 
+
+    def add_report(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "INSERT INTO `Отчеты` (`Автор отчета`, `Текст отчета`, `Дата отправки`) VALUES (%s, %s, %s);"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.id, self.report, self.departure_time))
+                connection.commit()
+        finally:
+            connection.close()
