@@ -36,6 +36,7 @@ class StudHelperBot:
     def start_message(self, message):
         self.user = User(None, None, None, message.from_user.username, None, None, message.from_user.id)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        self.tg_name_of_user = ''
         item1 = 0
         item3 = 0
         item4 = 0
