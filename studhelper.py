@@ -8,7 +8,6 @@ import uuid
 from datetime import datetime
 
 
-
 class StudHelperBot:
     token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
     bot = telebot.TeleBot(token)
@@ -206,7 +205,7 @@ class StudHelperBot:
         self.team.set_product(message.text)
         self.team.add_product()
         self.user.set_teamname(self.team.get_teamname())
-        self.user.set_role("Product Owner")
+        self.user.set_role("Scrum Master") # Product Owner
         self.user.add_user()
         self.bot.send_message(message.chat.id,
                               "Команда \"" + self.team.get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
