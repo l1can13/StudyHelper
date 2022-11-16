@@ -11,8 +11,6 @@ mysqli_set_charset($mysqli,'utf8');
 
 $result = $mysqli->query("SELECT * FROM `Команды`");
 
-$array = [];
-
 while ($row = $result->fetch_assoc()) {
     $array[] = $row;
 }

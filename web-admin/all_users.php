@@ -11,8 +11,6 @@ mysqli_set_charset($mysqli,'utf8');
 
 $result = $mysqli->query("SELECT `Имя`, `Группа`, `Команда` FROM `Пользователи`");
 
-$array = [];
-
 while ($row = $result->fetch_assoc()) {
     $array[] = $row;
 }

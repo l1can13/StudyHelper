@@ -32,16 +32,14 @@ let showAllUser = document.querySelector('.show_all_users')
 let manageBot = document.querySelector('.manage_bot');
 let statistics = document.querySelector('.statistics');
 let tableDiv = document.querySelector('.table_div');
+let infoDiv = document.querySelector('.info_div');
 
 let arrTeams = [], arrAllUser = [];
 let helpArr = [["Название", "Администратор", "Продукт", "Ид"], ["Имя", "Группа", "Команда"]];
 
 arrTeams = ajaxRequest("teams.php");
 arrAllUser = ajaxRequest("all_users.php");
-for (let i = 0; i < 10; ++i) {
-    arrTeams.unshift(helpArr[0]);
-}
-arrAllUser.unshift(helpArr[1]);
+arrTeams.unshift(helpArr[0]);
 
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
@@ -50,7 +48,7 @@ hamburgerButton.addEventListener('click', () => {
     showAllUser.classList.toggle('show');
     manageBot.classList.toggle('show');
     statistics.classList.toggle('show');
-})
+});
 
 showTeams.addEventListener('click', () => {
     console.log(arrTeams);
@@ -58,12 +56,8 @@ showTeams.addEventListener('click', () => {
     let temp = document.querySelector('.table');
     temp.innerHTML = table;
     tableDiv.appendChild(temp)
-})
+});
 
-showAllUser.addEventListener('click', () => {
-    console.log(arrAllUser);
-    let table = createTable(arrAllUser);
-    let temp = document.querySelector('.table');
-    temp.innerHTML = table;
-    tableDiv.appendChild(temp)
-})
+manageBot.addEventListener('click', () => {
+    window.location.href = 'manage_bot.html';
+});
