@@ -33,6 +33,7 @@ let checkboxBot = document.querySelector('#checkbox_bot');
 
 getBotStatus().includes('Active: active') ? checkboxBot.checked = true : checkboxBot.checked = false;
 
+
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
     sideMenu.classList.toggle('show');
