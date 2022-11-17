@@ -267,6 +267,7 @@ input:checked+.slider:before {
     font-family: 'Montserrat', sans-serif;
     color: #FEFFFF;
     background: #28293D;
+    max-width: 286px;
 }
 
 .get_bot_status:active,
@@ -276,7 +277,12 @@ input:checked+.slider:before {
 
 .result_title {
     margin-top: 24px;
+    margin-bottom: 10px;
     font-size: 20px;
     font-family: 'Montserrat', sans-serif;
     color: #28293D;
+}
+
+.status_div {
+    max-width: 750px;
 }
