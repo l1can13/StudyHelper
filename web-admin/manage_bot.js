@@ -5,7 +5,7 @@ function getBotStatus() {
         method: 'GET',
         async: false,
     }).done(function (data, textStatus, jqXHR) {
-       result = jqXHR.responseText;
+        result = jqXHR.responseText;
     });
 
     return result;
@@ -17,7 +17,7 @@ function changeBotStatus(status) {
         method: 'GET',
         async: false,
     }).done(function (data, textStatus, jqXHR) {
-       result = jqXHR.responseText;
+        result = jqXHR.responseText;
     });
 }
 
@@ -50,7 +50,7 @@ getBotStatusButton.addEventListener('click', () => {
 checkboxBot.addEventListener('change', (event) => {
     if (event.currentTarget.checked) {
         changeBotStatus('on');
-      } else {
+    } else {
         changeBotStatus('off');
-      }
+    }
 });
