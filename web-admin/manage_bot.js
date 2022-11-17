@@ -1,7 +1,20 @@
 function getBotStatus() {
     let result;
     $.ajax({
-        url: 'get_bot_status.php',
+        url: 'is_bot_active.php',
+        method: 'GET',
+        async: false,
+    }).done(function (data, textStatus, jqXHR) {
+        result = jqXHR.responseText;
+    });
+
+    return result;
+}
+
+function getReviewStatus() {
+    let result;
+    $.ajax({
+        url: 'is_review_active.php',
         method: 'GET',
         async: false,
     }).done(function (data, textStatus, jqXHR) {
@@ -14,10 +27,16 @@ function getBotStatus() {
 function changeBotStatus(status) {
     $.ajax({
         url: (status === 'off') ? 'turn_off_bot.php' : 'turn_on_bot.php',
-        method: 'GET',
+        method: 'POST',
         async: false,
-    }).done(function (data, textStatus, jqXHR) {
-        result = jqXHR.responseText;
+    });
+}
+
+function changeReviewVisibility(review) {
+    $.ajax({
+        url: review ? 'turn_on_review.php' : 'turn_off_review.php',
+        method: 'POST',
+        async: false,
     });
 }
 
@@ -30,8 +49,25 @@ let statistics = document.querySelector('.statistics');
 let getBotStatusButton = document.querySelector('.get_bot_status');
 let statusText = document.querySelector('.status_text');
 let checkboxBot = document.querySelector('#checkbox_bot');
+let checkboxReview = document.querySelector('#checkbox_review');
 
-getBotStatus().includes('Active: active') ? checkboxBot.checked = true : checkboxBot.checked = false;
+switch (getBotStatus()) {
+    case '1':
+        checkboxBot.checked = true;
+        break;
+    case '':
+        checkboxBot.checked = false;
+        break;
+}
+
+switch (getReviewStatus()) {
+    case '':
+        checkboxReview.checked = false;
+        break;
+    default:
+        checkboxReview.checked = true;
+        break;
+}
 
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
@@ -51,5 +87,14 @@ checkboxBot.addEventListener('change', (event) => {
         changeBotStatus('on');
     } else {
         changeBotStatus('off');
+        checkboxReview.checked = false;
+    }
+});
+
+checkboxReview.addEventListener('change', (event) => {
+    if (event.currentTarget.checked) {
+        changeReviewVisibility(true);
+    } else {
+        changeReviewVisibility(false);
     }
 });
