@@ -39,19 +39,17 @@ arrTeams = ajaxRequest("teams.php");
 arrAllUser = ajaxRequest("all_users.php");
 arrTeams.unshift(helpArr[0]);
 
+console.log(arrTeams);
+let table = createTable(arrTeams);
+let temp = document.querySelector('.table');
+temp.innerHTML = table;
+tableDiv.appendChild(temp)
+
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
     manageBot.classList.toggle('show');
-});
-
-showTeams.addEventListener('click', () => {
-    console.log(arrTeams);
-    let table = createTable(arrTeams);
-    let temp = document.querySelector('.table');
-    temp.innerHTML = table;
-    tableDiv.appendChild(temp)
 });
 
 manageBot.addEventListener('click', () => {
