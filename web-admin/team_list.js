@@ -27,13 +27,15 @@ function ajaxRequest(phpName) {
 let hamburgerButton = document.querySelector('.spans');
 let container = document.querySelector('.container');
 let sideMenu = document.querySelector('.side_menu');
-let showTeams = document.querySelector('.show_teams');
+let showTeams = document.querySelector('.show_teams')
 let manageBot = document.querySelector('.manage_bot');
+let teamName = document.querySelector('.team_name');
+let productName = document.querySelector('.product_name');
+let admin = document.querySelector('.admin');
 let tableDiv = document.querySelector('.table_div');
-let infoDiv = document.querySelector('.info_div');
 
 let arrTeams = [], arrAllUser = [];
-let helpArr = [["Название", "Администратор", "Продукт", "Ид"], ["Имя", "Группа", "Команда"]];
+let helpArr = [["Название", "Администратор", "Продукт", "Ид"], ["Имя", "Фамилия", "Группа", "Username", "Роль"]];
 
 arrTeams = ajaxRequest("teams.php");
 arrAllUser = ajaxRequest("all_users.php");
@@ -47,11 +49,7 @@ hamburgerButton.addEventListener('click', () => {
 });
 
 showTeams.addEventListener('click', () => {
-    console.log(arrTeams);
-    let table = createTable(arrTeams);
-    let temp = document.querySelector('.table');
-    temp.innerHTML = table;
-    tableDiv.appendChild(temp)
+    window.location.href = 'index.html';
 });
 
 manageBot.addEventListener('click', () => {
