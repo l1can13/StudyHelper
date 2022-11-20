@@ -42,10 +42,8 @@ function changeReviewVisibility(review) {
 
 let hamburgerButton = document.querySelector('.spans');
 let sideMenu = document.querySelector('.side_menu');
-let showTeams = document.querySelector('.show_teams')
-let showAllUser = document.querySelector('.show_all_users')
+let showTeams = document.querySelector('.show_teams');
 let manageBot = document.querySelector('.manage_bot');
-let statistics = document.querySelector('.statistics');
 let getBotStatusButton = document.querySelector('.get_bot_status');
 let statusText = document.querySelector('.status_text');
 let checkboxBot = document.querySelector('#checkbox_bot');
@@ -74,9 +72,7 @@ hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
-    showAllUser.classList.toggle('show');
     manageBot.classList.toggle('show');
-    statistics.classList.toggle('show');
 });
 
 getBotStatusButton.addEventListener('click', () => {
@@ -98,4 +94,8 @@ checkboxReview.addEventListener('change', (event) => {
     } else {
         changeReviewVisibility(false);
     }
+});
+
+showTeams.addEventListener('click', () => {
+    window.location.href = 'index.html';
 });
