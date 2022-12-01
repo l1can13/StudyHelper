@@ -1,3 +1,16 @@
+function getBotStatusText() {
+    let result;
+    $.ajax({
+        url: 'get_bot_status.php',
+        method: 'GET',
+        async: false,
+    }).done(function (data, textStatus, jqXHR) {
+        result = jqXHR.responseText;
+    });
+
+    return result;
+}
+
 function getBotStatus() {
     let result;
     $.ajax({
@@ -76,7 +89,7 @@ hamburgerButton.addEventListener('click', () => {
 });
 
 getBotStatusButton.addEventListener('click', () => {
-    statusText.textContent = getBotStatus();
+    statusText.textContent = getBotStatusText();
 });
 
 checkboxBot.addEventListener('change', (event) => {
