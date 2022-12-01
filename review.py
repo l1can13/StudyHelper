@@ -1,7 +1,6 @@
 from config import host, user, password, db_name
 import pymysql.cursors
 
-
 def connect_to_db():
     try:
         connection = pymysql.connect(
