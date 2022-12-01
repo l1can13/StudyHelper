@@ -5,6 +5,10 @@ ssh2_auth_password($connection, 'root', '9hfeygRJw~-$');
 
 $stream = ssh2_exec($connection, 'sudo systemctl status tgbot');
 stream_set_blocking($stream, true);
-$output = stream_get_contents($stream);
+$output1 = stream_get_contents($stream);
 
-echo $output;
+$stream = ssh2_exec($connection, 'sudo systemctl status tgbot_review');
+stream_set_blocking($stream, true);
+$output2 = stream_get_contents($stream);
+
+echo $output1 . $output2;
