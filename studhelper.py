@@ -24,12 +24,9 @@ class StudHelperBot:
         self.invited_user_dict = {}
         self.team_dict = {}
         self.review_dict = {}
-        self.temp_username = None
-        self.role_of_user = ''
-        self.id = 0
-        self.tg_name_of_user = ''
-        self.first_hello = False
-        self.accept = False
+        self.temp_username_dict = {}
+        self.tg_name_of_user_dict = {}
+        self.first_hello_dict = {}
         self.roles = ["Product owner", "Scrum Master", "Разработчик", "Участник команды"]
 
     def start(self):
@@ -39,11 +36,12 @@ class StudHelperBot:
         self.user_dict[message.chat.id] = User(None, None, None, message.from_user.username, None, None,
                                                message.from_user.id)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        self.tg_name_of_user = ''
+        self.tg_name_of_user_dict[message.chat.id] = ''
+        self.first_hello_dict[message.chat.id] = self.user_dict[message.chat.id].is_in_team()
         item1 = 0
         item3 = 0
         item4 = 0
-        if " " in message.text and not self.first_hello:
+        if " " in message.text and not self.first_hello_dict[message.chat.id]:
             message.text = message.text.split()[1]
             self.accept_invitation(message)
         else:
@@ -62,7 +60,8 @@ class StudHelperBot:
                 self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
                 self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
                 msg = self.bot.send_message(message.chat.id,
-                                            "Вы в команде \"" + self.user_dict[message.chat.id].get_teamname_from_bd() + "\"")
+                                            "Вы в команде \"" + self.user_dict[
+                                                message.chat.id].get_teamname_from_bd() + "\"")
                 if self.user_dict[message.chat.id].get_name() is None:
                     msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
                     self.bot.register_next_step_handler(msg, self.after_name)
@@ -77,12 +76,13 @@ class StudHelperBot:
                 item2 = types.KeyboardButton("Присоединиться к команде")
                 markup.add(item1)
                 markup.add(item2)
-            if not self.first_hello:
+            if not self.first_hello_dict[message.chat.id]:
                 if self.user_dict[message.chat.id].get_username() is not None:
-                    self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(), reply_markup=markup)
+                    self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(),
+                                          reply_markup=markup)
                 else:
                     self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
-                self.first_hello = True
+                self.first_hello_dict[message.chat.id] = True
             else:
                 self.bot.send_message(message.chat.id, "Что вы хотите сделать?", reply_markup=markup)
 
@@ -121,8 +121,8 @@ class StudHelperBot:
     def get_role_to_create_invitation(self, message):
         self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
         self.invited_user_dict[message.chat.id] = User()
-        # if self.tg_name_of_user != 'Нет':
-        #     self.tg_name_of_user = message.text
+        # if self.tg_name_of_user_dict[message.chat.id] != 'Нет':
+        #     self.tg_name_of_user_dict[message.chat.id] = message.text
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         item1 = types.KeyboardButton(self.roles[0])
         item2 = types.KeyboardButton(self.roles[1])
@@ -141,13 +141,15 @@ class StudHelperBot:
             self.get_role_to_create_invitation(message)
             return
         self.invited_user_dict[message.chat.id].set_role(message.text)
-        # self.invited_user.set_username(self.tg_name_of_user)
+        # self.invited_user.set_username(self.tg_name_of_user_dict[message.chat.id])
         self.invited_user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname())
         self.invited_user_dict[message.chat.id].add_user()
-        self.team_dict[message.chat.id].add_team_code(self.user_dict[message.chat.id].get_teamname(), message.text, self.team_dict[message.chat.id].get_team_code())
+        self.team_dict[message.chat.id].add_team_code(self.user_dict[message.chat.id].get_teamname(), message.text,
+                                                      self.team_dict[message.chat.id].get_team_code())
         self.bot.send_message(message.chat.id,
                               "Для того, чтобы приглашенный участник смог присоединиться к команде, ему необходимо ввести данную ссылку: ")
-        self.bot.send_message(message.chat.id, "https://t.me/Helping_Student_bot?start=" + self.team_dict[message.chat.id].get_team_code())
+        self.bot.send_message(message.chat.id, "https://t.me/Helping_Student_bot?start=" + self.team_dict[
+            message.chat.id].get_team_code())
         self.bot.send_message(message.chat.id, "Команда и роль будут определены автоматически")
         self.start_message(message)
 
@@ -177,14 +179,14 @@ class StudHelperBot:
             self.user_dict[message.chat.id].set_role((self.user_dict[message.chat.id].get_role_from_bd()))
             self.user_dict[message.chat.id].set_teamname((self.user_dict[message.chat.id].get_teamname_from_bd()))
         name = message.text
-        noSurname = False
-        isSpace = False
+        no_surname = False
+        is_space = False
         for index, val in enumerate(name):
             if val == ' ':
-                isSpace = True
+                is_space = True
                 if index == len(name) - 1:
-                    noSurname = True
-        if noSurname or not isSpace:
+                    no_surname = True
+        if no_surname or not is_space:
             msg = self.bot.send_message(message.chat.id, "Вы не ввели имя или фамилию, попробуйте еще раз:")
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
@@ -195,6 +197,9 @@ class StudHelperBot:
     def after_group(self, message):
         group = message.text
         self.user_dict[message.chat.id].set_group(group)
+        if message.from_user.username is not None:
+            self.user_dict[message.chat.id].set_username(message.from_user.username)
+            self.user_dict[message.chat.id].add_username()
         self.user_dict[message.chat.id].update_id_in_bd()
         self.user_dict[message.chat.id].add_group()
         self.user_dict[message.chat.id].add_name()
@@ -217,7 +222,8 @@ class StudHelperBot:
         self.user_dict[message.chat.id].set_role("Scrum Master")  # Product Owner
         self.user_dict[message.chat.id].add_user()
         self.bot.send_message(message.chat.id,
-                              "Команда \"" + self.team_dict[message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
+                              "Команда \"" + self.team_dict[
+                                  message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
         msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
         self.bot.register_next_step_handler(msg, self.after_name)
@@ -247,10 +253,10 @@ class StudHelperBot:
     # def after_evaluation(self, message):  # функция, где участникам ставят общую оценку от 0 до 10
     #     surname = message.text  # в surname лежит фамилия текущего пользователя
     #
-    #     self.temp_username = self.team.find_username_by_surname(
+    #     self.temp_username_dict[message.chat.id] = self.team.find_username_by_surname(
     #         surname)  # находим User_name по фамилии (возможно переписать в один запрос, когда ищем фамилию в бд)
     #     self.review = Review()
-    #     self.review.set_username(self.temp_username)
+    #     self.review.set_username(self.temp_username_dict[message.chat.id])
     #     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     #
     #     if surname != "Отмена":

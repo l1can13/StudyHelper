@@ -166,6 +166,16 @@ class User:
         finally:
             connection.close()
 
+    def add_username(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "UPDATE `Пользователи` SET `User_name` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.username, self.id))
+                connection.commit()
+        finally:
+            connection.close()
+
     def add_surname(self):
         connection = connect_to_db()
         try:
