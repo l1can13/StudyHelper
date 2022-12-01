@@ -7,20 +7,20 @@ function createTable(arr) {
 
 function ajaxRequest(phpName) {
     let arr = [];
-    let ajax = new XMLHttpRequest();
-    let dbData;
-    ajax.open("GET", phpName, true);
-    ajax.send();
-    ajax.onreadystatechange = function () {
-        if (ajax.readyState == 4 && ajax.status == 200) {
-            let data = ajax.responseText;
-            dbData = JSON.parse(data);
+    let result;
 
-            for (let i = 0; i < dbData.length; ++i) {
-                arr.push(Object.values(dbData[i]));
-            }
-        }
+    $.ajax({
+        url: phpName,
+        method: 'GET',
+        async: false,
+    }).done(function (data, textStatus, jqXHR) {
+        result = JSON.parse(data);
+    });
+
+    for (let i = 0; i < result.length; ++i) {
+        arr.push(Object.values(result[i]));
     }
+
     return arr;
 }
 
@@ -32,18 +32,29 @@ let manageBot = document.querySelector('.manage_bot');
 let tableDiv = document.querySelector('.table_div');
 let infoDiv = document.querySelector('.info_div');
 
-let arrTeams = [], arrAllUser = [];
-let helpArr = [["Название", "Администратор", "Продукт", "Ид"], ["Имя", "Группа", "Команда"]];
+let arrTeams = [];
+let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Команда"]];
 
 arrTeams = ajaxRequest("teams.php");
-arrAllUser = ajaxRequest("all_users.php");
+console.log(arrTeams);
 arrTeams.unshift(helpArr[0]);
 
-console.log(arrTeams);
 let table = createTable(arrTeams);
 let temp = document.querySelector('.table');
 temp.innerHTML = table;
-tableDiv.appendChild(temp)
+tableDiv.appendChild(temp);
+
+let trs = document.querySelectorAll('tr');
+
+for (var i = 0; i < trs.length; ++i) {
+    trs[i].addEventListener('click', function() {
+        var input_name = this.getElementsByTagName("th")[0].innerHTML;
+        var input_product = this.getElementsByTagName("th")[1].innerHTML;
+        var input_admin = this.getElementsByTagName("th")[2].innerHTML;
+        var url = 'team_list.html?'+ input_name + '&' + input_product + '&' + input_admin;
+        window.location.href = url; 
+    });
+}
 
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
