@@ -34,12 +34,23 @@ let productName = document.querySelector('.product_name');
 let admin = document.querySelector('.admin');
 let tableDiv = document.querySelector('.table_div');
 
-let arrTeams = [], arrAllUser = [];
-let helpArr = [["Название", "Администратор", "Продукт", "Ид"], ["Имя", "Фамилия", "Группа", "Username", "Роль"]];
+let arrTeams = [], arrAllUser = [], arrOneTeamUsers = [];
+let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"]];
+
+var textt = decodeURIComponent(location.search.substring(1)).split('&');
+teamName.textContent = textt[0];
+productName.textContent = textt[1];
+admin.textContent = textt[2];
 
 arrTeams = ajaxRequest("teams.php");
-arrAllUser = ajaxRequest("all_users.php");
+arrOneTeamUsers = ajaxRequest("one_team_users.php?team=" + textt[0]);
 arrTeams.unshift(helpArr[0]);
+arrOneTeamUsers.unshift(helpArr[1]);
+
+let table = createTable(arrOneTeamUsers);
+let temp = document.querySelector('.table');
+temp.innerHTML = table;
+tableDiv.appendChild(temp)
 
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
