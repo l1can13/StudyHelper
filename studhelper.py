@@ -8,19 +8,23 @@ import uuid
 from datetime import datetime
 
 
+def create_unique_inv_code():
+    return str(uuid.uuid1())[:8]
+
+
 class StudHelperBot:
-    token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
-    bot = telebot.TeleBot(token)
 
     def __init__(self):
+        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
+        self.bot = telebot.TeleBot(self.token)
         self.start_message = self.bot.message_handler(commands=['start'])(self.start_message)
         # self.button_message = self.bot.message_handler(commands=['button'])(self.button_message)
         self.message_reply = self.bot.message_handler(content_types='text')(self.message_reply)
-        self.user = None
-        self.team = None
+        self.user_dict = {}
+        self.invited_user_dict = {}
+        self.team_dict = {}
+        self.review_dict = {}
         self.temp_username = None
-        self.invited_user = None
-        self.review = None
         self.role_of_user = ''
         self.id = 0
         self.tg_name_of_user = ''
@@ -28,12 +32,12 @@ class StudHelperBot:
         self.accept = False
         self.roles = ["Product owner", "Scrum Master", "Разработчик", "Участник команды"]
 
-    @staticmethod
-    def start():
-        StudHelperBot.bot.infinity_polling()
+    def start(self):
+        self.bot.infinity_polling()
 
     def start_message(self, message):
-        self.user = User(None, None, None, message.from_user.username, None, None, message.from_user.id)
+        self.user_dict[message.chat.id] = User(None, None, None, message.from_user.username, None, None,
+                                               message.from_user.id)
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         self.tg_name_of_user = ''
         item1 = 0
@@ -43,21 +47,23 @@ class StudHelperBot:
             message.text = message.text.split()[1]
             self.accept_invitation(message)
         else:
-            if self.user.is_admin():
+            if self.user_dict[message.chat.id].is_admin():
                 item1 = types.KeyboardButton("Добавить участника")
                 # item3 = types.KeyboardButton("Оценить участников команды")
                 item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
                 markup.add(item1)
                 # markup.add(item3)
                 markup.add(item4)
-                self.team = Team(self.user.get_teamname_from_bd(), self.user.get_id())
-                self.user.set_teamname(self.team.get_teamname())
-            elif self.user.is_in_team():
-                self.user.set_teamname(self.user.get_teamname_from_bd())
-                self.user.set_role(self.user.get_role_from_bd())
-                self.user.set_name(self.user.get_name_from_bd())
-                msg = self.bot.send_message(message.chat.id, "Вы в команде \"" + self.user.get_teamname_from_bd() + "\"")
-                if self.user.get_name() is None:
+                self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
+                                                       self.user_dict[message.chat.id].get_id())
+                self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
+            elif self.user_dict[message.chat.id].is_in_team():
+                self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
+                self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
+                self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
+                msg = self.bot.send_message(message.chat.id,
+                                            "Вы в команде \"" + self.user_dict[message.chat.id].get_teamname_from_bd() + "\"")
+                if self.user_dict[message.chat.id].get_name() is None:
                     msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
                     self.bot.register_next_step_handler(msg, self.after_name)
                     return
@@ -72,8 +78,8 @@ class StudHelperBot:
                 markup.add(item1)
                 markup.add(item2)
             if not self.first_hello:
-                if self.user.get_username() is not None:
-                    self.bot.send_message(message.chat.id, "Привет, " + self.user.get_username(), reply_markup=markup)
+                if self.user_dict[message.chat.id].get_username() is not None:
+                    self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(), reply_markup=markup)
                 else:
                     self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
                 self.first_hello = True
@@ -101,18 +107,20 @@ class StudHelperBot:
         #                                 reply_markup=markup)
         #     self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Присоединиться к команде":
-            msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ", reply_markup=ReplyKeyboardRemove())
+            msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ",
+                                        reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(msg, self.accept_invitation)
         elif message.text == "Отправить отчёт о проделанной работе":
-            msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ", reply_markup=ReplyKeyboardRemove())
+            msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
+                                        reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(msg, self.report_of_people)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.start_message(message)
 
     def get_role_to_create_invitation(self, message):
-        self.team.set_team_code(self.create_unique_inv_code())
-        self.invited_user = User()
+        self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
+        self.invited_user_dict[message.chat.id] = User()
         # if self.tg_name_of_user != 'Нет':
         #     self.tg_name_of_user = message.text
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -132,31 +140,32 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.get_role_to_create_invitation(message)
             return
-        self.invited_user.set_role(message.text)
+        self.invited_user_dict[message.chat.id].set_role(message.text)
         # self.invited_user.set_username(self.tg_name_of_user)
-        self.invited_user.set_teamname(self.user.get_teamname())
-        self.invited_user.add_user()
-        self.team.add_team_code(self.user.get_teamname(), message.text, self.team.get_team_code())
-        self.bot.send_message(message.chat.id, "Для того, чтобы приглашенный участник смог присоединиться к команде, ему необходимо ввести данную ссылку: ")
-        self.bot.send_message(message.chat.id, "https://t.me/Helping_Student_bot?start=" + self.team.get_team_code())
+        self.invited_user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname())
+        self.invited_user_dict[message.chat.id].add_user()
+        self.team_dict[message.chat.id].add_team_code(self.user_dict[message.chat.id].get_teamname(), message.text, self.team_dict[message.chat.id].get_team_code())
+        self.bot.send_message(message.chat.id,
+                              "Для того, чтобы приглашенный участник смог присоединиться к команде, ему необходимо ввести данную ссылку: ")
+        self.bot.send_message(message.chat.id, "https://t.me/Helping_Student_bot?start=" + self.team_dict[message.chat.id].get_team_code())
         self.bot.send_message(message.chat.id, "Команда и роль будут определены автоматически")
         self.start_message(message)
 
-    def create_unique_inv_code(self):
-        return str(uuid.uuid1())[:8]
-
     def accept_invitation(self, message):
-        if self.user.check_team_with_code(message.text):  # успешно принимаем в команду
-            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!", reply_markup=ReplyKeyboardRemove())
+        if self.user_dict[message.chat.id].check_team_with_code(message.text):  # успешно принимаем в команду
+            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!",
+                                  reply_markup=ReplyKeyboardRemove())
             self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
             msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
-            self.user.set_id(message.from_user.id)
-            self.user.set_teamname(self.user.get_team_using_code(message.text))
-            self.user.set_role(self.user.get_role_using_code(message.text))
-            self.user.update_id_in_bd()
+            self.user_dict[message.chat.id].set_id(message.from_user.id)
+            self.user_dict[message.chat.id].set_teamname(
+                self.user_dict[message.chat.id].get_team_using_code(message.text))
+            self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
+            self.user_dict[message.chat.id].update_id_in_bd()
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
-            self.bot.send_message(message.chat.id, "Некорректный код или некорректная ссылка, пожалуйста, попробуйте еще раз")
+            self.bot.send_message(message.chat.id,
+                                  "Некорректный код или некорректная ссылка, пожалуйста, попробуйте еще раз")
             self.start_message(message)
 
     def name_again(self, message):
@@ -164,9 +173,9 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.after_name)
 
     def after_name(self, message):
-        if self.user.get_username() is not None:
-            self.user.set_role((self.user.get_role_from_bd()))
-            self.user.set_teamname((self.user.get_teamname_from_bd()))
+        if self.user_dict[message.chat.id].get_username() is not None:
+            self.user_dict[message.chat.id].set_role((self.user_dict[message.chat.id].get_role_from_bd()))
+            self.user_dict[message.chat.id].set_teamname((self.user_dict[message.chat.id].get_teamname_from_bd()))
         name = message.text
         noSurname = False
         isSpace = False
@@ -179,36 +188,36 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Вы не ввели имя или фамилию, попробуйте еще раз:")
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
-            self.user.set_name(name)
+            self.user_dict[message.chat.id].set_name(name)
             msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
             self.bot.register_next_step_handler(msg, self.after_group)
 
     def after_group(self, message):
         group = message.text
-        self.user.set_group(group)
-        self.user.update_id_in_bd()
-        self.user.add_group()
-        self.user.add_name()
+        self.user_dict[message.chat.id].set_group(group)
+        self.user_dict[message.chat.id].update_id_in_bd()
+        self.user_dict[message.chat.id].add_group()
+        self.user_dict[message.chat.id].add_name()
         self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!")
         self.start_message(message)
 
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
-        self.team = Team(name_of_team, self.user.get_id())
-        if self.user.get_username() is not None:
-            self.team.set_admin(self.user.get_username())
-        self.team.add()
+        self.team_dict[message.chat.id] = Team(name_of_team, self.user_dict[message.chat.id].get_id())
+        if self.user_dict[message.chat.id].get_username() is not None:
+            self.team_dict[message.chat.id].set_admin(self.user_dict[message.chat.id].get_username())
+        self.team_dict[message.chat.id].add()
         msg = self.bot.send_message(message.chat.id, "Введите название продукта: ")
         self.bot.register_next_step_handler(msg, self.after_product)
 
     def after_product(self, message):
-        self.team.set_product(message.text)
-        self.team.add_product()
-        self.user.set_teamname(self.team.get_teamname())
-        self.user.set_role("Scrum Master") # Product Owner
-        self.user.add_user()
+        self.team_dict[message.chat.id].set_product(message.text)
+        self.team_dict[message.chat.id].add_product()
+        self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
+        self.user_dict[message.chat.id].set_role("Scrum Master")  # Product Owner
+        self.user_dict[message.chat.id].add_user()
         self.bot.send_message(message.chat.id,
-                              "Команда \"" + self.team.get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
+                              "Команда \"" + self.team_dict[message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
         self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
         msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
         self.bot.register_next_step_handler(msg, self.after_name)
@@ -300,10 +309,10 @@ class StudHelperBot:
 
     def report_of_people(self, message):
         departure_time = datetime.now()
-        report = message.text # в report лежит отчет о проделанной работе
-        self.user.set_report(report)
-        self.user.set_departure_time(departure_time)
-        self.user.add_report()
+        report = message.text  # в report лежит отчет о проделанной работе
+        self.user_dict[message.chat.id].set_report(report)
+        self.user_dict[message.chat.id].set_departure_time(departure_time)
+        self.user_dict[message.chat.id].add_report()
         self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!")
         self.start_message(message)
 
