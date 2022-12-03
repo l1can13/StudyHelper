@@ -164,6 +164,8 @@ class StudHelperBot:
                 self.user_dict[message.chat.id].get_team_using_code(message.text))
             self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
             self.user_dict[message.chat.id].update_id_in_bd()
+            temp = Team.get_admin_of_team(message.text)
+            self.team_dict[temp].delete_code_from_bd(message.text)
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.bot.send_message(message.chat.id,
@@ -209,8 +211,9 @@ class StudHelperBot:
     def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
         self.team_dict[message.chat.id] = Team(name_of_team, self.user_dict[message.chat.id].get_id())
-        if self.user_dict[message.chat.id].get_username() is not None:
-            self.team_dict[message.chat.id].set_admin(self.user_dict[message.chat.id].get_username())
+        if self.user_dict[message.chat.id].get_username() is None:
+            self.user_dict[message.chat.id].set_username('no_username')
+        self.team_dict[message.chat.id].set_admin(self.user_dict[message.chat.id].get_username())
         self.team_dict[message.chat.id].add()
         msg = self.bot.send_message(message.chat.id, "Введите название продукта: ")
         self.bot.register_next_step_handler(msg, self.after_product)
