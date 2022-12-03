@@ -88,6 +88,7 @@ class Team:
                 sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`, `Ид`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.teamname, self.admin, self.admin_id))
                 connection.commit()
+
         finally:
             connection.close()
 
@@ -125,6 +126,32 @@ class Team:
                 sql_request = "DELETE FROM `Пользователи` WHERE `Команда` = %s"
                 cursor.execute(sql_request, self.teamname)
                 connection.commit()
+        finally:
+            connection.close()
+
+    def delete_code_from_bd(self, code):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "DELETE FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, code)
+                connection.commit()
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_admin_of_team(code):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                # sql_request = "SELECT Команда FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                # cursor.execute(sql_request, code)
+
+                sql_request = "SELECT Ид FROM `Команды` WHERE `Название` = (SELECT Команда FROM `Коды` WHERE `Код` = %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, code)
+                result = cursor.fetchone()
+                connection.commit()
+                return result['Ид']
         finally:
             connection.close()
 
