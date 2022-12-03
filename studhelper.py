@@ -59,9 +59,6 @@ class StudHelperBot:
                 self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
                 self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
                 self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
-                msg = self.bot.send_message(message.chat.id,
-                                            "Вы в команде \"" + self.user_dict[
-                                                message.chat.id].get_teamname_from_bd() + "\"")
                 if self.user_dict[message.chat.id].get_name() is None:
                     msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
                     self.bot.register_next_step_handler(msg, self.after_name)
@@ -73,9 +70,7 @@ class StudHelperBot:
                     markup.add(item2)
             else:
                 item1 = types.KeyboardButton("Регистрация команды")
-                item2 = types.KeyboardButton("Присоединиться к команде")
                 markup.add(item1)
-                markup.add(item2)
             if not self.first_hello_dict[message.chat.id]:
                 if self.user_dict[message.chat.id].get_username() is not None:
                     self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(),
@@ -106,10 +101,6 @@ class StudHelperBot:
         #                                 'Нужно будет поставить оценки участнику команды и написать про него отзывы',
         #                                 reply_markup=markup)
         #     self.bot.register_next_step_handler(msg, self.evaluation)
-        elif message.text == "Присоединиться к команде":
-            msg = self.bot.send_message(message.chat.id, "Введите ваш код-приглашение: ",
-                                        reply_markup=ReplyKeyboardRemove())
-            self.bot.register_next_step_handler(msg, self.accept_invitation)
         elif message.text == "Отправить отчёт о проделанной работе":
             msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
                                         reply_markup=ReplyKeyboardRemove())
@@ -155,14 +146,16 @@ class StudHelperBot:
 
     def accept_invitation(self, message):
         if self.user_dict[message.chat.id].check_team_with_code(message.text):  # успешно принимаем в команду
-            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду!",
-                                  reply_markup=ReplyKeyboardRemove())
-            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
             self.user_dict[message.chat.id].set_id(message.from_user.id)
             self.user_dict[message.chat.id].set_teamname(
                 self.user_dict[message.chat.id].get_team_using_code(message.text))
             self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
+            self.user_dict[message.chat.id].update_id_in_bd()
+            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
+                                                    message.chat.id].get_teamname_from_bd() + "\"!",
+                                  reply_markup=ReplyKeyboardRemove())
+            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
             self.user_dict[message.chat.id].update_id_in_bd()
             temp = Team.get_admin_of_team(message.text)
             self.team_dict[temp].delete_code_from_bd(message.text)
