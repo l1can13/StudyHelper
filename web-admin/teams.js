@@ -36,7 +36,6 @@ let arrTeams = [];
 let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Команда"]];
 
 arrTeams = ajaxRequest("teams.php");
-console.log(arrTeams);
 arrTeams.unshift(helpArr[0]);
 
 let table = createTable(arrTeams);

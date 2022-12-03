@@ -7,20 +7,21 @@ function createTable(arr) {
 
 function ajaxRequest(phpName) {
     let arr = [];
-    let ajax = new XMLHttpRequest();
-    let dbData;
-    ajax.open("GET", phpName, true);
-    ajax.send();
-    ajax.onreadystatechange = function () {
-        if (ajax.readyState == 4 && ajax.status == 200) {
-            let data = ajax.responseText;
-            dbData = JSON.parse(data);
+    let result;
 
-            for (let i = 0; i < dbData.length; ++i) {
-                arr.push(Object.values(dbData[i]));
-            }
-        }
+    $.ajax({
+        url: phpName,
+        method: 'GET',
+        async: false,
+    }).done(function (data, textStatus, jqXHR) {
+        console.log(data);
+        result = JSON.parse(data);
+    });
+
+    for (let i = 0; i < result.length; ++i) {
+        arr.push(Object.values(result[i]));
     }
+
     return arr;
 }
 
@@ -44,6 +45,7 @@ admin.textContent = textt[2];
 
 arrTeams = ajaxRequest("teams.php");
 arrOneTeamUsers = ajaxRequest("one_team_users.php?team=" + textt[0]);
+console.log(arrOneTeamUsers);
 arrTeams.unshift(helpArr[0]);
 arrOneTeamUsers.unshift(helpArr[1]);
 
