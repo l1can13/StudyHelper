@@ -40,18 +40,6 @@ class Team:
             self.team_codes = []
             self.admin_id = 0
 
-    @staticmethod
-    def find_username_by_surname(surname):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `User_name` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, surname)
-                result = cursor.fetchone()
-                connection.commit()
-                return result['User_name']
-        finally:
-            connection.close()
 
     # функция для получения фамилий из бд для определенной группы
     def get_team_members(self):

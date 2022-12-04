@@ -75,6 +75,18 @@ class User:
         self.report = None
         self.departure_time = None
 
+    def find_username_by_surname(self, surname):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql_request = "SELECT `Ид` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, surname)
+                result = cursor.fetchone()
+                connection.commit()
+                return result['Ид']
+        finally:
+            connection.close()
+
     def get_counter_of_people(self):
         return self.counter_of_people
 
@@ -212,8 +224,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.id, self.username))
+                sql_request = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.id)
                 tmnm = cursor.fetchone()
                 connection.commit()
                 return tmnm['Команда']
