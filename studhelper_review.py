@@ -162,7 +162,7 @@ class StudHelperBot:
             self.team_dict[temp].delete_code_from_bd(message.text)
             self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
             msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
-            self.user_dict[message.chat.id].update_id_in_bd()
+            # self.user_dict[message.chat.id].update_id_in_bd()
 
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
@@ -200,7 +200,7 @@ class StudHelperBot:
         if message.from_user.username is not None:
             self.user_dict[message.chat.id].set_username(message.from_user.username)
             self.user_dict[message.chat.id].add_username()
-        self.user_dict[message.chat.id].update_id_in_bd()
+        # self.user_dict[message.chat.id].update_id_in_bd()
         self.user_dict[message.chat.id].add_group()
         self.user_dict[message.chat.id].add_name()
         self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!")
