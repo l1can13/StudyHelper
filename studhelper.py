@@ -85,7 +85,7 @@ class StudHelperBot:
         if message.text == "Регистрация команды":
             self.bot.send_message(message.chat.id, "Заполните форму ниже")
             msg = self.bot.send_message(message.chat.id, "Введите имя команды: ", reply_markup=ReplyKeyboardRemove())
-            self.bot.register_next_step_handler(msg, self.product)
+            self.bot.register_next_step_handler(msg, self.set_team_name)
         elif message.text == "Добавить участника":
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1 = types.KeyboardButton("Да")
@@ -154,11 +154,12 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
                                                     message.chat.id].get_teamname_from_bd() + "\"!",
                                   reply_markup=ReplyKeyboardRemove())
+            temp = Team.get_admin_of_team(message.text)
+            self.team_dict[temp].delete_code_from_bd(message.text)
             self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
             msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
             self.user_dict[message.chat.id].update_id_in_bd()
-            temp = Team.get_admin_of_team(message.text)
-            self.team_dict[temp].delete_code_from_bd(message.text)
+
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.bot.send_message(message.chat.id,
@@ -201,28 +202,44 @@ class StudHelperBot:
         self.bot.send_message(message.chat.id, "Ваши данные успешно сохранены!")
         self.start_message(message)
 
-    def product(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
+    def set_team_name(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
-        self.team_dict[message.chat.id] = Team(name_of_team, self.user_dict[message.chat.id].get_id())
-        if self.user_dict[message.chat.id].get_username() is None:
-            self.user_dict[message.chat.id].set_username('no_username')
-        self.team_dict[message.chat.id].set_admin(self.user_dict[message.chat.id].get_username())
-        self.team_dict[message.chat.id].add()
-        msg = self.bot.send_message(message.chat.id, "Введите название продукта: ")
+        if Team.check_teamname_for_unique(name_of_team): # проверяем по бд уникальность названия команды
+            self.team_dict[message.chat.id] = Team(name_of_team, self.user_dict[message.chat.id].get_id())
+            if self.user_dict[message.chat.id].get_username() is None:
+                self.user_dict[message.chat.id].set_username('no_username')
+            self.team_dict[message.chat.id].set_admin(self.user_dict[message.chat.id].get_username()) #сетаем админа у определенной команды
+            self.team_dict[message.chat.id].add() #добавляем команду в бд, добавляется название, юзернейм админа и его ид в тг
+            self.write_product_name(message)
+        else:
+            self.bot.send_message(message.chat.id, "Такое имя команды уже существует")
+            self.bot.send_message(message.chat.id, "Пожалуйста, выберите другое имя")
+            msg = self.bot.send_message(message.chat.id, "Введите имя команды: ", reply_markup=ReplyKeyboardRemove())
+            self.bot.register_next_step_handler(msg, self.set_team_name)
+
+    def write_product_name(self, message):
+        msg = self.bot.send_message(message.chat.id, "Введите название продукта: ", reply_markup=ReplyKeyboardRemove())
         self.bot.register_next_step_handler(msg, self.after_product)
 
     def after_product(self, message):
-        self.team_dict[message.chat.id].set_product(message.text)
-        self.team_dict[message.chat.id].add_product()
-        self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
-        self.user_dict[message.chat.id].set_role("Scrum Master")  # Product Owner
-        self.user_dict[message.chat.id].add_user()
-        self.bot.send_message(message.chat.id,
-                              "Команда \"" + self.team_dict[
-                                  message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
-        self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-        msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
-        self.bot.register_next_step_handler(msg, self.after_name)
+        product_name = message.text
+        if Team.check_product_for_unique(product_name):
+            self.team_dict[message.chat.id].set_product(product_name)
+            self.team_dict[message.chat.id].add_product()
+            self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
+            self.user_dict[message.chat.id].set_role("Scrum Master")  # Product Owner
+            self.user_dict[message.chat.id].add_user()
+            self.bot.send_message(message.chat.id,
+                                  "Команда \"" + self.team_dict[
+                                      message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
+            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+            self.bot.register_next_step_handler(msg, self.after_name)
+        else:
+            self.bot.send_message(message.chat.id, "Такое имя для продукта уже существует")
+            self.bot.send_message(message.chat.id, "Пожалуйста, выберите другое имя")
+            self.write_product_name(message)
+
 
     # def evaluation(self, message):  # функция для оценки участников команды
     #     team_members = self.team.get_team_members()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
