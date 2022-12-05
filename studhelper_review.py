@@ -47,10 +47,10 @@ class StudHelperBot:
         else:
             if self.user_dict[message.chat.id].is_admin():
                 item1 = types.KeyboardButton("Добавить участника")
-                # item3 = types.KeyboardButton("Оценить участников команды")
+                item3 = types.KeyboardButton("Оценить участников команды")
                 item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
                 markup.add(item1)
-                # markup.add(item3)
+                markup.add(item3)
                 markup.add(item4)
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
                                                        self.user_dict[message.chat.id].get_id())
