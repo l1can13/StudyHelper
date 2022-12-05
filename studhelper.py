@@ -105,6 +105,10 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
                                         reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(msg, self.report_of_people)
+        elif message.text == "Обновить":
+            msg = self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
+                                        reply_markup=ReplyKeyboardRemove())
+            self.start_message(message)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.start_message(message)
