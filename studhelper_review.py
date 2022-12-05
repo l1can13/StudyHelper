@@ -47,10 +47,10 @@ class StudHelperBot:
         else:
             if self.user_dict[message.chat.id].is_admin():
                 item1 = types.KeyboardButton("Добавить участника")
-                item3 = types.KeyboardButton("Оценить участников команды")
+                # item3 = types.KeyboardButton("Оценить участников команды")
                 item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
                 markup.add(item1)
-                markup.add(item3)
+                # markup.add(item3)
                 markup.add(item4)
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
                                                        self.user_dict[message.chat.id].get_id())
@@ -64,9 +64,9 @@ class StudHelperBot:
                     self.bot.register_next_step_handler(msg, self.after_name)
                     return
                 else:
-                    item1 = types.KeyboardButton("Оценить участников команды")
+                    # item1 = types.KeyboardButton("Оценить участников команды")
                     item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
-                    markup.add(item1)
+                    # markup.add(item1)
                     markup.add(item2)
             else:
                 item1 = types.KeyboardButton("Регистрация команды")
@@ -93,14 +93,14 @@ class StudHelperBot:
             markup.add(item1)
             markup.add(item2)
             self.get_role_to_create_invitation(message)
-        elif message.text == "Оценить участников команды":
-            item = types.KeyboardButton("Хорошо")
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(item)
-            msg = self.bot.send_message(message.chat.id,
-                                        'Нужно будет поставить оценки участнику команды и написать про него отзывы',
-                                        reply_markup=markup)
-            self.bot.register_next_step_handler(msg, self.evaluation)
+        # elif message.text == "Оценить участников команды":
+        #     item = types.KeyboardButton("Хорошо")
+        #     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        #     markup.add(item)
+        #     msg = self.bot.send_message(message.chat.id,
+        #                                 'Нужно будет поставить оценки участнику команды и написать про него отзывы',
+        #                                 reply_markup=markup)
+        #     self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Отправить отчёт о проделанной работе":
             msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
                                         reply_markup=ReplyKeyboardRemove())
@@ -115,7 +115,7 @@ class StudHelperBot:
 
     def get_role_to_create_invitation(self, message):
         self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
-        self.invited_user_dict[message.chat.id] = User()
+        # self.invited_user_dict[message.chat.id] = User()
         # if self.tg_name_of_user_dict[message.chat.id] != 'Нет':
         #     self.tg_name_of_user_dict[message.chat.id] = message.text
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -135,10 +135,10 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.get_role_to_create_invitation(message)
             return
-        self.invited_user_dict[message.chat.id].set_role(message.text)
-        # self.invited_user.set_username(self.tg_name_of_user_dict[message.chat.id])
-        self.invited_user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname())
-        self.invited_user_dict[message.chat.id].add_user()
+        # self.invited_user_dict[message.chat.id].set_role(message.text)
+        # # self.invited_user.set_username(self.tg_name_of_user_dict[message.chat.id])
+        # self.invited_user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname())
+        # self.invited_user_dict[message.chat.id].add_user()
         self.team_dict[message.chat.id].add_team_code(self.user_dict[message.chat.id].get_teamname(), message.text,
                                                       self.team_dict[message.chat.id].get_team_code())
         self.bot.send_message(message.chat.id,
@@ -154,7 +154,7 @@ class StudHelperBot:
             self.user_dict[message.chat.id].set_teamname(
                 self.user_dict[message.chat.id].get_team_using_code(message.text))
             self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
-            self.user_dict[message.chat.id].update_id_in_bd()
+            self.user_dict[message.chat.id].add_user()
             self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
                                                     message.chat.id].get_teamname_from_bd() + "\"!",
                                   reply_markup=ReplyKeyboardRemove())

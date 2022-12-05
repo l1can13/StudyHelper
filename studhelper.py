@@ -115,7 +115,7 @@ class StudHelperBot:
 
     def get_role_to_create_invitation(self, message):
         self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
-        self.invited_user_dict[message.chat.id] = User()
+        # self.invited_user_dict[message.chat.id] = User()
         # if self.tg_name_of_user_dict[message.chat.id] != 'Нет':
         #     self.tg_name_of_user_dict[message.chat.id] = message.text
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -135,10 +135,10 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.get_role_to_create_invitation(message)
             return
-        self.invited_user_dict[message.chat.id].set_role(message.text)
-        # self.invited_user.set_username(self.tg_name_of_user_dict[message.chat.id])
-        self.invited_user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname())
-        self.invited_user_dict[message.chat.id].add_user()
+        # self.invited_user_dict[message.chat.id].set_role(message.text)
+        # # self.invited_user.set_username(self.tg_name_of_user_dict[message.chat.id])
+        # self.invited_user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname())
+        # self.invited_user_dict[message.chat.id].add_user()
         self.team_dict[message.chat.id].add_team_code(self.user_dict[message.chat.id].get_teamname(), message.text,
                                                       self.team_dict[message.chat.id].get_team_code())
         self.bot.send_message(message.chat.id,
@@ -154,7 +154,7 @@ class StudHelperBot:
             self.user_dict[message.chat.id].set_teamname(
                 self.user_dict[message.chat.id].get_team_using_code(message.text))
             self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
-            self.user_dict[message.chat.id].update_id_in_bd()
+            self.user_dict[message.chat.id].add_user()
             self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
                                                     message.chat.id].get_teamname_from_bd() + "\"!",
                                   reply_markup=ReplyKeyboardRemove())
