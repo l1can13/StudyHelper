@@ -64,9 +64,9 @@ class StudHelperBot:
                     self.bot.register_next_step_handler(msg, self.after_name)
                     return
                 else:
-                    # item1 = types.KeyboardButton("Оценить участников команды")
+                    item1 = types.KeyboardButton("Оценить участников команды")
                     item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
-                    # markup.add(item1)
+                    markup.add(item1)
                     markup.add(item2)
             else:
                 item1 = types.KeyboardButton("Регистрация команды")
@@ -93,14 +93,14 @@ class StudHelperBot:
             markup.add(item1)
             markup.add(item2)
             self.get_role_to_create_invitation(message)
-        # elif message.text == "Оценить участников команды":
-        #     item = types.KeyboardButton("Хорошо")
-        #     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        #     markup.add(item)
-        #     msg = self.bot.send_message(message.chat.id,
-        #                                 'Нужно будет поставить оценки участнику команды и написать про него отзывы',
-        #                                 reply_markup=markup)
-        #     self.bot.register_next_step_handler(msg, self.evaluation)
+        elif message.text == "Оценить участников команды":
+            item = types.KeyboardButton("Хорошо")
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup.add(item)
+            msg = self.bot.send_message(message.chat.id,
+                                        'Нужно будет поставить оценки участнику команды и написать про него отзывы',
+                                        reply_markup=markup)
+            self.bot.register_next_step_handler(msg, self.evaluation)
         elif message.text == "Отправить отчёт о проделанной работе":
             msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
                                         reply_markup=ReplyKeyboardRemove())
