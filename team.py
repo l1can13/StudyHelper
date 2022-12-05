@@ -143,6 +143,36 @@ class Team:
         finally:
             connection.close()
 
+    @staticmethod
+    def check_teamname_for_unique(teamname):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT * FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, teamname)
+                result = cursor.fetchall()
+                connection.commit()
+                if result:
+                    return False
+                return True
+        finally:
+            connection.close()
+
+    @staticmethod
+    def check_product_for_unique(product): #вернет true если в бд ничего нет (то есть уникальное название) и false, если такое уже есть
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT * FROM `Команды` WHERE `Продукт` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, product)
+                result = cursor.fetchall()
+                connection.commit()
+                if result:
+                    return False
+                return True
+        finally:
+            connection.close()
+
     # Getters/Setters
     def set_admin(self, admin):
         self.admin = admin
