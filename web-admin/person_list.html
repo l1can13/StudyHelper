@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Участник</title>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="person_list.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <script src="person_list.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+
+            <div class="hamburger">
+                <div class="spans">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="title">StudHelper</div>
+        </div>
+
+        <div class="main">
+
+            <div class="side_menu">
+                <button class="show_teams">Список команд</button>
+                <button class="manage_bot">Управление ботом</button>
+            </div>
+
+            <div class="info_window">
+                <div class="nav_div">
+                    <div class="person_info_div">
+                        <div class="name_and_fname_info">
+                            <span class="name"></span>
+                        </div>
+
+                        <div class="group_info">
+                            <span class="group">Группа: </span>
+                            <span class="groupname"></span>
+                        </div>
+
+                        <div class="username_info">
+                            <span class="user">Telegram Username: </span>
+                            <span class="username"></span>
+                        </div>
+
+                        <div class="team_info">
+                            <span class="team">Команда: </span>
+                            <span class="teamname"></span>
+                        </div>
+
+                        <div class="role_info">
+                            <span class="role">Роль: </span>
+                            <span class="rolename"></span>
+                        </div>
+                    </div>
+
+                    <div class="marksandreports_div">
+                        <div class="marks">
+                            <table class="table"></table>
+                        </div>
+
+                        <hr size="6" width="100%" color="#28293D">
+
+                        <div class="total_mark">
+                            <span class="itog">Итоговая оценка: </span>
+                            <span class="itog_number"></span>
+                        </div>
+                        
+                        <div class="reports">
+                            <button class="get_reports" onclick="this.className='clicked'"></button>
+                            <span class="reports_text"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
