@@ -54,6 +54,19 @@ let temp = document.querySelector('.table');
 temp.innerHTML = table;
 tableDiv.appendChild(temp)
 
+let trs = document.querySelectorAll('tr');
+
+for (var i = 0; i < trs.length; ++i) {
+    trs[i].addEventListener('click', function() {
+        var input_name = this.getElementsByTagName("th")[0].innerHTML;
+        var input_group = this.getElementsByTagName("th")[1].innerHTML;
+        var input_username = this.getElementsByTagName("th")[2].innerHTML;
+        var input_role = this.getElementsByTagName("th")[3].innerHTML;
+        var url = 'person_list.html?'+ input_name + '&' + input_group + '&' + input_username + '&' + textt[0] + '&' + input_role ;
+        window.location.href = url; 
+    });
+}
+
 hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
     sideMenu.classList.toggle('show');
