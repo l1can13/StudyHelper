@@ -7,7 +7,7 @@ function createTable(arr) {
 
 function ajaxRequest(phpName) {
     let arr = [];
-    let result;
+    let result = [];
 
     $.ajax({
         url: phpName,
@@ -17,9 +17,10 @@ function ajaxRequest(phpName) {
         console.log(data);
         result = JSON.parse(data);
     });
-
-    for (let i = 0; i < result.length; ++i) {
-        arr.push(Object.values(result[i]));
+    if (result) {
+        for (let i = 0; i < result.length; ++i) {
+            arr.push(Object.values(result[i]));
+        }
     }
 
     return arr;
@@ -64,7 +65,12 @@ for (var i = 1; i < arrUserInfo.length; ++i) {
     arrUserInfo[i][6] = elem[0];
 }
 total_mark /= ((arrUserInfo.length - 1) * 3);
-totalMark.textContent = total_mark.toFixed(2).toString();
+if (total_mark) {
+    totalMark.textContent = total_mark.toFixed(2).toString();
+}
+else {
+    totalMark.textContent = '-';
+}
 
 let table = createTable(arrUserInfo);
 let temp = document.querySelector('.table');
