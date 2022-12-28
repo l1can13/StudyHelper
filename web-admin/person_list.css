@@ -349,7 +349,7 @@ a {
     content: 'Показать отчеты пользователя';
     max-width: 286px;
     }
-    
+
     .clicked:before {
     padding: 18px 31px;
     font-size: 20px;
