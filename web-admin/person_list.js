@@ -42,7 +42,7 @@ let reportsText = document.querySelector('.reports_text');
 let marksDiv = document.querySelector('.marks');
 let getReports = document.querySelector('.get_reports');
 
-let arrOneTeamUsers = [], arrOnePerson = [], arrReports = [];
+let arrOneTeamUsers = [], arrOnePerson = [], arrReports = [], nameAndId = [];
 let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"], ["Общая оценка", "Решение задач", "Командная работа", "Ответственность", "Помощь членам команды", "Автор оценки", "Дата"]];
 
 var textt = decodeURIComponent(location.search.substring(1)).split('&');
@@ -52,7 +52,8 @@ userName.textContent = textt[2];
 teamName.textContent = textt[3];
 roleName.textContent = textt[4];
 
-arrUserInfo = ajaxRequest("one_person_info.php?username=" + textt[2]);
+nameAndId = ajaxRequest("name_and_id.php?team=" + textt[3]);
+arrUserInfo = ajaxRequest("one_person_info.php?username=" + textt[5]);
 arrUserInfo.unshift(helpArr[2]);
 
 let total_mark = 0;
@@ -63,6 +64,12 @@ for (var i = 1; i < arrUserInfo.length; ++i) {
 
     var elem = arrUserInfo[i][6].split('.');
     arrUserInfo[i][6] = elem[0];
+
+    for (var j = 0; j < nameAndId.length; ++j){
+        if (nameAndId[j][1] == arrUserInfo[i][5]){
+            arrUserInfo[i][5] = nameAndId[j][0];
+        }
+    }
 }
 total_mark /= ((arrUserInfo.length - 1) * 3);
 if (total_mark) {
@@ -79,10 +86,12 @@ marksDiv.appendChild(temp);
 
 
 let reports = "";
-arrReports = ajaxRequest("user_reports.php?username=" + textt[2]);
+arrReports = ajaxRequest("user_reports.php?username=" + textt[5]);
 for (var i = 0; i < arrReports.length; ++i) {
-    reports += arrReports[i];
-    reports += '\n';
+    var elem = arrReports[i][0].split('.');
+    arrReports[i][0] = elem[0];
+
+    reports += arrReports[i][0]+ ' ' + arrReports[i][1] + '\n';
 }
 
 getReports.addEventListener('click', () => {

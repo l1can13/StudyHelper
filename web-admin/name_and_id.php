@@ -9,7 +9,7 @@ $par4_db = "u1841284_studhelper";
 $mysqli = new mysqli($par1_ip, $par2_name, $par3_p, $par4_db);
 mysqli_set_charset($mysqli,'utf8');
 
-$result = $mysqli->query("SELECT `Дата отправки`, `Текст отчета` FROM `Отчеты` WHERE `Автор отчета` LIKE '$_GET[username]'");
+$result = $mysqli->query("SELECT `Имя`, `Ид` FROM `Пользователи` WHERE `Команда` LIKE '$_GET[team]'");
 
 while ($row = $result->fetch_assoc()) {
     $array[] = $row;
