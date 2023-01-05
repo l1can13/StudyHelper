@@ -7,7 +7,7 @@ function createTable(arr) {
 
 function ajaxRequest(phpName) {
     let arr = [];
-    let result;
+    let result = [];
 
     $.ajax({
         url: phpName,
@@ -17,9 +17,10 @@ function ajaxRequest(phpName) {
         console.log(data);
         result = JSON.parse(data);
     });
-
-    for (let i = 0; i < result.length; ++i) {
-        arr.push(Object.values(result[i]));
+    if (result) {
+        for (let i = 0; i < result.length; ++i) {
+            arr.push(Object.values(result[i]));
+        }
     }
 
     return arr;
@@ -35,7 +36,7 @@ let productName = document.querySelector('.product_name');
 let admin = document.querySelector('.admin');
 let tableDiv = document.querySelector('.table_div');
 
-let arrTeams = [], arrAllUser = [], arrOneTeamUsers = [];
+let arrTeams = [], arrAllUser = [], arrOneTeamUsers = [], usernameAndId = [];
 let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"]];
 
 var textt = decodeURIComponent(location.search.substring(1)).split('&');
@@ -45,7 +46,8 @@ admin.textContent = textt[2];
 
 arrTeams = ajaxRequest("teams.php");
 arrOneTeamUsers = ajaxRequest("one_team_users.php?team=" + textt[0]);
-console.log(arrOneTeamUsers);
+usernameAndId = ajaxRequest("username_and_id.php?team=" + textt[0]);
+console.log(usernameAndId[0]);
 arrTeams.unshift(helpArr[0]);
 arrOneTeamUsers.unshift(helpArr[1]);
 
@@ -62,7 +64,18 @@ for (var i = 0; i < trs.length; ++i) {
         var input_group = this.getElementsByTagName("th")[1].innerHTML;
         var input_username = this.getElementsByTagName("th")[2].innerHTML;
         var input_role = this.getElementsByTagName("th")[3].innerHTML;
-        var url = 'person_list.html?'+ input_name + '&' + input_group + '&' + input_username + '&' + textt[0] + '&' + input_role ;
+        if (input_username != 'null') {
+            console.log(input_username);
+            var j = 0;
+            while (usernameAndId[j][0] != input_username) {
+                j += 1;
+            }
+            var input_id = usernameAndId[j][1];
+        }
+        else {
+            var input_id = 0;
+        }
+        var url = 'person_list.html?'+ input_name + '&' + input_group + '&' + input_username + '&' + textt[0] + '&' + input_role + '&' + input_id;
         window.location.href = url; 
     });
 }

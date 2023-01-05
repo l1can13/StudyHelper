@@ -52,7 +52,8 @@ userName.textContent = textt[2];
 teamName.textContent = textt[3];
 roleName.textContent = textt[4];
 
-arrUserInfo = ajaxRequest("one_person_info.php?username=" + textt[2]);
+
+arrUserInfo = ajaxRequest("one_person_info.php?username=" + textt[5]);
 arrUserInfo.unshift(helpArr[2]);
 
 let total_mark = 0;
@@ -79,10 +80,12 @@ marksDiv.appendChild(temp);
 
 
 let reports = "";
-arrReports = ajaxRequest("user_reports.php?username=" + textt[2]);
+arrReports = ajaxRequest("user_reports.php?username=" + textt[5]);
 for (var i = 0; i < arrReports.length; ++i) {
-    reports += arrReports[i];
-    reports += '\n';
+    var elem = arrReports[i][0].split('.');
+    arrReports[i][0] = elem[0];
+
+    reports += arrReports[i][0]+ ' ' + arrReports[i][1] + '\n';
 }
 
 getReports.addEventListener('click', () => {
