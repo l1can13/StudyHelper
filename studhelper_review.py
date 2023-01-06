@@ -310,31 +310,49 @@ class StudHelperBot:
         teamwork = message.text  # в teamwork лежит оценка пользователя за командную работу
         self.review_dict[message.chat.id].set_teamwork(teamwork)
         feedback = self.bot.send_message(message.chat.id,
-                                         "Напишите отзыв о том, насколько был ответственен этот участник команды: ")
+                                         "Напишите отзыв о том, насколько был ответственен этот участник команды: ", reply_markup=ReplyKeyboardRemove())
+        self.bot.register_next_step_handler(feedback, self.get_feedback)
+
+    def get_tmwork_again(self, message):
+        feedback = self.bot.send_message(message.chat.id,
+                                         "Напишите отзыв о том, насколько был ответственен этот участник команды: ", reply_markup=ReplyKeyboardRemove())
         self.bot.register_next_step_handler(feedback, self.get_feedback)
 
     def get_feedback(self, message):  # функция, где участникам пишут отзыв об их помощи в решении технических задач
-        responsibility = message.text  # в responsibility лежит отзыв об ответственности пользователя
-        self.review_dict[message.chat.id].set_responsibility(responsibility)
-        feedback2 = self.bot.send_message(message.chat.id,
-                                          "Напишите отзыв о том, насколько этот участник команды помогал в решении технических задач: ")
-        self.bot.register_next_step_handler(feedback2, self.end_of_evaluation)
+        if len(message.text) < 3:
+            msg = self.bot.send_message(message.chat.id,
+                                        "Кажется, вы ввели неверные данные, обратите внимание, что нужно ввести текстовый отзыв!\nНапишите отзыв о том, насколько был ответственен этот участник команды: ",
+                                        reply_markup=ReplyKeyboardRemove())
+            self.bot.register_next_step_handler(msg, self.get_feedback)
+        else:
+            responsibility = message.text  # в responsibility лежит отзыв об ответственности пользователя
+            self.review_dict[message.chat.id].set_responsibility(responsibility)
+            feedback2 = self.bot.send_message(message.chat.id,
+                                              "Напишите отзыв о том, насколько этот участник команды помогал в решении технических задач: ",
+                                              reply_markup=ReplyKeyboardRemove())
+            self.bot.register_next_step_handler(feedback2, self.end_of_evaluation)
 
     def end_of_evaluation(self, message):
-        tech_help = message.text  # в tech_help лежит отзыв о помощи пользователя в решении технических задач
-        self.review_dict[message.chat.id].set_tech_help(tech_help)
+        if len(message.text) < 3:
+            msg = self.bot.send_message(message.chat.id,
+                                        "Кажется, вы ввели неверные данные, обратите внимание, что нужно ввести текстовый отзыв!\nНапишите отзыв о том, насколько этот участник команды помогал в решении технических задач: ",
+                                        reply_markup=ReplyKeyboardRemove())
+            self.bot.register_next_step_handler(msg, self.end_of_evaluation)
+        else:
+            tech_help = message.text  # в tech_help лежит отзыв о помощи пользователя в решении технических задач
+            self.review_dict[message.chat.id].set_tech_help(tech_help)
 
-        current_date = datetime.now()
-        self.review_dict[message.chat.id].set_date(current_date)
-        self.review_dict[message.chat.id].set_reviewer(self.user_dict[message.chat.id].get_id())
+            current_date = datetime.now()
+            self.review_dict[message.chat.id].set_date(current_date)
+            self.review_dict[message.chat.id].set_reviewer(self.user_dict[message.chat.id].get_id())
 
-        self.review_dict[message.chat.id].add_review()
+            self.review_dict[message.chat.id].add_review()
 
-        self.user_dict[message.chat.id].set_username(message.from_user.username)
-        self.user_dict[message.chat.id].set_role((self.user_dict[message.chat.id].get_role_from_bd()))
-        self.user_dict[message.chat.id].set_teamname((self.user_dict[message.chat.id].get_teamname_from_bd()))
-        self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!")
-        self.start_message(message)
+            self.user_dict[message.chat.id].set_username(message.from_user.username)
+            self.user_dict[message.chat.id].set_role((self.user_dict[message.chat.id].get_role_from_bd()))
+            self.user_dict[message.chat.id].set_teamname((self.user_dict[message.chat.id].get_teamname_from_bd()))
+            self.bot.send_message(message.chat.id, "Спасибо за Ваш отзыв!")
+            self.start_message(message)
 
     def report_of_people(self, message):
         departure_time = datetime.now()

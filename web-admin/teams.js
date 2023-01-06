@@ -46,6 +46,7 @@ tableDiv.appendChild(temp);
 let trs = document.querySelectorAll('tr');
 
 for (var i = 0; i < trs.length; ++i) {
+    trs[i].style.cursor = 'pointer';
     trs[i].addEventListener('click', function() {
         var input_name = this.getElementsByTagName("th")[0].innerHTML;
         var input_product = this.getElementsByTagName("th")[1].innerHTML;
