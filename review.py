@@ -48,6 +48,7 @@ class Review:
     def set_date(self, date):
         self.date = date
 
+
     def set_general_mark(self, general_mark):
         self.general_mark = general_mark
 
