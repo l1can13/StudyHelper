@@ -72,8 +72,8 @@ class User:
             self.role = None
             self.id = 0
             self.counter_of_people = 0
-        self.report = None
-        self.departure_time = None
+        # self.report = None
+        # self.departure_time = None
 
     def find_username_by_surname(self, surname):
         connection = connect_to_db()
@@ -135,17 +135,17 @@ class User:
     def get_id(self):
         return self.id
 
-    def get_report(self):
-        return  self.report
-
-    def set_report(self,arg):
-        self.report = arg
-
-    def get_departure_time(self):
-        return self.departure_time
-
-    def set_departure_time(self, arg):
-        self.departure_time = arg
+    # def get_report(self):
+    #     return  self.report
+    #
+    # def set_report(self,arg):
+    #     self.report = arg
+    #
+    # def get_departure_time(self):
+    #     return self.departure_time
+    #
+    # def set_departure_time(self, arg):
+    #     self.departure_time = arg
 
     def add_user(self):
         connection = connect_to_db()
@@ -327,12 +327,12 @@ class User:
             connection.close()
 
 
-    def add_report(self):
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`) VALUES (%s, %s, %s, %s);"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.username, self.id, self.report, self.departure_time))
-                connection.commit()
-        finally:
-            connection.close()
+    # def add_report(self):
+    #     connection = connect_to_db()
+    #     try:
+    #         with connection.cursor() as cursor:
+    #             sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`) VALUES (%s, %s, %s, %s);"  # строка для SQL-запроса
+    #             cursor.execute(sql_request, (self.username, self.id, self.report, self.departure_time))
+    #             connection.commit()
+    #     finally:
+    #         connection.close()

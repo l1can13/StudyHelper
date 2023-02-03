@@ -1,5 +1,7 @@
 import telebot
 from telebot.types import ReplyKeyboardRemove
+
+from report import Report
 from team import Team
 from user import User
 from review import Review
@@ -27,7 +29,10 @@ class StudHelperBot:
         self.temp_username_dict = {}
         self.tg_name_of_user_dict = {}
         self.first_hello_dict = {}
+        self.report_dict = {}
+        self.sprint_now = ''
         self.roles = ["Product owner", "Scrum Master", "Разработчик", "Участник команды"]
+        self.sprints = ["Спринт №0", "Спринт №1", "Спринт №2", "Спринт №3", "Спринт №4", "Спринт №5", "Спринт №6"]
 
     def start(self):
         self.bot.infinity_polling()
@@ -101,10 +106,11 @@ class StudHelperBot:
         #                                 'Нужно будет поставить оценки участнику команды и написать про него отзывы',
         #                                 reply_markup=markup)
         #     self.bot.register_next_step_handler(msg, self.evaluation)
-        elif message.text == "Отправить отчёт о проделанной работе":
-            msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
-                                        reply_markup=ReplyKeyboardRemove())
-            self.bot.register_next_step_handler(msg, self.report_of_people)
+        elif message.text == "Отправить отчёт о проделанной работе": # Сначала выбираем спринт, потом уже пишем текст отчета
+            self.choose_sprint_on_review(message)
+            # msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
+            #                             reply_markup=ReplyKeyboardRemove())
+            # self.bot.register_next_step_handler(msg, self.report_of_people)
         elif message.text == "Обновить":
             msg = self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
                                         reply_markup=ReplyKeyboardRemove())
@@ -112,6 +118,36 @@ class StudHelperBot:
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.start_message(message)
+
+    def choose_sprint_on_review(self, message):
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        item1 = types.KeyboardButton(self.sprints[0])
+        item2 = types.KeyboardButton(self.sprints[1])
+        item3 = types.KeyboardButton(self.sprints[2])
+        item4 = types.KeyboardButton(self.sprints[3])
+        item5 = types.KeyboardButton(self.sprints[4])
+        item6 = types.KeyboardButton(self.sprints[5])
+        item7 = types.KeyboardButton(self.sprints[6])
+        markup.add(item1)
+        markup.add(item2)
+        markup.add(item3)
+        markup.add(item4)
+        markup.add(item5)
+        markup.add(item6)
+        markup.add(item7)
+        msg = self.bot.send_message(message.chat.id, "Выберите спринт: ", reply_markup=markup)
+        self.bot.register_next_step_handler(msg, self.set_sprint)
+
+    def set_sprint(self, message):
+        if message.text in self.sprints:
+            self.sprint_now = message.text #будет в формате "Спринт №1"/"Спринт №2" и тд
+            msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
+                                        reply_markup=ReplyKeyboardRemove())
+            self.bot.register_next_step_handler(msg, self.report_of_people)
+        else:
+            self.bot.send_message(message.chat.id, "Я вас не понимаю :(", reply_markup=ReplyKeyboardRemove())
+            self.choose_sprint_on_review(message)
+
 
     def get_role_to_create_invitation(self, message):
         self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
@@ -333,9 +369,11 @@ class StudHelperBot:
     def report_of_people(self, message):
         departure_time = datetime.now()
         report = message.text  # в report лежит отчет о проделанной работе
-        self.user_dict[message.chat.id].set_report(report)
-        self.user_dict[message.chat.id].set_departure_time(departure_time)
-        self.user_dict[message.chat.id].add_report()
+        self.report_dict[message.chat.id] = Report()
+        self.report_dict[message.chat.id].set_report(report)
+        self.report_dict[message.chat.id].set_sprint(self.sprint_now)
+        self.report_dict[message.chat.id].set_departure_time(departure_time)
+        # self.report_dict[message.chat.id].add_report() в комменте, тк хз какие поля
         self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!")
         self.start_message(message)
 
