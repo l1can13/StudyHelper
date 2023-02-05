@@ -79,7 +79,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Ид` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
+                #sql_request = "SELECT `Ид` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `user_id` FROM `users` WHERE `name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, surname)
                 result = cursor.fetchone()
                 connection.commit()
@@ -151,10 +152,14 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                insert_user = "INSERT INTO `Пользователи` (`Имя`, `Группа`, `User_name`, `Команда`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
-                cursor.execute(insert_user, (self.name, self.group, self.username, self.teamname,
-                                             self.role, self.id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                #insert_user = "INSERT INTO `Пользователи` (`Имя`, `Группа`, `User_name`, `Команда`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
+                insert_user = "INSERT INTO `users` (`user_id`, `name`, `tg_username`) VALUES (%s, %s, %s);"
+                cursor.execute(insert_user, (self.id, self.name, self.username)) # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
+
+                #insert_user = "INSERT INTO `team_members` (`team_id`, `user_id`, `role`, `invite_code`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
+                #cursor.execute(insert_user, (self.name, self.group, self.username, self.teamname, self.role, self.id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                #connection.commit()
         finally:
             connection.close()
 
@@ -162,7 +167,12 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                delete_user = "DELETE FROM `Пользователи` WHERE `Ид` = %s"
+                #delete_user = "DELETE FROM `Пользователи` WHERE `Ид` = %s"
+                delete_user = "DELETE FROM `users` WHERE `user_id` = %s"
+                cursor.execute(delete_user, self.id)
+                connection.commit()
+
+                delete_user = "DELETE FROM `team_members` WHERE `user_id` = %s"
                 cursor.execute(delete_user, self.id)
                 connection.commit()
         finally:
@@ -172,7 +182,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "UPDATE `Пользователи` SET `Имя` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
+                #sql_request = "UPDATE `Пользователи` SET `Имя` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
+                sql_request = "UPDATE `users` SET `name` = %s WHERE `user_id` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.name, self.id))
                 connection.commit()
         finally:
@@ -182,23 +193,25 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "UPDATE `Пользователи` SET `User_name` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
+                #sql_request = "UPDATE `Пользователи` SET `User_name` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
+                sql_request = "UPDATE `users` SET `tg_username` = %s WHERE `user_id` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.username, self.id))
                 connection.commit()
         finally:
             connection.close()
 
-    def add_surname(self):
+    """def add_surname(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
+                #sql_request = "UPDATE `Пользователи` SET `Фамилия` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
                 sql_request = "UPDATE `Пользователи` SET `Фамилия` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.surname, self.id))
                 connection.commit()
         finally:
-            connection.close()
+            connection.close()"""
 
-    def add_group(self):
+    """def add_group(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -206,17 +219,18 @@ class User:
                 cursor.execute(sql_request, (self.group, self.id))
                 connection.commit()
         finally:
-            connection.close()
+            connection.close()"""
 
     def get_role_from_bd(self):
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "SELECT `Роль` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.id, self.username))
+                #sql_request = "SELECT `Роль` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `role` FROM `team_members` WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.id)
                 role = cursor.fetchone()
                 connection.commit()
-                return role['Роль']
+                return role['role']
         finally:
             connection.close()
 
@@ -224,11 +238,12 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s"  # строка для SQL-запроса
+                #sql_request = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `team_name` FROM `teams` WHERE `team_id` IN (SELECT `team_id` FROM `team_members` WHERE `user_id` = %s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.id)
                 tmnm = cursor.fetchone()
                 connection.commit()
-                return tmnm['Команда']
+                return tmnm['team_name']
         finally:
             connection.close()
 
@@ -238,8 +253,9 @@ class User:
         check = ''
         try:
             with connection.cursor() as cursor:
-                user_from_db = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"
-                cursor.execute(user_from_db, (self.id, self.username))
+                #user_from_db = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"
+                user_from_db = "SELECT `team_id` FROM `team_members` WHERE `user_id` = %s"
+                cursor.execute(user_from_db, self.id)
                 check = cursor.fetchall()
                 connection.commit()
         finally:
@@ -253,7 +269,8 @@ class User:
         check = ''
         try:
             with connection.cursor() as cursor:
-                user_from_db = "SELECT `Название` FROM `Команды` WHERE `Ид` = %s"
+                #user_from_db = "SELECT `Название` FROM `Команды` WHERE `Ид` = %s"
+                user_from_db = "SELECT `team_name` FROM `teams` WHERE `admin_user_id` = %s"
                 cursor.execute(user_from_db, self.id)
                 check = cursor.fetchall()
                 connection.commit()
@@ -267,7 +284,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                #sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `team_id` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchall()
                 connection.commit()
@@ -281,12 +299,13 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                #sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `team_name` FROM `teams` WHERE `team_id` IN (SELECT `team_id` FROM `team_members` WHERE `invite_code` = %s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchall()
                 connection.commit()
                 for row in result:
-                    return row['Команда']
+                    return row['team_name']
         finally:
             connection.close()
 
@@ -295,12 +314,13 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `Роль` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                #sql_request = "SELECT `Роль` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `role` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchall()
                 connection.commit()
                 for row in result:
-                    return row['Роль']
+                    return row['role']
         finally:
             connection.close()
 
@@ -308,7 +328,8 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "UPDATE `Пользователи` SET `Ид` = %s WHERE `Команда` = %s AND `Роль` = %s"  # строка для SQL-запроса
+                #sql_request = "UPDATE `Пользователи` SET `Ид` = %s WHERE `Команда` = %s AND `Роль` = %s"  # строка для SQL-запроса
+                sql_request = "UPDATE `users` SET `user_id` = %s WHERE `user_id` IN (SELECT `user_id` FROM `team_members` WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s) AND `role` = %s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.id, self.teamname, self.role))
                 connection.commit()
         finally:
@@ -318,11 +339,12 @@ class User:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.id, self.username))
+                #sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `name` FROM `users` WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.id)
                 role = cursor.fetchone()
                 connection.commit()
-                return role['Имя']
+                return role['name']
         finally:
             connection.close()
 
