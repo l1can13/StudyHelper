@@ -184,6 +184,7 @@ class StudHelperBot:
         self.bot.send_message(message.chat.id, "Команда и роль будут определены автоматически")
         self.start_message(message)
 
+
     def accept_invitation(self, message):
         if self.user_dict[message.chat.id].check_team_with_code(message.text):  # успешно принимаем в команду
             self.user_dict[message.chat.id].set_id(message.from_user.id)
