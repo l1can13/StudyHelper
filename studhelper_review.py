@@ -53,7 +53,7 @@ class StudHelperBot:
                 markup.add(item3)
                 markup.add(item4)
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
-                                                       self.user_dict[message.chat.id].get_id())
+                                                       self.user_dict[message.chat.id].get_tg_id())
                 self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
             elif self.user_dict[message.chat.id].is_in_team():
                 self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
@@ -150,7 +150,7 @@ class StudHelperBot:
 
     def accept_invitation(self, message):
         if self.user_dict[message.chat.id].check_team_with_code(message.text):  # успешно принимаем в команду
-            self.user_dict[message.chat.id].set_id(message.from_user.id)
+            self.user_dict[message.chat.id].set_tg_id(message.from_user.id)
             self.user_dict[message.chat.id].set_teamname(
                 self.user_dict[message.chat.id].get_team_using_code(message.text))
             self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
@@ -209,7 +209,7 @@ class StudHelperBot:
     def set_team_name(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         name_of_team = message.text
         if Team.check_teamname_for_unique(name_of_team):  # проверяем по бд уникальность названия команды
-            self.team_dict[message.chat.id] = Team(name_of_team, self.user_dict[message.chat.id].get_id())
+            self.team_dict[message.chat.id] = Team(name_of_team, self.user_dict[message.chat.id].get_tg_id())
             if self.user_dict[message.chat.id].get_username() is None:
                 self.user_dict[message.chat.id].set_username('no_username')
             self.team_dict[message.chat.id].set_admin(
@@ -248,7 +248,7 @@ class StudHelperBot:
 
     def evaluation(self, message):  # функция для оценки участников команды
         self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
-                                               self.user_dict[message.chat.id].get_id())
+                                               self.user_dict[message.chat.id].get_tg_id())
         team_members = self.team_dict[
             message.chat.id].get_team_members()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
         arr_of_names = []
@@ -344,7 +344,7 @@ class StudHelperBot:
 
             current_date = datetime.now()
             self.review_dict[message.chat.id].set_date(current_date)
-            self.review_dict[message.chat.id].set_reviewer(self.user_dict[message.chat.id].get_id())
+            self.review_dict[message.chat.id].set_reviewer(self.user_dict[message.chat.id].get_tg_id())
 
             self.review_dict[message.chat.id].add_review()
 

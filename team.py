@@ -25,28 +25,39 @@ class Team:
     def __init__(self, *args):
         if len(args) == 2:
             self.teamname = args[0]
-            #self.admin = ''
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
             self.team_codes = []
             self.admin_id = args[1]
+            self.team_id = None
         else:
             self.teamname = None
-            #self.admin = None
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
             self.team_codes = []
             self.admin_id = 0
+            self.team_id = None
 
+    def set_team_id(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql_request = "SELECT `team_id` FROM teams where `team_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.teamname)
+                result = cursor.fetchone()
+                connection.commit()
+                self.team_id = result['team_id']
+        finally:
+            connection.close()
 
     # функция для получения фамилий из бд для определенной группы
     def get_team_members(self):
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                #sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
+                # sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
                 sql_request = "SELECT `name` FROM `users` WHERE `user_id` IN (SELECT `user_id` FROM `team_members` WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 result = cursor.fetchall()
@@ -59,7 +70,7 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                #sql_request = "SELECT `Название` FROM `Команды` WHERE `Код` = %s"  # строка для SQL-запроса
+                # sql_request = "SELECT `Название` FROM `Команды` WHERE `Код` = %s"  # строка для SQL-запроса
                 sql_request = "SELECT `user_id` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchall()
@@ -75,9 +86,9 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`, `Ид`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
-                sql_request = "INSERT INTO `teams` (`team_name`, `admin_user_id`) VALUES (%s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.teamname, self.admin_id))
+                # sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`, `Ид`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
+                sql_request = "INSERT INTO `teams` (`team_name`, `product_name`, `admin_user_id`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.teamname, self.product, self.admin_id))
                 connection.commit()
 
         finally:
@@ -88,21 +99,22 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "UPDATE `Команды` SET Продукт = (%s) WHERE Название = (%s)"  # строка для SQL-запроса
+                # sql_request = "UPDATE `Команды` SET Продукт = (%s) WHERE Название = (%s)"  # строка для SQL-запроса
                 sql_request = "UPDATE `teams` SET `product_name` = (%s) WHERE `team_name` = (%s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.product, self.teamname))
                 connection.commit()
         finally:
             connection.close()
 
-    #Метод для заполнения поля 'Код команды'
-    def add_team_code(self, team_id, role, code): # СЮДА ПЕРЕДАВАЛОСЬ НАЗВАНИЕ КОМАНДЫ, А НУЖНО, ЧТОБЫ ПЕРЕДАВАЛСЯ АЙДИ
+    # Метод для заполнения поля 'Код команды'
+    def add_team_code(self, role, code):  # СЮДА ПЕРЕДАВАЛОСЬ НАЗВАНИЕ КОМАНДЫ, А НУЖНО, ЧТОБЫ ПЕРЕДАВАЛСЯ АЙДИ
+        self.set_team_id()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "INSERT INTO `Коды` (`Команда`, `Роль`, `Код`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
+                # sql_request = "INSERT INTO `Коды` (`Команда`, `Роль`, `Код`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
                 sql_request = "INSERT INTO `team_members` (`team_id`, `role`, `invite_code`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (team_id, role, code))
+                cursor.execute(sql_request, (self.team_id, role, code))
                 connection.commit()
         finally:
             connection.close()
@@ -112,12 +124,12 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "DELETE FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
+                # sql_request = "DELETE FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
                 sql_request = "DELETE FROM `teams` WHERE `team_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 connection.commit()
 
-                #sql_request = "DELETE FROM `Пользователи` WHERE `Команда` = %s"
+                # sql_request = "DELETE FROM `Пользователи` WHERE `Команда` = %s"
                 sql_request = "DELETE FROM `team_members` WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s)"
                 cursor.execute(sql_request, self.teamname)
                 connection.commit()
@@ -143,7 +155,7 @@ class Team:
                 # sql_request = "SELECT Команда FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
                 # cursor.execute(sql_request, code)
 
-                #sql_request = "SELECT Ид FROM `Команды` WHERE `Название` = (SELECT Команда FROM `Коды` WHERE `Код` = %s)"  # строка для SQL-запроса
+                # sql_request = "SELECT Ид FROM `Команды` WHERE `Название` = (SELECT Команда FROM `Коды` WHERE `Код` = %s)"  # строка для SQL-запроса
                 sql_request = "SELECT `admin_user_id` FROM `teams` WHERE `team_id` IN (SELECT `team_id` FROM `team_members` WHERE `invite_code` = %s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchone()
@@ -157,7 +169,7 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "SELECT * FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
+                # sql_request = "SELECT * FROM `Команды` WHERE `Название` = %s"  # строка для SQL-запроса
                 sql_request = "SELECT * FROM `teams` WHERE `team_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, teamname)
                 result = cursor.fetchall()
@@ -169,11 +181,12 @@ class Team:
             connection.close()
 
     @staticmethod
-    def check_product_for_unique(product): #вернет true если в бд ничего нет (то есть уникальное название) и false, если такое уже есть
+    def check_product_for_unique(
+            product):  # вернет true если в бд ничего нет (то есть уникальное название) и false, если такое уже есть
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "SELECT * FROM `Команды` WHERE `Продукт` = %s"  # строка для SQL-запроса
+                # sql_request = "SELECT * FROM `Команды` WHERE `Продукт` = %s"  # строка для SQL-запроса
                 sql_request = "SELECT * FROM `teams` WHERE `product_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, product)
                 result = cursor.fetchall()
@@ -214,3 +227,9 @@ class Team:
 
     def get_team_code(self):
         return self.team_codes[0]
+
+    def get_admin(self):
+        return self.admin_id
+
+    def set_admin(self, admin_id):
+        self.admin_id = admin_id
