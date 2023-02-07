@@ -75,19 +75,6 @@ class User:
             self.tg_id = 0
             self.counter_of_people = 0
 
-    def find_username_by_surname(self, surname):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                # sql_request = "SELECT `Ид` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
-                sql_request = "SELECT `user_id` FROM `users` WHERE `name` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, surname)
-                result = cursor.fetchone()
-                connection.commit()
-                return result['Ид']
-        finally:
-            connection.close()
-
     def set_db_id(self):
         connection = connect_to_db()
         try:
@@ -100,6 +87,20 @@ class User:
                     self.db_id = result['user_id']
                 else:
                     self.db_id = -1
+        finally:
+            connection.close()
+
+    # функция для получения фамилий из бд для определенной группы
+    def get_team_members(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                # sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `name` FROM `users` WHERE `user_id` IN (SELECT `user_id` FROM `team_members` WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s)) and `user_id` != %s and `user_id` not in (select `assessored_user_id` from `team_members_ratings` where `assessor_user_id` = %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.teamname, self.db_id, self.db_id))
+                result = cursor.fetchall()
+                connection.commit()
+                return result
         finally:
             connection.close()
 
