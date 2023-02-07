@@ -34,7 +34,7 @@ let showTeams = document.querySelector('.show_teams')
 let manageBot = document.querySelector('.manage_bot');
 let personName = document.querySelector('.name');
 let groupName = document.querySelector('.groupname');
-let userName = document.querySelector('.username');
+let userId = document.querySelector('.id');
 let teamName = document.querySelector('.teamname');
 let roleName = document.querySelector('.rolename');
 let totalMark = document.querySelector('.itog_number');
@@ -43,40 +43,26 @@ let marksDiv = document.querySelector('.marks');
 let getReports = document.querySelector('.get_reports');
 
 let arrOneTeamUsers = [], arrOnePerson = [], arrReports = [], nameAndId = [];
-let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"], ["Общая оценка", "Решение задач", "Командная работа", "Ответственность", "Помощь членам команды", "Автор оценки", "Дата"]];
+let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"], ["Ид автора оценки", "Автор оценки", "Общая оценка", "Положительные моменты", "Отрицательные моменты", "Дата"]];
 
 var textt = decodeURIComponent(location.search.substring(1)).split('&');
 personName.textContent = textt[0];
-groupName.textContent = textt[1];
-userName.textContent = textt[2];
+userId.textContent = textt[1];
+groupName.textContent = textt[2];
 teamName.textContent = textt[3];
 roleName.textContent = textt[4];
 
-nameAndId = ajaxRequest("name_and_id.php?team=" + textt[3]);
-arrUserInfo = ajaxRequest("one_person_info.php?username=" + textt[5]);
+nameAndId = ajaxRequest("name_by_id.php");
+console.log(nameAndId);
+arrUserInfo = ajaxRequest("one_person_info.php?username=" + textt[1]);
 arrUserInfo.unshift(helpArr[2]);
 
-let total_mark = 0;
 for (var i = 1; i < arrUserInfo.length; ++i) {
-    total_mark += Number(arrUserInfo[i][0]);
-    total_mark += Number(arrUserInfo[i][1]);
-    total_mark += Number(arrUserInfo[i][2]);
-
-    var elem = arrUserInfo[i][6].split('.');
-    arrUserInfo[i][6] = elem[0];
-
     for (var j = 0; j < nameAndId.length; ++j){
-        if (nameAndId[j][1] == arrUserInfo[i][5]){
-            arrUserInfo[i][5] = nameAndId[j][0];
+        if (nameAndId[j][0] == arrUserInfo[i][0]) {
+            arrUserInfo[i][1] = nameAndId[j][1];
         }
     }
-}
-total_mark /= ((arrUserInfo.length - 1) * 3);
-if (total_mark) {
-    totalMark.textContent = total_mark.toFixed(2).toString();
-}
-else {
-    totalMark.textContent = '-';
 }
 
 let table = createTable(arrUserInfo);
@@ -84,14 +70,10 @@ let temp = document.querySelector('.table');
 temp.innerHTML = table;
 marksDiv.appendChild(temp);
 
-
 let reports = "";
-arrReports = ajaxRequest("user_reports.php?username=" + textt[5]);
+arrReports = ajaxRequest("user_reports.php?userid=" + textt[1]);
 for (var i = 0; i < arrReports.length; ++i) {
-    var elem = arrReports[i][0].split('.');
-    arrReports[i][0] = elem[0];
-
-    reports += arrReports[i][0]+ ' ' + arrReports[i][1] + '\n';
+    reports += 'Спринт № ' + arrReports[i][0]+ ' , дата отчёта: ' + arrReports[i][1] + ' , текст отчёта: ' + arrReports[i][2] + '\n';
 }
 
 getReports.addEventListener('click', () => {
