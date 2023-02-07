@@ -52,20 +52,6 @@ class Team:
         finally:
             connection.close()
 
-    # функция для получения фамилий из бд для определенной группы
-    def get_team_members(self):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                # sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
-                sql_request = "SELECT `name` FROM `users` WHERE `user_id` IN (SELECT `user_id` FROM `team_members` WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, self.teamname)
-                result = cursor.fetchall()
-                connection.commit()
-                return result
-        finally:
-            connection.close()
-
     def check_team_with_code(self, code):
         connection = connect_to_db()
         try:
@@ -91,6 +77,19 @@ class Team:
                 cursor.execute(sql_request, (self.teamname, self.product, self.admin_id))
                 connection.commit()
 
+        finally:
+            connection.close()
+
+    def find_db_id_by_surname(self, surname):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                # sql_request = "SELECT `Ид` FROM `Пользователи` WHERE `Имя` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `user_id` FROM `users` WHERE `name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, surname)
+                result = cursor.fetchone()
+                connection.commit()
+                return result['user_id']
         finally:
             connection.close()
 
