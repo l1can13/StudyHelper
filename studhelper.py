@@ -54,9 +54,11 @@ class StudHelperBot:
                 item1 = types.KeyboardButton("Добавить участника")
                 # item3 = types.KeyboardButton("Оценить участников команды")
                 item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+                item5 = types.KeyboardButton("Помощь")
                 markup.add(item1)
                 # markup.add(item3)
                 markup.add(item4)
+                markup.add(item5)
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
                                                        self.user_dict[message.chat.id].get_db_id())
                 self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
@@ -71,11 +73,15 @@ class StudHelperBot:
                 else:
                     # item1 = types.KeyboardButton("Оценить участников команды")
                     item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
+                    item5 = types.KeyboardButton("Помощь")
                     # markup.add(item1)
                     markup.add(item2)
+                    markup.add(item5)
             else:
                 item1 = types.KeyboardButton("Регистрация команды")
+                item5 = types.KeyboardButton("Помощь")
                 markup.add(item1)
+                markup.add(item5)
             if not self.first_hello_dict[message.chat.id]:
                 if self.user_dict[message.chat.id].get_username() is not None:
                     self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(),
@@ -91,6 +97,10 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Заполните форму ниже")
             msg = self.bot.send_message(message.chat.id, "Введите имя команды: ", reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(msg, self.set_team_name)
+        elif message.text == "Помощь":
+            msg = self.bot.send_message(message.chat.id, "Возникла проблема с ботом, или нашли баг?\n\nНапишите @l1can для получения информации по боту, а также для решения любой проблемы (как создать команду, переименование/удаление команды, удаление участников, переименование/удаление продукта, и т.д)",
+                                        reply_markup=ReplyKeyboardRemove())
+            self.start_message(message)
         elif message.text == "Добавить участника":
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             item1 = types.KeyboardButton("Да")
@@ -111,7 +121,7 @@ class StudHelperBot:
             # msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
             #                             reply_markup=ReplyKeyboardRemove())
             # self.bot.register_next_step_handler(msg, self.report_of_people)
-        elif message.text == "Обновить":
+        elif message.text.lower() == "обновить":
             msg = self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
                                         reply_markup=ReplyKeyboardRemove())
             self.start_message(message)
@@ -135,7 +145,7 @@ class StudHelperBot:
         markup.add(item5)
         markup.add(item6)
         markup.add(item7)
-        msg = self.bot.send_message(message.chat.id, "Выберите спринт: ", reply_markup=markup)
+        msg = self.bot.send_message(message.chat.id, "Выберите спринт (меню с кнопками можно пролистать): ", reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.set_sprint)
 
     def set_sprint(self, message):
@@ -197,7 +207,7 @@ class StudHelperBot:
                 message.chat.id].get_teamname() + "\"!",
                                   reply_markup=ReplyKeyboardRemove())
             self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+            msg = self.bot.send_message(message.chat.id, "Введите имя в формате Фамилия Имя Отчество:")
 
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
@@ -206,7 +216,7 @@ class StudHelperBot:
             self.start_message(message)
 
     def name_again(self, message):
-        msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+        msg = self.bot.send_message(message.chat.id, "Введите имя в формате Фамилия Имя Отчество:")
         self.bot.register_next_step_handler(msg, self.after_name)
 
     def after_name(self, message):
@@ -223,7 +233,7 @@ class StudHelperBot:
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.user_dict[message.chat.id].set_name(name)
-            msg = self.bot.send_message(message.chat.id, "Введите Вашу группу:")
+            msg = self.bot.send_message(message.chat.id, "Введите номер Вашей группы в формате XXXX:")
             self.bot.register_next_step_handler(msg, self.after_group)
 
     def after_group(self, message):
@@ -284,7 +294,7 @@ class StudHelperBot:
                                   "Команда \"" + self.team_dict[
                                       message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
             self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-            msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
+            msg = self.bot.send_message(message.chat.id, "Введите имя в формате Фамилия Имя Отчество:")
             self.bot.register_next_step_handler(msg, self.after_name)
         else:
             self.bot.send_message(message.chat.id, "Такое имя для продукта уже существует")
@@ -381,9 +391,10 @@ class StudHelperBot:
         report = message.text  # в report лежит отчет о проделанной работе
         self.report_dict[message.chat.id] = Report()
         self.report_dict[message.chat.id].set_report(report)
-        self.report_dict[message.chat.id].set_sprint(self.sprint_now)
-        self.report_dict[message.chat.id].set_departure_time(departure_time)
-        # self.report_dict[message.chat.id].add_report() в комменте, тк хз какие поля
+        self.report_dict[message.chat.id].set_sprint(int(self.sprint_now[len(self.sprint_now) - 1]))
+        self.report_dict[message.chat.id].set_date(departure_time)
+        self.report_dict[message.chat.id].set_user(self.user_dict[message.chat.id].get_db_id())
+        self.report_dict[message.chat.id].add_report()
         self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!")
         self.start_message(message)
 
