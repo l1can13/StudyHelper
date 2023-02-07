@@ -24,7 +24,7 @@ class Report:
     def __init__(self):
         self.report = ''
         self.sprint = None
-        self.user = None
+        self.db_id = None
         self.date = None
 
     def set_report(self, report):
@@ -37,7 +37,7 @@ class Report:
         self.date = date
 
     def set_user(self, user):
-        self.user = user
+        self.db_id = user
 
     def get_report(self):
         return self.report
@@ -49,7 +49,7 @@ class Report:
         return self.date
 
     def get_user(self):
-        return self.user
+        return self.db_id
 
     def add_report(self): #функция добавления данных в бд
         connection = connect_to_db()
@@ -57,7 +57,7 @@ class Report:
             with connection.cursor() as cursor:
                 #sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`, `Спринт`) VALUES (%s, %s, %s, %s, %s);"  # строка для SQL-запроса
                 sql_request = "INSERT INTO `sprint_reports` (`user_id`, `sprint_num`, `report_text`, `report_date`) VALUES (%s, %s, %s, %s);"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.user, self.sprint, self.report, self.date))
+                cursor.execute(sql_request, (self.db_id, self.sprint, self.report, self.date))
                 connection.commit()
         finally:
             connection.close()
