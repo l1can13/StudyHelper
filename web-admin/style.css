@@ -184,3 +184,7 @@ html, body {
 .table tbody tr:nth-child(even){
 	background: #f3f3f3;
 }
+
+.table tbody tr:hover {
+    background: #a3edb5;
+}

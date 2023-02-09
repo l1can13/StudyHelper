@@ -9,7 +9,7 @@ $par4_db = "u1841284_studhelper_fixed";
 $mysqli = new mysqli($par1_ip, $par2_name, $par3_p, $par4_db);
 mysqli_set_charset($mysqli,'utf8');
 
-$result = $mysqli->query("SELECT `sprint_num`, `report_date`, `report_text` FROM `sprint_reports` WHERE `user_id` LIKE '$_GET[userid]'");
+$result = $mysqli->query("SELECT `user_id`, `name` FROM `users`");
 
 while ($row = $result->fetch_assoc()) {
     $array[] = $row;

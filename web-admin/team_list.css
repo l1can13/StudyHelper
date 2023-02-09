@@ -183,6 +183,28 @@ body {
     margin-left: 2px;
 }
 
+.team_id_info {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-left: 4px;
+}
+
+.team_id {
+    font-family: 'Montserrat', sans-serif;
+    color:#000000;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.id {
+    font-family: 'Montserrat', sans-serif;
+    color:#000000;
+    font-size: 22px;
+    margin-bottom: 8px;
+    margin-left: 10px;
+}
+
 .admin_info {
     display: flex;
     flex-direction: row;
@@ -264,4 +286,8 @@ body {
 
 .table tbody tr:nth-child(even){
 	background: #f3f3f3;
+}
+
+.table tbody tr:hover {
+    background: #a3edb5;
 }

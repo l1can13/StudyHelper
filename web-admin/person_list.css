@@ -174,6 +174,29 @@ body {
     margin-bottom: 8px;
 }
 
+.user_id_info {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+
+.user_id {
+    font-family: 'Montserrat', sans-serif;
+    white-space: nowrap;
+    color:#000000;
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.id {
+    font-family: 'Montserrat', sans-serif;
+    color:#000000;
+    font-size: 22px;
+    margin-bottom: 8px;
+    margin-left: 10px;
+}
+
 .group_info {
     display: flex;
     flex-direction: row;
@@ -189,29 +212,6 @@ body {
 }
 
 .groupname {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-    margin-bottom: 8px;
-    margin-left: 10px;
-}
-
-.username_info {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    margin-bottom: 10px;
-}
-
-.user {
-    font-family: 'Montserrat', sans-serif;
-    white-space: nowrap;
-    color:#000000;
-    font-size: 22px;
-    margin-bottom: 8px;
-}
-
-.username {
     font-family: 'Montserrat', sans-serif;
     color:#000000;
     font-size: 22px;
@@ -317,31 +317,11 @@ body {
 	background: #f3f3f3;
 }
 
-.total_mark {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    margin-bottom: 40px;
-    margin-top: 20px;
-}
-
-.itog {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-}
-
-.itog_number {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-    margin-left: 10px;
-}
-
 .reports {
     width: 100%;
     display: flex;
     flex-direction: column;
+    margin-top: 45px;
 }
 
 .get_reports:before {
