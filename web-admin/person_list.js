@@ -44,6 +44,7 @@ let getReports = document.querySelector('.get_reports');
 
 let arrOneTeamUsers = [], arrOnePerson = [], arrReports = [], nameAndId = [];
 let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"], ["Ид автора оценки", "Автор оценки", "Общая оценка", "Положительные моменты", "Отрицательные моменты", "Дата"]];
+let clicked = false;
 
 var textt = decodeURIComponent(location.search.substring(1)).split('&');
 personName.textContent = textt[0];
@@ -77,7 +78,18 @@ for (var i = 0; i < arrReports.length; ++i) {
 }
 
 getReports.addEventListener('click', () => {
-    reportsText.textContent = reports;
+    if (getReports.innerHTML === 'Показать отчеты пользователя') {
+        reportsText.textContent = reports;
+        getReports.innerHTML = 'Скрыть отчеты пользователя'
+        getReports.style.background = '#28293D';
+        getReports.style.color = '#FEFFFF';
+    }
+    else {
+        reportsText.textContent = '';
+        getReports.innerHTML = 'Показать отчеты пользователя';
+        getReports.style.background = '#D9D9D9';
+        getReports.style.color = '#28293D';
+    }
 });
 
 hamburgerButton.addEventListener('click', () => {

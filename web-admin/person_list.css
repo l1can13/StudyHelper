@@ -325,25 +325,16 @@ body {
     margin-top: 45px;
 }
 
-.get_reports:before {
+.get_reports {
+    display: flex;
     padding: 18px 31px;
     font-size: 20px;
     font-family: 'Montserrat', sans-serif;
     color: #000000;
     background: #A5A5A5;
-    content: 'Показать отчеты пользователя';
     max-width: 286px;
-    }
-    
-    .clicked:before {
-    padding: 18px 31px;
-    font-size: 20px;
-    font-family: 'Montserrat', sans-serif;
-    color: #FEFFFF;
-    background: #28293D;
-    content: 'Скрыть отчеты пользователя';
-    max-width: 286px;
-    }
+    height: auto;
+}
 
 .reports_text {
     margin-top: 24px;
@@ -351,4 +342,5 @@ body {
     font-size: 20px;
     font-family: 'Montserrat', sans-serif;
     color: #28293D;
+    text-align: start;
 }
