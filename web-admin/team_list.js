@@ -31,6 +31,7 @@ let container = document.querySelector('.container');
 let sideMenu = document.querySelector('.side_menu');
 let showTeams = document.querySelector('.show_teams')
 let manageBot = document.querySelector('.manage_bot');
+let manageDb = document.querySelector('.manage_db');
 let teamName = document.querySelector('.team_name');
 let productName = document.querySelector('.product_name');
 let admin = document.querySelector('.admin');
@@ -75,6 +76,7 @@ hamburgerButton.addEventListener('click', () => {
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
     manageBot.classList.toggle('show');
+    manageDb.classList.toggle('show');
 });
 
 showTeams.addEventListener('click', () => {

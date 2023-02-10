@@ -99,7 +99,7 @@ body {
     visibility: visible;
 }
 
-.manage_bot.show {
+.manage_bot.show, .manage_db.show {
     width: 100%;
     opacity: 1;
     visibility: visible;
@@ -125,7 +125,7 @@ body {
 }
 
 
-.manage_bot {
+.manage_bot, .manage_db {
     width: 0;
     height: 60px;
     opacity: 0;
@@ -136,7 +136,7 @@ body {
 }
 
 .show_teams:hover,
-.manage_bot:hover {
+.manage_bot:hover, .manage_db:hover {
     background: #28293d;
     color: #feffff;
 }

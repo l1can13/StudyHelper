@@ -32,6 +32,7 @@ let container = document.querySelector('.container');
 let sideMenu = document.querySelector('.side_menu');
 let showTeams = document.querySelector('.show_teams')
 let manageBot = document.querySelector('.manage_bot');
+let manageDb = document.querySelector('.manage_db');
 let personName = document.querySelector('.name');
 let groupName = document.querySelector('.groupname');
 let userId = document.querySelector('.id');
@@ -97,6 +98,7 @@ hamburgerButton.addEventListener('click', () => {
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
     manageBot.classList.toggle('show');
+    manageDb.classList.toggle('show');
 });
 
 showTeams.addEventListener('click', () => {

@@ -57,6 +57,7 @@ let hamburgerButton = document.querySelector('.spans');
 let sideMenu = document.querySelector('.side_menu');
 let showTeams = document.querySelector('.show_teams');
 let manageBot = document.querySelector('.manage_bot');
+let manageDb = document.querySelector('.manage_db');
 let getBotStatusButton = document.querySelector('.get_bot_status');
 let statusText = document.querySelector('.status_text');
 let checkboxBot = document.querySelector('#checkbox_bot');
@@ -86,6 +87,7 @@ hamburgerButton.addEventListener('click', () => {
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
     manageBot.classList.toggle('show');
+    manageDb.classList.toggle('show');
 });
 
 getBotStatusButton.addEventListener('click', () => {
