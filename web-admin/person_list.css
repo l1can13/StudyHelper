@@ -105,7 +105,7 @@ body {
     visibility: visible;
 }
 
-.show_teams.show {
+.show_teams.show, .show_final_report.show {
     width: 100%;
     height: 60px;
     opacity: 1;
@@ -124,6 +124,15 @@ body {
     visibility: hidden;
 }
 
+.show_final_report {
+    height: 60px;
+    opacity: 0;
+    text-align: start;
+    padding-left: 25px;
+    color: #28293d;
+    transition: 0.15s;
+    visibility: hidden;
+}
 
 .manage_bot, .manage_db {
     width: 0;
@@ -135,8 +144,7 @@ body {
     transition: 0.15s;
 }
 
-.show_teams:hover,
-.manage_bot:hover, .manage_db:hover {
+.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover {
     background: #28293d;
     color: #feffff;
 }

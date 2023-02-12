@@ -30,7 +30,8 @@ function ajaxRequest(phpName) {
 let hamburgerButton = document.querySelector('.spans');
 let container = document.querySelector('.container');
 let sideMenu = document.querySelector('.side_menu');
-let showTeams = document.querySelector('.show_teams')
+let showTeams = document.querySelector('.show_teams');
+let showFinalReport = document.querySelector('.show_final_report');
 let manageBot = document.querySelector('.manage_bot');
 let manageDb = document.querySelector('.manage_db');
 let personName = document.querySelector('.name');
@@ -97,12 +98,17 @@ hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
+    showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
 });
 
 showTeams.addEventListener('click', () => {
     window.location.href = 'index.html';
+});
+
+showFinalReport.addEventListener('click', () => {
+    window.location.href = 'final_report.html';
 });
 
 manageBot.addEventListener('click', () => {
