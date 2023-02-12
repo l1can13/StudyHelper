@@ -9,7 +9,7 @@ $par4_db = "studhelper";
 $mysqli = new mysqli($par1_ip, $par2_name, $par3_p, $par4_db);
 mysqli_set_charset($mysqli,'utf8');
 
-$result = $mysqli->query("SELECT * FROM `team_members_ratings` WHERE `assessored_user_id` LIKE '$_GET[username]'");
+$result = $mysqli->query("SELECT `assessor_user_id`, `overall_rating`, `advantages`, `disadvantages`, `rate_date` FROM `team_members_ratings` WHERE `assessored_user_id` LIKE '$_GET[username]'");
 
 while ($row = $result->fetch_assoc()) {
     $array[] = $row;

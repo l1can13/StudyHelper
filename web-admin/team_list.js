@@ -37,19 +37,20 @@ let teamName = document.querySelector('.team_name');
 let productName = document.querySelector('.product_name');
 let admin = document.querySelector('.admin');
 let tableDiv = document.querySelector('.table_div');
-let id = document.querySelector('.id');
 
 let arrTeams = [], arrAllUser = [], arrOneTeamUsers = [], usernameAndId = [];
-let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Ид пользователя", "Имя", "Группа", "Роль"]];
+let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Роль"]];
 
 var textt = decodeURIComponent(location.search.substring(1)).split('&');
 teamName.textContent = textt[0];
 productName.textContent = textt[1];
 admin.textContent = textt[2];
-id.textContent = textt[3];
+var userId = textt[3];
+idd = ajaxRequest("team_by_admin.php?admin=" + userId);
+id = idd[0][0];
 
 arrTeams = ajaxRequest("teams.php");
-arrOneTeamUsers = ajaxRequest("one_team_users.php?team=" + textt[3]);
+arrOneTeamUsers = ajaxRequest("one_team_users.php?team=" + id);
 arrTeams.unshift(helpArr[0]);
 arrOneTeamUsers.unshift(helpArr[1]);
 
@@ -63,10 +64,11 @@ let trs = document.querySelectorAll('tr');
 for (var i = 0; i < trs.length; ++i) {
     trs[i].style.cursor = 'pointer';
     trs[i].addEventListener('click', function() {
-        var input_id = this.getElementsByTagName("th")[0].innerHTML;
-        var input_name = this.getElementsByTagName("th")[1].innerHTML;
-        var input_group = this.getElementsByTagName("th")[2].innerHTML;
-        var input_role = this.getElementsByTagName("th")[3].innerHTML;
+        var input_name = this.getElementsByTagName("th")[0].innerHTML;
+        var input_group = this.getElementsByTagName("th")[1].innerHTML;
+        var input_role = this.getElementsByTagName("th")[2].innerHTML;
+        idFromInfo = ajaxRequest("id_from_info.php?name=" + input_name + "&group=" + input_group + "&role=" + input_role + "&team=" + id);
+        var input_id = idFromInfo[0][0];
         var url = 'person_list.html?'+ input_name  + '&' + input_id + '&' + input_group + '&' + textt[0] + '&' + input_role;
         window.location.href = url; 
     });

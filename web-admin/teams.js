@@ -34,22 +34,20 @@ let manageDb = document.querySelector('.manage_db');
 let tableDiv = document.querySelector('.table_div');
 let infoDiv = document.querySelector('.info_div');
 
-let arrTeams = [];
-let helpArr = [["Ид команды", "Команда", "Продукт", "Имя администратора", "Ид администратора"], ["Имя", "Группа", "Команда"]];
+let arrTeams = [], ids = [];
+let helpArr = [["Команда", "Продукт", "Администратор"], ["Имя", "Группа", "Команда"]];
 
 arrTeams = ajaxRequest("teams.php");
 namesByIds = ajaxRequest("name_by_id.php");
 
 for (var i = 0; i < arrTeams.length; ++i) {
-    arrTeams[i].push("");
-    arrTeams[i][4] = arrTeams[i][3];
+    ids.push(arrTeams[i][2]);
     for (var j = 0; j < namesByIds.length; ++j) {
-        if (namesByIds[j][0] == arrTeams[i][4]) {
-            arrTeams[i][3] = namesByIds[j][1];
+        if (namesByIds[j][0] == arrTeams[i][2]) {
+            arrTeams[i][2] = namesByIds[j][1];
         }
     }
 }
-console.log(arrTeams);
 arrTeams.unshift(helpArr[0]);
 
 let table = createTable(arrTeams);
@@ -62,11 +60,11 @@ let trs = document.querySelectorAll('tr');
 for (var i = 0; i < trs.length; ++i) {
     trs[i].style.cursor = 'pointer';
     trs[i].addEventListener('click', function() {
-        var input_team_id = this.getElementsByTagName("th")[0].innerHTML;
-        var input_name = this.getElementsByTagName("th")[1].innerHTML;
-        var input_product = this.getElementsByTagName("th")[2].innerHTML;
-        var input_admin = this.getElementsByTagName("th")[3].innerHTML;
-        var url = 'team_list.html?'+ input_name + '&' + input_product + '&' + input_admin + '&' + input_team_id;
+        var input_name = this.getElementsByTagName("th")[0].innerHTML;
+        var input_product = this.getElementsByTagName("th")[1].innerHTML;
+        var input_admin = this.getElementsByTagName("th")[2].innerHTML;
+        var input_id = ids[this.rowIndex - 1];
+        var url = 'team_list.html?'+ input_name + '&' + input_product + '&' + input_admin + '&' + input_id;
         window.location.href = url; 
     });
 }

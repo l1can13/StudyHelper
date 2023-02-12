@@ -9,7 +9,7 @@ $par4_db = "studhelper";
 $mysqli = new mysqli($par1_ip, $par2_name, $par3_p, $par4_db);
 mysqli_set_charset($mysqli,'utf8');
 
-$sql = "SELECT a.user_id, a.name, a.group_num, b.role FROM users a, team_members b WHERE a.user_id = b.user_id AND b.team_id LIKE '$_GET[team]' ";
+$sql = "SELECT a.name, a.group_num, b.role FROM users a, team_members b WHERE a.user_id = b.user_id AND b.team_id LIKE '$_GET[team]' ";
 $result = $mysqli->query($sql);
 
 while ($row = $result->fetch_assoc()) {
