@@ -56,6 +56,7 @@ function changeReviewVisibility(review) {
 let hamburgerButton = document.querySelector('.spans');
 let sideMenu = document.querySelector('.side_menu');
 let showTeams = document.querySelector('.show_teams');
+let showFinalReport = document.querySelector('.show_final_report');
 let manageBot = document.querySelector('.manage_bot');
 let manageDb = document.querySelector('.manage_db');
 let getBotStatusButton = document.querySelector('.get_bot_status');
@@ -86,6 +87,7 @@ hamburgerButton.addEventListener('click', () => {
     hamburgerButton.classList.toggle('open');
     sideMenu.classList.toggle('show');
     showTeams.classList.toggle('show');
+    showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
 });
@@ -113,4 +115,8 @@ checkboxReview.addEventListener('change', (event) => {
 
 showTeams.addEventListener('click', () => {
     window.location.href = 'index.html';
+});
+
+showFinalReport.addEventListener('click', () => {
+    window.location.href = 'final_report.html';
 });
