@@ -46,7 +46,7 @@ class StudHelperBot:
         item1 = 0
         item3 = 0
         item4 = 0
-        if " " in message.text and not self.first_hello_dict[message.chat.id]:
+        if " " in message.text and not self.first_hello_dict[message.chat.id] and message.text != 'Отмена регистрации':
             message.text = message.text.split()[1]
             self.accept_invitation(message)
         else:
@@ -94,9 +94,11 @@ class StudHelperBot:
 
     def message_reply(self, message):
         if message.text == "Регистрация команды":
-            self.bot.send_message(message.chat.id, "Заполните форму ниже")
-            msg = self.bot.send_message(message.chat.id, "Введите имя команды: ", reply_markup=ReplyKeyboardRemove())
-            self.bot.register_next_step_handler(msg, self.set_team_name)
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            item1 = types.KeyboardButton("Отмена регистрации")
+            item2 = types.KeyboardButton("Продолжить регистрацию")
+            markup.add(item1, item2)
+            msg = self.bot.send_message(message.chat.id, "Внимание! Команду должен регистрировать Scrum Master! Если Вы не являетесь Scrum Master'ом, то нажмите кнопку 'Отмена регистрации'. Если являетесь - нажмите кнопку 'Продолжить регистрацию'", reply_markup=markup)
         elif message.text == "Помощь":
             msg = self.bot.send_message(message.chat.id, "Возникла проблема с ботом, или нашли баг?\n\nНапишите @l1can для получения информации по боту, а также для решения любой проблемы (как создать команду, переименование/удаление команды, удаление участников, переименование/удаление продукта, и т.д)",
                                         reply_markup=ReplyKeyboardRemove())
@@ -125,6 +127,14 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
                                         reply_markup=ReplyKeyboardRemove())
             self.start_message(message)
+        elif message.text == "Отмена регистрации":
+            msg = self.bot.send_message(message.chat.id, "Возврат к главному меню", reply_markup=ReplyKeyboardRemove())
+            self.start_message(message)
+        elif message.text == "Продолжить регистрацию":
+            self.bot.send_message(message.chat.id, "Заполните форму ниже", reply_markup=ReplyKeyboardRemove())
+            # msg = self.bot.send_message(message.chat.id, "Введите имя команды: ", reply_markup=ReplyKeyboardRemove())
+            msg = self.bot.send_message(message.chat.id, "Введите имя команды: ")
+            self.bot.register_next_step_handler(msg, self.set_team_name)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.start_message(message)
