@@ -17,7 +17,8 @@ def create_unique_inv_code():
 class StudHelperBot:
 
     def __init__(self):
-        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
+        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"  # prod
+        # self.token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ" #test
         self.bot = telebot.TeleBot(self.token)
         self.start_message = self.bot.message_handler(commands=['start'])(self.start_message)
         # self.button_message = self.bot.message_handler(commands=['button'])(self.button_message)

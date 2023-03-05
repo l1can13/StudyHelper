@@ -17,7 +17,8 @@ def create_unique_inv_code():
 class StudHelperBot:
 
     def __init__(self):
-        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"
+        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE" #prod
+        #self.token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ" #test
         self.bot = telebot.TeleBot(self.token)
         self.start_message = self.bot.message_handler(commands=['start'])(self.start_message)
         # self.button_message = self.bot.message_handler(commands=['button'])(self.button_message)
@@ -32,7 +33,7 @@ class StudHelperBot:
         self.report_dict = {}
         self.sprint_now = ''
         self.roles = ["Product owner", "Scrum Master", "Разработчик", "Участник команды"]
-        self.sprints = ["Спринт №0", "Спринт №1", "Спринт №2", "Спринт №3", "Спринт №4", "Спринт №5", "Спринт №6"]
+        self.sprints = ["Спринт №1", "Спринт №2", "Спринт №3", "Спринт №4", "Спринт №5", "Спринт №6"]
 
     def start(self):
         self.bot.infinity_polling()
