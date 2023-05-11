@@ -36,7 +36,7 @@ let tableDiv = document.querySelector('.table_div');
 let infoDiv = document.querySelector('.info_div');
 
 let arrFinalReport = [], arrIdAndRole = [];
-let helpArr = [["Имя", "Группа", "Команда", "Общая оценка среднее", "Общее количество оценок"], ["Имя", "Группа", "Команда"]];
+let helpArr = [["Имя", "Группа", "Команда", "СО", "КО", "Количество отчетов"], ["Имя", "Группа", "Команда"]];
 
 arrFinalReport = ajaxRequest("final_report.php");
 console.log(arrFinalReport);

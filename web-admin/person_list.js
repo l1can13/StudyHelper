@@ -41,10 +41,15 @@ let roleName = document.querySelector('.rolename');
 let totalMark = document.querySelector('.itog_number');
 let reportsText = document.querySelector('.reports_text');
 let marksDiv = document.querySelector('.marks');
+let reportsDiv = document.querySelector('.reports');
 let getReports = document.querySelector('.get_reports');
 
 let arrOneTeamUsers = [], arrOnePerson = [], arrReports = [], nameAndId = [];
-let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Username", "Роль"], ["Автор оценки", "Общая оценка", "Положительные моменты", "Отрицательные моменты", "Дата"]];
+let helpArr = [["Название", "Продукт", "Администратор", "Ид"],
+["Имя", "Группа", "Username", "Роль"],
+["Автор оценки", "Общая оценка", "Положительные моменты", "Отрицательные моменты", "Дата"],
+[`Номер спринта`, `Дата отчёта`, `Текст отчёта`]
+];
 let clicked = false;
 
 var textt = decodeURIComponent(location.search.substring(1)).split('&');
@@ -59,7 +64,7 @@ arrUserInfo = ajaxRequest("one_person_info.php?username=" + userId);
 arrUserInfo.unshift(helpArr[2]);
 
 for (var i = 1; i < arrUserInfo.length; ++i) {
-    for (var j = 0; j < nameAndId.length; ++j){
+    for (var j = 0; j < nameAndId.length; ++j) {
         if (nameAndId[j][0] == arrUserInfo[i][0]) {
             arrUserInfo[i][0] = nameAndId[j][1];
         }
@@ -71,21 +76,34 @@ let temp = document.querySelector('.table');
 temp.innerHTML = table;
 marksDiv.appendChild(temp);
 
-let reports = "";
 arrReports = ajaxRequest("user_reports.php?userid=" + userId);
-for (var i = 0; i < arrReports.length; ++i) {
-    reports += 'Спринт № ' + arrReports[i][0]+ ' , дата отчёта: ' + arrReports[i][1] + ' , текст отчёта: ' + arrReports[i][2] + '\n';
-}
+arrReports.unshift(helpArr[3]);
+let sprints = createTable(arrReports);
+let sprintsTable = document.querySelector('.sprints_table');
+sprintsTable.innerHTML = sprints;
+$(sprintsTable).hide()
+
+// let reports = "";
+// arrReports = ajaxRequest("user_reports.php?userid=" + userId);
+// for (var i = 0; i < arrReports.length; ++i) {
+//     reports += 'Спринт № ' + arrReports[i][0]+ ' , дата отчёта: ' + arrReports[i][1] + ' , текст отчёта: ' + arrReports[i][2] + '\n';
+// }
+
+$(getReports).click(function () {
+    if ($(sprintsTable).is(':visible')) {
+        $(sprintsTable).hide()
+    } else {
+        $(sprintsTable).show()
+    }
+})
 
 getReports.addEventListener('click', () => {
     if (getReports.innerHTML === 'Показать отчеты пользователя') {
-        reportsText.textContent = reports;
         getReports.innerHTML = 'Скрыть отчеты пользователя'
         getReports.style.background = '#28293D';
         getReports.style.color = '#FEFFFF';
     }
     else {
-        reportsText.textContent = '';
         getReports.innerHTML = 'Показать отчеты пользователя';
         getReports.style.background = '#D9D9D9';
         getReports.style.color = '#28293D';
