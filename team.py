@@ -106,14 +106,13 @@ class Team:
             connection.close()
 
     # Метод для заполнения поля 'Код команды'
-    def add_team_code(self, role, code):  # СЮДА ПЕРЕДАВАЛОСЬ НАЗВАНИЕ КОМАНДЫ, А НУЖНО, ЧТОБЫ ПЕРЕДАВАЛСЯ АЙДИ
+    def add_team_code(self, user_id, role, code):  # СЮДА ПЕРЕДАВАЛОСЬ НАЗВАНИЕ КОМАНДЫ, А НУЖНО, ЧТОБЫ ПЕРЕДАВАЛСЯ АЙДИ
         self.set_team_id()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                # sql_request = "INSERT INTO `Коды` (`Команда`, `Роль`, `Код`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
-                sql_request = "INSERT INTO `team_members` (`team_id`, `role`, `invite_code`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.team_id, role, code))
+                sql_request = "INSERT INTO `team_members` (`team_id`, `user_id`, `role`, `invite_code`) VALUES (%s, %s, %s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.team_id, user_id, role, code))
                 connection.commit()
         finally:
             connection.close()
@@ -134,17 +133,6 @@ class Team:
                 connection.commit()
         finally:
             connection.close()
-
-    """def delete_code_from_bd(self, code):
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                #sql_request = "DELETE FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
-                sql_request = "DELETE FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
-                connection.commit()
-        finally:
-            connection.close()"""
 
     @staticmethod
     def get_admin_of_team(code):
@@ -193,6 +181,38 @@ class Team:
                 if result:
                     return False
                 return True
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_teamname_by_code(code):
+        connection = connect_to_db()
+
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `team_name` FROM `teams` " \
+                              "INNER JOIN `team_members` ON `teams`.`team_id` = `team_members`.`team_id`" \
+                              "WHERE `team_members`.`invite_code` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, code)
+                result = cursor.fetchone()
+                connection.commit()
+
+                return result['team_name']
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_user_id_by_code(code):
+        connection = connect_to_db()
+
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `user_id` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, code)
+                result = cursor.fetchone()
+                connection.commit()
+
+                return result['user_id']
         finally:
             connection.close()
 

@@ -188,6 +188,36 @@ class User:
     def get_db_id(self):
         return self.db_id
 
+    @staticmethod
+    def add_empty_user():
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                insert_user = "INSERT INTO `users` (`name`, `group_num`, `tg_id`) VALUES (%s, %s, %s);"
+                cursor.execute(insert_user,
+                               ('invited_user',
+                                'INVT',
+                                None))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                connection.commit()
+
+                return cursor.lastrowid
+        finally:
+            connection.close()
+
+    def add(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                # insert_user = "INSERT INTO `Пользователи` (`Имя`, `Группа`, `User_name`, `Команда`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
+                insert_user = "INSERT INTO `users` (`name`, `group_num`, `tg_id`) VALUES (%s, %s, %s);"
+                cursor.execute(insert_user,
+                               (self.name, self.group, self.tg_id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                connection.commit()
+
+                self.set_db_id()
+        finally:
+            connection.close()
+
     def add_user(self):
         connection = connect_to_db()
         try:
@@ -399,12 +429,16 @@ class User:
         finally:
             connection.close()
 
-    # def add_report(self):
-    #     connection = connect_to_db()
-    #     try:
-    #         with connection.cursor() as cursor:
-    #             sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`) VALUES (%s, %s, %s, %s);"  # строка для SQL-запроса
-    #             cursor.execute(sql_request, (self.username, self.id, self.report, self.departure_time))
-    #             connection.commit()
-    #     finally:
-    #         connection.close()
+    def update_invited_user(self, user_id):
+        connection = connect_to_db()
+        try:
+            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
+                sql_request = "UPDATE `users`" \
+                              "SET `name` = %s," \
+                              "`group_num` = %s," \
+                              "`tg_id` = %s " \
+                              "WHERE `user_id` = %s"
+                cursor.execute(sql_request, (self.name, self.group, self.tg_id, user_id))
+                connection.commit()
+        finally:
+            connection.close()

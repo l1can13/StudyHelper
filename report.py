@@ -2,6 +2,7 @@ from config import host, user, password, db_name
 import pymysql.cursors
 import datetime
 
+
 # тупо класс report'ов (отчетов) здесь храним текст отчета, какой спринт, время отправки и дополнительные поля
 # ид и юзернейм, чтобы можно было грузить в бд
 def connect_to_db():
@@ -51,11 +52,11 @@ class Report:
     def get_user(self):
         return self.db_id
 
-    def add_report(self): #функция добавления данных в бд
+    def add_report(self):  # функция добавления данных в бд
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                #sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`, `Спринт`) VALUES (%s, %s, %s, %s, %s);"  # строка для SQL-запроса
+                # sql_request = "INSERT INTO `Отчеты` (`Имя пользователя`, `Автор отчета`, `Текст отчета`, `Дата отправки`, `Спринт`) VALUES (%s, %s, %s, %s, %s);"  # строка для SQL-запроса
                 sql_request = "INSERT INTO `sprint_reports` (`user_id`, `sprint_num`, `report_text`, `report_date`) VALUES (%s, %s, %s, %s);"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.db_id, self.sprint, self.report, self.date))
                 connection.commit()
