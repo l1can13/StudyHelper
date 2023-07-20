@@ -75,3 +75,14 @@ class Report:
                 connection.commit()
         finally:
             connection.close()
+
+    def delete_report(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "DELETE FROM `sprint_reports`" \
+                              "WHERE `user_id` = %s and `sprint_num` = %s"
+                cursor.execute(sql_request, (self.db_id, self.sprint))
+                connection.commit()
+        finally:
+            connection.close()
