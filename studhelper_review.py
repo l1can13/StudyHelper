@@ -303,7 +303,7 @@ class StudHelperBot:
             self.write_product_name(message)
 
     def evaluation(self, message):  # функция для оценки участников команды
-        team_members = self.user_dict[message.chat.id].get_team_members()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
+        team_members = self.user_dict[message.chat.id].get_teammates_only_names()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
         arr_of_names = []
         for elem in team_members:
             arr_of_names.append(elem['name'])  # в arr_of_name(список) кладем только сами фамилии

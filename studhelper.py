@@ -16,14 +16,13 @@ def create_unique_inv_code():
     return str(uuid.uuid1())[:8]
 
 
-def continue_cancel_buttons():
+def continue_cancel_buttons(button1='Продолжить', button2='Изменить'):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-    item1 = types.KeyboardButton("Изменить")
-    item2 = types.KeyboardButton("Продолжить")
+    item1 = types.KeyboardButton(button1)
+    item2 = types.KeyboardButton(button2)
     item3 = types.KeyboardButton("Отменить")
-    markup.add(item1)
-    markup.add(item2)
+    markup.row(item1, item2)
     markup.add(item3)
 
     return markup
@@ -91,16 +90,25 @@ class StudHelperBot:
                 item1 = types.KeyboardButton("Добавить участника")
                 item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
                 item5 = types.KeyboardButton("Помощь")
-                markup.add(item1)
-                markup.add(item4)
-                markup.add(item5)
+                item6 = types.KeyboardButton("Моя команда")
+                item7 = types.KeyboardButton("Мои отчёты")
+                markup.row(item1, item4)
+                markup.row(item5, item6)
+                markup.add(item7)
+
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
                                                        self.user_dict[message.chat.id].get_db_id())
                 self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
             elif self.user_dict[message.chat.id].is_in_team():
-                self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
-                self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
-                self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
+                if self.user_dict[message.chat.id].get_teamname() is None:
+                    self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
+
+                if self.user_dict[message.chat.id].get_role() is None:
+                    self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
+
+                if self.user_dict[message.chat.id].get_name() is None:
+                    self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
+
                 if self.user_dict[message.chat.id].get_name() is None:
                     msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
                     self.bot.register_next_step_handler(msg, self.after_name)
@@ -108,8 +116,10 @@ class StudHelperBot:
                 else:
                     item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
                     item5 = types.KeyboardButton("Помощь")
-                    markup.add(item2)
-                    markup.add(item5)
+                    item6 = types.KeyboardButton("Моя команда")
+                    item7 = types.KeyboardButton("Мои отчёты")
+                    markup.row(item2, item5)
+                    markup.row(item6, item7)
             else:
                 item1 = types.KeyboardButton("Регистрация команды")
                 item5 = types.KeyboardButton("Помощь")
@@ -145,7 +155,7 @@ class StudHelperBot:
             self.start_message(message)
         elif message.text == "Добавить участника":
             self.get_role_to_create_invitation(message)
-        elif message.text == "Отправить отчёт о проделанной работе":  # Сначала выбираем спринт, потом уже пишем текст отчета
+        elif message.text == "Отправить отчёт о проделанной работе":
             self.choose_sprint_on_review(message)
         elif message.text.lower() == "обновить":
             self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
@@ -156,8 +166,64 @@ class StudHelperBot:
             self.start_message(message)
         elif message.text == "Продолжить регистрацию":
             self.team_registration(message)
+        elif message.text == "Моя команда":
+            self.team_information(message)
+        elif message.text == "Мои отчёты":
+            self.my_reports(message)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
+            self.start_message(message)
+
+    def my_reports(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        try:
+            reports_list = self.user_dict[message.chat.id].get_reports()
+            reports_str = \
+                '\n'.join([f"*Спринт №{report['sprint_num']}*\n"
+                           f"Дата отправки: {report['report_date']}\n\n"
+                           f"Текст отчёта:\n{report['report_text']}\n"
+                           f"\n----------------------------------------\n"
+                           for report in reports_list]) \
+                    if reports_list \
+                    else 'У Вас нет отчётов.'
+
+            self.bot.send_message(message.chat.id,
+                                  reports_str,
+                                  reply_markup=ReplyKeyboardRemove(),
+                                  parse_mode="Markdown")
+            self.start_message(message)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вас отсутствует в боте!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
+            self.start_message(message)
+
+    def team_information(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        try:
+            team_name = self.user_dict[message.chat.id].get_teamname() \
+                if self.user_dict[message.chat.id].get_teamname() is not None \
+                else self.user_dict[message.chat.id].get_teamname_from_bd()
+
+            product = self.team_dict[message.chat.id].get_product() \
+                if self.team_dict[message.chat.id].get_product() is not None \
+                else self.user_dict[message.chat.id].get_product_from_db()
+
+            teammates_list = self.user_dict[message.chat.id].get_teammates()
+            teammates_str = '\n'.join([f"{teammate['name']} - {teammate['role']}" for teammate in teammates_list])
+
+            self.bot.send_message(message.chat.id,
+                                  f"Название команды: {team_name}\n"
+                                  f"Продукт: {product}\n\n"
+                                  f"Члены команды:\n{teammates_str}",
+                                  reply_markup=ReplyKeyboardRemove())
+            self.start_message(message)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вашей команде отсутствует!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
             self.start_message(message)
 
     def team_registration(self, message):
@@ -194,7 +260,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода номера спринта.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -255,8 +321,7 @@ class StudHelperBot:
                 message.chat.id].get_team_code())  # dev
             self.bot.send_message(message.chat.id, "Команда и роль будут определены автоматически")
             self.start_message(message)
-        except IntegrityError as e:
-            print(traceback.format_exc())
+        except IntegrityError:
             self.bot.send_message(message.chat.id, "Кажется, информация о Вашей команде отсутствует!\n\n"
                                                    "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
             self.start_message(message)
@@ -304,7 +369,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода своего ФИО.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -381,7 +446,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода номера Вашей группы.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -444,7 +509,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода названия команды.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -488,7 +553,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода названия продукта.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -507,6 +572,27 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Пожалуйста, выберите другое имя")
             self.enter_product_name(message)
 
+    def rewrite_report(self, message):
+        if message.chat.id not in self.user_dict:
+            self.update(message)
+
+        answer = message.text
+
+        if answer == 'Да':
+            self.report_dict[message.chat.id].update_report()
+
+            self.bot.send_message(message.chat.id, "Отчет успешно обновлен. Возвращаюсь в основное меню...")
+            self.start_message(message)
+        elif answer == 'Нет':
+            self.bot.send_message(message.chat.id, "Возвращаюсь в основное меню...")
+            self.start_message(message)
+        elif answer == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+        else:
+            self.bot.send_message(message.chat.id, "Я вас не понимаю :(")
+            self.start_message(message)
+
     def set_report_text(self, message, report):
         departure_time = datetime.now()
 
@@ -522,11 +608,16 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!")
             self.start_message(message)
         except IntegrityError:
-            self.bot.send_message(message.chat.id,
-                                  f"Отчет по спринту № {int(self.sprint_now[len(self.sprint_now) - 1])} "
-                                  f"уже существует или информация о Вас отсутствует в боте.\n\n"
-                                  "Напишите в поддержку (@l1can), чтобы получить помощь!")
-            self.start_message(message)
+            markup = continue_cancel_buttons('Да', 'Нет')
+
+            msg = self.bot.send_message(message.chat.id,
+                                        f"Отчет по спринту № {int(self.sprint_now[len(self.sprint_now) - 1])} "
+                                        f"уже существует.\n\n"
+                                        f"*Хотите перезаписать данный отчет?*",
+                                        parse_mode='Markdown',
+                                        reply_markup=markup)
+
+            self.bot.register_next_step_handler(msg, self.rewrite_report)
 
     def report_of_people(self, message):
         if message.chat.id not in self.user_dict:
@@ -541,7 +632,7 @@ class StudHelperBot:
                                   "в процессе ввода текста отчета по спринту № "
                                   f"{sprint_num}.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
