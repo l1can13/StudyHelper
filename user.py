@@ -355,6 +355,27 @@ class User:
         finally:
             connection.close()
 
+    def get_teammates_excludes_me(self):
+        if self.team_id is None:
+            self.set_team_id()
+        if self.db_id is None:
+            self.set_db_id()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `users`.`name`, `team_members`.`role` " \
+                              "FROM `users` " \
+                              "INNER JOIN `team_members` ON `users`.`user_id` = `team_members`.`user_id` " \
+                              "WHERE `team_members`.`team_id` = %s and `team_members`.`user_id` != %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.team_id, self.db_id))
+                teammates = cursor.fetchall()
+                connection.commit()
+
+            return teammates
+        finally:
+            connection.close()
+
     def get_reports(self):
         if self.db_id is None:
             self.set_db_id()
@@ -374,9 +395,9 @@ class User:
 
     # Метод для проверки наличия пользователя в команде
     def is_in_team(self):
-        self.set_db_id()
+        if self.db_id is None:
+            self.set_db_id()
         connection = connect_to_db()
-        check = ''
         try:
             with connection.cursor() as cursor:
                 # user_from_db = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"
@@ -392,7 +413,6 @@ class User:
 
     def is_admin(self):
         connection = connect_to_db()
-        check = ''
         try:
             with connection.cursor() as cursor:
                 # user_from_db = "SELECT `Название` FROM `Команды` WHERE `Ид` = %s"
@@ -483,5 +503,37 @@ class User:
                               "WHERE `user_id` = %s"
                 cursor.execute(sql_request, (self.name, self.group, self.tg_id, user_id))
                 connection.commit()
+        finally:
+            connection.close()
+
+    def get_who_evaluated_me(self):
+        if self.db_id is None:
+            self.set_db_id()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `users`.`name` " \
+                              "FROM `users`" \
+                              "INNER JOIN `team_members_ratings` ON `team_members_ratings`.`assessor_user_id` = `users`.`user_id`" \
+                              "WHERE `team_members_ratings`.`assessored_user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                user_result = cursor.fetchall()
+                connection.commit()
+
+                return user_result
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_name_by_id(user_id):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `name` FROM `users` WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, user_id)
+                user_result = cursor.fetchone()
+                connection.commit()
+                return user_result['name']
         finally:
             connection.close()
