@@ -76,22 +76,24 @@ class User:
             self.counter_of_people = 0
 
     def set_db_id(self):
+        self.db_id = self.get_db_id_from_db()
+
+    def get_team_id_from_db(self):
+        self.set_db_id()
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `user_id` FROM `users` WHERE `tg_id` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, self.tg_id)
+                sql_request = "SELECT `team_id` FROM `team_members` WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
                 result = cursor.fetchone()
                 connection.commit()
-                if result:
-                    self.db_id = result['user_id']
-                else:
-                    self.db_id = -1
+
+                return result['team_id'] if result else -1
         finally:
             connection.close()
 
     # функция для получения фамилий из бд для определенной группы
-    def get_team_members(self):
+    def get_teammates_only_names(self):
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
@@ -112,7 +114,8 @@ class User:
                 cursor.execute(sql_request, self.tg_id)
                 result = cursor.fetchone()
                 connection.commit()
-                return result['user_id']
+
+                return result['user_id'] if result else -1
         finally:
             connection.close()
 
@@ -153,16 +156,7 @@ class User:
         return self.username
 
     def set_team_id(self):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `team_id` FROM `teams` WHERE `team_name` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, self.teamname)
-                result = cursor.fetchone()
-                connection.commit()
-                self.team_id = result['team_id']
-        finally:
-            connection.close()
+        self.team_id = self.get_team_id_from_db()
 
     def get_team_id(self):
         return self.team_id
@@ -211,7 +205,8 @@ class User:
                 # insert_user = "INSERT INTO `Пользователи` (`Имя`, `Группа`, `User_name`, `Команда`, `Роль`, `Ид`) VALUES (%s, %s, %s, %s, %s, %s);"
                 insert_user = "INSERT INTO `users` (`name`, `group_num`, `tg_id`) VALUES (%s, %s, %s);"
                 cursor.execute(insert_user,
-                               (self.name, self.group, self.tg_id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                               (self.name, self.group,
+                                self.tg_id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
 
                 self.set_db_id()
@@ -326,6 +321,54 @@ class User:
                 tmnm = cursor.fetchone()
                 connection.commit()
                 return tmnm['team_name']
+        finally:
+            connection.close()
+
+    def get_product_from_db(self):
+        self.set_db_id()
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `product_name` FROM `teams` WHERE `team_id` = (SELECT `team_id` FROM `team_members` WHERE `user_id` = %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                product_name = cursor.fetchone()
+                connection.commit()
+                return product_name['product_name']
+        finally:
+            connection.close()
+
+    def get_teammates(self):
+        if self.team_id is None:
+            self.set_team_id()
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `users`.`name`, `team_members`.`role` " \
+                              "FROM `users` " \
+                              "INNER JOIN `team_members` ON `users`.`user_id` = `team_members`.`user_id` " \
+                              "WHERE `team_members`.`team_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.team_id)
+                teammates = cursor.fetchall()
+                connection.commit()
+
+            return teammates
+        finally:
+            connection.close()
+
+    def get_reports(self):
+        if self.db_id is None:
+            self.set_db_id()
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `sprint_num`, `report_text`, `report_date`" \
+                              "FROM `sprint_reports`" \
+                              "WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                teammates = cursor.fetchall()
+                connection.commit()
+
+            return teammates
         finally:
             connection.close()
 

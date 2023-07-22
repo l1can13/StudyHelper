@@ -16,14 +16,13 @@ def create_unique_inv_code():
     return str(uuid.uuid1())[:8]
 
 
-def continue_cancel_buttons():
+def continue_cancel_buttons(button1='Продолжить', button2='Изменить'):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-    item1 = types.KeyboardButton("Изменить")
-    item2 = types.KeyboardButton("Продолжить")
-    item3 = types.KeyboardButton("Отменить")
-    markup.add(item1)
-    markup.add(item2)
+    item1 = types.KeyboardButton(button1)
+    item2 = types.KeyboardButton(button2)
+    item3 = types.KeyboardButton("Отмена")
+    markup.row(item1, item2)
     markup.add(item3)
 
     return markup
@@ -88,28 +87,45 @@ class StudHelperBot:
             self.accept_invitation(message)
         else:
             if self.user_dict[message.chat.id].is_admin():
-                item1 = types.KeyboardButton("Добавить участника")
-                item4 = types.KeyboardButton("Отправить отчёт о проделанной работе")
-                item5 = types.KeyboardButton("Помощь")
-                markup.add(item1)
-                markup.add(item4)
-                markup.add(item5)
+                buttons = [
+                    [types.KeyboardButton("Добавить участника"), types.KeyboardButton("Отправить отчёт")],
+                    [types.KeyboardButton("Помощь"), types.KeyboardButton("Моя команда")],
+                    [types.KeyboardButton("Мои отчёты"), types.KeyboardButton("Удалить отчёт")],
+                ]
+
+                for button_row in buttons:
+                    markup.row(*button_row)
+
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
                                                        self.user_dict[message.chat.id].get_db_id())
                 self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
             elif self.user_dict[message.chat.id].is_in_team():
-                self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
-                self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
-                self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
+                if self.user_dict[message.chat.id].get_teamname() is None:
+                    self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
+
+                if self.user_dict[message.chat.id].get_role() is None:
+                    self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_from_bd())
+
+                if self.user_dict[message.chat.id].get_name() is None:
+                    self.user_dict[message.chat.id].set_name(self.user_dict[message.chat.id].get_name_from_bd())
+
                 if self.user_dict[message.chat.id].get_name() is None:
                     msg = self.bot.send_message(message.chat.id, "Введите Ваше имя и фамилию:")
                     self.bot.register_next_step_handler(msg, self.after_name)
                     return
                 else:
-                    item2 = types.KeyboardButton("Отправить отчёт о проделанной работе")
-                    item5 = types.KeyboardButton("Помощь")
-                    markup.add(item2)
-                    markup.add(item5)
+                    buttons = [
+                        types.KeyboardButton("Отправить отчёт"),
+                        types.KeyboardButton("Помощь"),
+                        types.KeyboardButton("Моя команда"),
+                        types.KeyboardButton("Мои отчёты"),
+                        types.KeyboardButton("Удалить отчёт"),
+                    ]
+
+                    rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+
+                    for row in rows:
+                        markup.row(*row)
             else:
                 item1 = types.KeyboardButton("Регистрация команды")
                 item5 = types.KeyboardButton("Помощь")
@@ -145,7 +161,7 @@ class StudHelperBot:
             self.start_message(message)
         elif message.text == "Добавить участника":
             self.get_role_to_create_invitation(message)
-        elif message.text == "Отправить отчёт о проделанной работе":  # Сначала выбираем спринт, потом уже пишем текст отчета
+        elif message.text == "Отправить отчёт":
             self.choose_sprint_on_review(message)
         elif message.text.lower() == "обновить":
             self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
@@ -156,8 +172,151 @@ class StudHelperBot:
             self.start_message(message)
         elif message.text == "Продолжить регистрацию":
             self.team_registration(message)
+        elif message.text == "Моя команда":
+            self.team_information(message)
+        elif message.text == "Мои отчёты":
+            self.my_reports(message)
+        elif message.text == "Удалить отчёт":
+            self.number_selection(message)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
+            self.start_message(message)
+
+    def get_reports_str(self, message):
+        reports_list = self.user_dict[message.chat.id].get_reports()
+        reports_str = \
+            '\n'.join([f"*Спринт №{report['sprint_num']}*\n"
+                       f"Дата отправки: {report['report_date']}\n\n"
+                       f"Текст отчёта:\n{report['report_text']}\n"
+                       f"\n----------------------------------------\n"
+                       for report in reports_list]) \
+                if reports_list \
+                else 'У Вас нет отчётов.'
+
+        return reports_str
+
+    def get_sprint_numbers_markup(self, message):
+        reports_list = self.user_dict[message.chat.id].get_reports()
+        sprint_numbers = [report['sprint_num'] for report in reports_list]
+        cancel = types.KeyboardButton("Отмена")
+
+        if sprint_numbers:
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            for sprint_num in sprint_numbers:
+                button = types.KeyboardButton(f"Спринт №{sprint_num}")
+                markup.add(button)
+            markup.add(cancel)
+        else:
+            markup = None
+
+        return markup
+
+    def number_selection(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        reports_str = self.get_reports_str(message)
+
+        self.bot.send_message(message.chat.id,
+                              reports_str,
+                              parse_mode="Markdown")
+
+        if reports_str == "У Вас нет отчётов.":
+            self.start_message(message)
+            return
+
+        markup = self.get_sprint_numbers_markup(message)
+
+        msg = self.bot.send_message(message.chat.id,
+                                    'Какой отчёт вы хотите удалить?\n\n'
+                                    '*Выберите спринт из списка*',
+                                    reply_markup=markup,
+                                    parse_mode="Markdown")
+
+        self.bot.register_next_step_handler(msg, self.confirm_delete_report)
+
+    def confirm_delete_report(self, message):
+        if message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+            return
+
+        sprint_num = message.text
+
+        markup = continue_cancel_buttons('Да', 'Нет')
+
+        msg = self.bot.send_message(message.chat.id,
+                                    'Вы уверены, что хотите удалить спринт?',
+                                    reply_markup=markup,
+                                    parse_mode="Markdown")
+
+        self.bot.register_next_step_handler(msg, self.delete_report, sprint_num)
+
+    def delete_report(self, message, sprint_num):
+        if message.text == 'Нет':
+            self.bot.send_message(message.chat.id, "Возвращаюсь в меню выбора спринта...")
+            self.number_selection(message)
+            return
+        elif message.text == 'Да':
+            try:
+                self.report_dict[message.chat.id] = Report()
+                self.report_dict[message.chat.id].set_sprint(sprint_num[-1])
+                self.report_dict[message.chat.id].set_user(self.user_dict[message.chat.id].get_db_id())
+
+                self.report_dict[message.chat.id].delete_report()
+
+                self.bot.send_message(message.chat.id, "Отчет успешно удален! Возвращаюсь в основное меню...")
+                self.start_message(message)
+            except IntegrityError:
+                self.bot.send_message(message.chat.id,
+                                      "Информация об отчете не найдена! Возвращаюсь в основное меню...")
+                self.start_message(message)
+        elif message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+            return
+        else:
+            self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
+            self.start_message(message)
+
+    def my_reports(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        try:
+            self.bot.send_message(message.chat.id,
+                                  self.get_reports_str(message),
+                                  parse_mode="Markdown")
+            self.start_message(message)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вас отсутствует в боте!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
+            self.start_message(message)
+
+    def team_information(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        try:
+            team_name = self.user_dict[message.chat.id].get_teamname() \
+                if self.user_dict[message.chat.id].get_teamname() is not None \
+                else self.user_dict[message.chat.id].get_teamname_from_bd()
+
+            product = self.team_dict[message.chat.id].get_product() \
+                if self.team_dict[message.chat.id].get_product() is not None \
+                else self.user_dict[message.chat.id].get_product_from_db()
+
+            teammates_list = self.user_dict[message.chat.id].get_teammates()
+            teammates_str = '\n'.join([f"{teammate['name']} - {teammate['role']}" for teammate in teammates_list])
+
+            self.bot.send_message(message.chat.id,
+                                  f"Название команды: {team_name}\n"
+                                  f"Продукт: {product}\n\n"
+                                  f"Члены команды:\n{teammates_str}")
+            self.start_message(message)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вашей команде отсутствует!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
             self.start_message(message)
 
     def team_registration(self, message):
@@ -167,20 +326,16 @@ class StudHelperBot:
 
     def choose_sprint_on_review(self, message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item1 = types.KeyboardButton(self.sprints[0])
-        item2 = types.KeyboardButton(self.sprints[1])
-        item3 = types.KeyboardButton(self.sprints[2])
-        item4 = types.KeyboardButton(self.sprints[3])
-        item5 = types.KeyboardButton(self.sprints[4])
-        item6 = types.KeyboardButton(self.sprints[5])
-        item7 = types.KeyboardButton('Отменить')
-        markup.add(item1)
-        markup.add(item2)
-        markup.add(item3)
-        markup.add(item4)
-        markup.add(item5)
-        markup.add(item6)
-        markup.add(item7)
+
+        buttons = [types.KeyboardButton(sprint) for sprint in self.sprints]
+        cancel_button = types.KeyboardButton('Отмена')
+
+        rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+        for row in rows:
+            markup.row(*row)
+
+        markup.add(cancel_button)
+
         msg = self.bot.send_message(message.chat.id, "Выберите спринт (меню с кнопками можно пролистать): ",
                                     reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.set_sprint)
@@ -194,7 +349,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода номера спринта.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -204,7 +359,7 @@ class StudHelperBot:
             msg = self.bot.send_message(message.chat.id, "Напишите текст вашего отчета: ",
                                         reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(msg, self.report_of_people)
-        elif message.text == 'Отменить':
+        elif message.text == 'Отмена':
             self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
             self.start_message(message)
         else:
@@ -216,22 +371,23 @@ class StudHelperBot:
             self.update(message)
 
         self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
+
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        item1 = types.KeyboardButton(self.roles[0])
-        item2 = types.KeyboardButton(self.roles[1])
-        item3 = types.KeyboardButton(self.roles[2])
-        item4 = types.KeyboardButton(self.roles[3])
-        item5 = types.KeyboardButton('Отменить')
-        markup.add(item1)
-        markup.add(item2)
-        markup.add(item3)
-        markup.add(item4)
-        markup.add(item5)
+
+        buttons = [types.KeyboardButton(role) for role in self.roles]
+        cancel_button = types.KeyboardButton('Отмена')
+
+        rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+        for row in rows:
+            markup.row(*row)
+
+        markup.add(cancel_button)
+
         msg = self.bot.send_message(message.chat.id, "Выберите роль пользователя: ", reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.add_user_to_bd)
 
     def add_user_to_bd(self, message):
-        if message.text == 'Отменить':
+        if message.text == 'Отмена':
             self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
             self.start_message(message)
             return
@@ -255,8 +411,7 @@ class StudHelperBot:
                 message.chat.id].get_team_code())  # dev
             self.bot.send_message(message.chat.id, "Команда и роль будут определены автоматически")
             self.start_message(message)
-        except IntegrityError as e:
-            print(traceback.format_exc())
+        except IntegrityError:
             self.bot.send_message(message.chat.id, "Кажется, информация о Вашей команде отсутствует!\n\n"
                                                    "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
             self.start_message(message)
@@ -304,7 +459,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода своего ФИО.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -381,7 +536,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода номера Вашей группы.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -426,7 +581,7 @@ class StudHelperBot:
             edit(message)
         elif message.text == 'Продолжить':
             callback(message, args[0])
-        elif message.text == 'Отменить':
+        elif message.text == 'Отмена':
             self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
             self.start_message(message)
         else:
@@ -444,7 +599,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода названия команды.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -488,7 +643,7 @@ class StudHelperBot:
                                   "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
                                   "в процессе ввода названия продукта.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
@@ -507,6 +662,27 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Пожалуйста, выберите другое имя")
             self.enter_product_name(message)
 
+    def rewrite_report(self, message):
+        if message.chat.id not in self.user_dict:
+            self.update(message)
+
+        answer = message.text
+
+        if answer == 'Да':
+            self.report_dict[message.chat.id].update_report()
+
+            self.bot.send_message(message.chat.id, "Отчет успешно обновлен. Возвращаюсь в основное меню...")
+            self.start_message(message)
+        elif answer == 'Нет':
+            self.bot.send_message(message.chat.id, "Возвращаюсь в основное меню...")
+            self.start_message(message)
+        elif answer == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+        else:
+            self.bot.send_message(message.chat.id, "Я вас не понимаю :(")
+            self.start_message(message)
+
     def set_report_text(self, message, report):
         departure_time = datetime.now()
 
@@ -522,11 +698,16 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Спасибо за Ваш отчёт!")
             self.start_message(message)
         except IntegrityError:
-            self.bot.send_message(message.chat.id,
-                                  f"Отчет по спринту № {int(self.sprint_now[len(self.sprint_now) - 1])} "
-                                  f"уже существует или информация о Вас отсутствует в боте.\n\n"
-                                  "Напишите в поддержку (@l1can), чтобы получить помощь!")
-            self.start_message(message)
+            markup = continue_cancel_buttons('Да', 'Нет')
+
+            msg = self.bot.send_message(message.chat.id,
+                                        f"Отчет по спринту № {int(self.sprint_now[len(self.sprint_now) - 1])} "
+                                        f"уже существует.\n\n"
+                                        f"*Хотите перезаписать данный отчет?*\n\n",
+                                        parse_mode='Markdown',
+                                        reply_markup=markup)
+
+            self.bot.register_next_step_handler(msg, self.rewrite_report)
 
     def report_of_people(self, message):
         if message.chat.id not in self.user_dict:
@@ -541,7 +722,7 @@ class StudHelperBot:
                                   "в процессе ввода текста отчета по спринту № "
                                   f"{sprint_num}.\n\n"
                                   "Начните процесс заново "
-                                  "(если Вы начинали делать это ранее) или обратитесь за помощью"
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
                                   "к технической поддержке (@l1can).")
             self.start_message(message)
             return
