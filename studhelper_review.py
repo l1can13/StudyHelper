@@ -91,6 +91,7 @@ class StudHelperBot:
             if self.user_dict[message.chat.id].is_admin():
                 buttons = [
                     types.KeyboardButton("Добавить участника"),
+                    types.KeyboardButton("Удалить участника"),
                     types.KeyboardButton("Отправить отчёт"),
                     types.KeyboardButton("Помощь"),
                     types.KeyboardButton("Моя команда"),
@@ -98,6 +99,7 @@ class StudHelperBot:
                     types.KeyboardButton("Удалить отчёт"),
                     types.KeyboardButton("Оценить участников команды"),
                     types.KeyboardButton("Кто меня оценил?"),
+                    types.KeyboardButton("Отчёт о команде"),
                 ]
 
                 rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
@@ -193,6 +195,10 @@ class StudHelperBot:
             self.evaluation(message)
         elif message.text == "Кто меня оценил?":
             self.get_who_evaluated_me(message)
+        elif message.text == "Отчёт о команде":
+            self.get_team_report(message)
+        elif message.text == "Удалить участника":
+            self.teammate_selection(message)
         else:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.start_message(message)
@@ -386,6 +392,129 @@ class StudHelperBot:
             self.start_message(message)
 
     # endregion
+    def teammate_selection(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        markup = self.get_teammates_markup(message)
+
+        msg = self.bot.send_message(message.chat.id,
+                                    "С помощью меню кнопок выберите кого Вы хотите удалить из команды",
+                                    reply_markup=markup,
+                                    parse_mode="Markdown")
+
+        self.bot.register_next_step_handler(msg, self.confirm_delete_teammate)
+
+    def confirm_delete_teammate(self, message):
+        if message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+            return
+        elif message.text.startswith('/start'):
+            self.bot.send_message(message.chat.id,
+                                  "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
+                                  "в процессе удаления члена команды.\n\n"
+                                  "Начните процесс заново "
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
+                                  "к технической поддержке (@l1can).")
+            self.start_message(message)
+            return
+        elif message.text in self.get_teammates_list(message):
+            teammate = message.text
+
+            markup = continue_cancel_buttons('Да', 'Нет')
+
+            msg = self.bot.send_message(message.chat.id,
+                                        f'Вы уверены, что хотите удалить этого члена команды: {teammate}?',
+                                        reply_markup=markup,
+                                        parse_mode="Markdown")
+
+            self.bot.register_next_step_handler(msg, self.delete_teammate, teammate)
+        else:
+            self.bot.send_message(message.chat.id, "Выберите члена команды из предложенных в меню кнопок!")
+            self.number_selection(message)
+
+    def delete_teammate(self, message, teammate):
+        if message.text == 'Нет':
+            self.bot.send_message(message.chat.id, "Возвращаюсь в меню выбора члена команды...")
+            self.teammate_selection(message)
+            return
+        elif message.text == 'Да':
+            try:
+                deleted_user_id = User.get_id_by_name(teammate)
+                deleted_tg_id = User.get_tg_id_by_user_id(deleted_user_id)
+
+                User.delete_user_from_team(deleted_user_id)
+
+                self.bot.send_message(message.chat.id, f"Пользователь {teammate} успешно удалён! Возвращаюсь в "
+                                                       "основное меню...")
+
+                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+                item1 = types.KeyboardButton("Регистрация команды")
+                item5 = types.KeyboardButton("Помощь")
+                markup.add(item1)
+                markup.add(item5)
+
+                self.first_hello_dict[deleted_tg_id] = False
+
+                self.bot.send_message(deleted_tg_id, "*Вас удалили из команды!*\n"
+                                                     "Если Вы хотите присоединиться к другой команде - попросите "
+                                                     "Scrum-мастера ссылку-приглашение и перейдите по ней.\n\n"
+                                                     "Для создания своей команды - воспользуйтесь кнопкой "
+                                                     "\"Регистрация команды\".",
+                                      reply_markup=markup,
+                                      parse_mode='Markdown')
+
+                self.start_message(message)
+            except IntegrityError:
+                self.bot.send_message(message.chat.id,
+                                      "Информация о данном члене команды не найдена! Возвращаюсь в основное меню...")
+                self.start_message(message)
+        elif message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+            return
+        else:
+            self.bot.send_message(message.chat.id, "Я вас не понимаю :(")
+            self.start_message(message)
+
+    def get_team_report(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        try:
+            if not self.user_dict[message.chat.id].is_admin():
+                self.bot.send_message(message.chat.id, "У Вас нет прав, чтобы отправить данную команду!")
+                self.start_message(message)
+                return
+
+            reviews_list = self.team_dict[message.chat.id].get_count_reviews_every_teammate()
+            reviews_str = '\n'.join([f"{review['name']} - {review['count_reviews']}"
+                                     for review in reviews_list])
+
+            reports_list = self.team_dict[message.chat.id].get_count_reports_every_teammate()
+            reports_str = '\n'.join([f"{report['name']} - {report['count_reports']}"
+                                     for report in reports_list])
+
+            reviews_normal = self.user_dict[message.chat.id].get_count_teammates()
+            reports_normal = 6
+
+            self.bot.send_message(message.chat.id,
+                                  f"*Отчет о команде\n\n*"
+                                  f"*Количество авторства оценок (сколько каждый член команды поставил оценок другим "
+                                  f"членам команды)*\n"
+                                  f"{reviews_str}\n\n"
+                                  f"*Количество отчётов*\n"
+                                  f"{reports_str}\n\n"
+                                  f"Должно быть отзывов о членах команды: *{reviews_normal['count_teammates']}*\n"
+                                  f"Должно быть отчетов о проделанной работе: *{reports_normal}*",
+                                  parse_mode='Markdown')
+            self.start_message(message)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вас отсутствует в боте!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
+            self.start_message(message)
+
     def get_reports_str(self, message):
         reports_list = self.user_dict[message.chat.id].get_reports()
         reports_str = \
@@ -398,6 +527,9 @@ class StudHelperBot:
                 else 'У Вас нет отчётов.'
 
         return reports_str
+
+    def get_sprint_numbers_list(self, message):
+        return [report['sprint_num'] for report in self.user_dict[message.chat.id].get_reports()]
 
     def get_sprint_numbers_markup(self, message):
         reports_list = self.user_dict[message.chat.id].get_reports()
@@ -414,6 +546,24 @@ class StudHelperBot:
             markup = None
 
         return markup
+
+    def get_teammates_markup(self, message):
+        teammates = self.user_dict[message.chat.id].get_teammates_excludes_me()
+        cancel = types.KeyboardButton("Отмена")
+
+        if teammates:
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            for teammate in teammates:
+                button = types.KeyboardButton(f"{teammate['name']}")
+                markup.add(button)
+            markup.add(cancel)
+        else:
+            markup = None
+
+        return markup
+
+    def get_teammates_list(self, message):
+        return [teammate['name'] for teammate in self.user_dict[message.chat.id].get_teammates_excludes_me()]
 
     def number_selection(self, message):
         if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
@@ -444,17 +594,29 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
             self.start_message(message)
             return
+        elif message.text.startswith('/start'):
+            self.bot.send_message(message.chat.id,
+                                  "Вы пытаетесь начать общение с ботом или ввести ссылку-приглашение "
+                                  "в процессе выбора спринта для удаления.\n\n"
+                                  "Начните процесс заново "
+                                  "(если Вы начинали делать это ранее) или обратитесь за помощью "
+                                  "к технической поддержке (@l1can).")
+            self.start_message(message)
+            return
+        elif message.text in self.get_sprint_numbers_list(message):
+            sprint_num = message.text
 
-        sprint_num = message.text
+            markup = continue_cancel_buttons('Да', 'Нет')
 
-        markup = continue_cancel_buttons('Да', 'Нет')
+            msg = self.bot.send_message(message.chat.id,
+                                        'Вы уверены, что хотите удалить спринт?',
+                                        reply_markup=markup,
+                                        parse_mode="Markdown")
 
-        msg = self.bot.send_message(message.chat.id,
-                                    'Вы уверены, что хотите удалить спринт?',
-                                    reply_markup=markup,
-                                    parse_mode="Markdown")
-
-        self.bot.register_next_step_handler(msg, self.delete_report, sprint_num)
+            self.bot.register_next_step_handler(msg, self.delete_report, sprint_num)
+        else:
+            self.bot.send_message(message.chat.id, "Выберите спринт из предложенных в меню кнопок!")
+            self.number_selection(message)
 
     def delete_report(self, message, sprint_num):
         if message.text == 'Нет':
@@ -574,21 +736,31 @@ class StudHelperBot:
         if message.chat.id not in self.user_dict:
             self.update(message)
 
-        self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
+        if not self.user_dict[message.chat.id].is_admin():
+            self.bot.send_message(message.chat.id, "У Вас нет прав, чтобы отправить данную команду!")
+            self.start_message(message)
+            return
 
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        try:
+            self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
 
-        buttons = [types.KeyboardButton(role) for role in self.roles]
-        cancel_button = types.KeyboardButton('Отмена')
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-        rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
-        for row in rows:
-            markup.row(*row)
+            buttons = [types.KeyboardButton(role) for role in self.roles]
+            cancel_button = types.KeyboardButton('Отмена')
 
-        markup.add(cancel_button)
+            rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
+            for row in rows:
+                markup.row(*row)
 
-        msg = self.bot.send_message(message.chat.id, "Выберите роль пользователя: ", reply_markup=markup)
-        self.bot.register_next_step_handler(msg, self.add_user_to_bd)
+            markup.add(cancel_button)
+
+            msg = self.bot.send_message(message.chat.id, "Выберите роль пользователя: ", reply_markup=markup)
+            self.bot.register_next_step_handler(msg, self.add_user_to_bd)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вашей команде отсутствует!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
+            self.start_message(message)
 
     def add_user_to_bd(self, message):
         if message.text == 'Отмена':
@@ -621,26 +793,55 @@ class StudHelperBot:
             self.start_message(message)
 
     def accept_invitation(self, message):
-        if message.chat.id not in self.user_dict:
-            self.update(message)
+        try:
+            if message.chat.id not in self.user_dict:
+                self.update(message)
 
-        if self.user_dict[message.chat.id].check_team_with_code(message.text):  # успешно принимаем в команду
-            self.user_dict[message.chat.id].set_tg_id(message.from_user.id)
-            self.user_dict[message.chat.id].set_invite_code(message.text)
-            self.user_dict[message.chat.id].set_teamname(
-                self.user_dict[message.chat.id].get_team_using_code(message.text))
-            self.user_dict[message.chat.id].set_role(self.user_dict[message.chat.id].get_role_using_code(message.text))
+            elif message.text != 'admin' \
+                    and self.user_dict[message.chat.id].is_exists():
+                self.user_dict[message.chat.id].set_invite_code(message.text)
 
-            self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
-                message.chat.id].get_teamname() + "\"!",
-                                  reply_markup=ReplyKeyboardRemove())
-            self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
-            msg = self.bot.send_message(message.chat.id, "Введите имя в формате Фамилия Имя:")
+                need_to_clear_id = self.user_dict[message.chat.id].get_id_by_invite_code()
 
-            self.bot.register_next_step_handler(msg, self.after_name)
-        else:
-            self.bot.send_message(message.chat.id,
-                                  "Некорректный код или некорректная ссылка, пожалуйста, попробуйте еще раз")
+                self.user_dict[message.chat.id].update_user_id_in_team_members()
+
+                User.delete_user_from_users_by_id(need_to_clear_id)
+
+                self.user_dict[message.chat.id].set_tg_id(message.from_user.id)
+                self.user_dict[message.chat.id].set_invite_code(message.text)
+                self.user_dict[message.chat.id].set_teamname(
+                    self.user_dict[message.chat.id].get_team_using_code(message.text))
+                self.user_dict[message.chat.id].set_role(
+                    self.user_dict[message.chat.id].get_role_using_code(message.text))
+
+                self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
+                    message.chat.id].get_teamname() + "\"!")
+
+                self.start_message(message)
+                return
+
+            if self.user_dict[message.chat.id].check_team_with_code(message.text):  # успешно принимаем в команду
+                self.user_dict[message.chat.id].set_tg_id(message.from_user.id)
+                self.user_dict[message.chat.id].set_invite_code(message.text)
+                self.user_dict[message.chat.id].set_teamname(
+                    self.user_dict[message.chat.id].get_team_using_code(message.text))
+                self.user_dict[message.chat.id].set_role(
+                    self.user_dict[message.chat.id].get_role_using_code(message.text))
+
+                self.bot.send_message(message.chat.id, "Вы успешно добавлены в команду \"" + self.user_dict[
+                    message.chat.id].get_teamname() + "\"!",
+                                      reply_markup=ReplyKeyboardRemove())
+                self.bot.send_message(message.chat.id, "Пожалуйста, заполните информацию о себе")
+                msg = self.bot.send_message(message.chat.id, "Введите имя в формате Фамилия Имя:")
+
+                self.bot.register_next_step_handler(msg, self.after_name)
+            else:
+                self.bot.send_message(message.chat.id,
+                                      "Некорректный код или некорректная ссылка, пожалуйста, попробуйте еще раз")
+                self.start_message(message)
+        except IntegrityError:
+            self.bot.send_message(message.chat.id, "Кажется, информация о Вашей команде отсутствует!\n\n"
+                                                   "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
             self.start_message(message)
 
     def enter_group_num(self, message):
@@ -698,7 +899,8 @@ class StudHelperBot:
         try:
             self.user_dict[message.chat.id].set_group(group)
 
-            if self.user_dict[message.chat.id].get_invite_code() != 'admin':
+            if self.user_dict[message.chat.id].get_invite_code() != 'admin' \
+                    and not self.user_dict[message.chat.id].is_exists():
                 self.user_dict[message.chat.id].update_invited_user(
                     Team.get_user_id_by_code(self.user_dict[message.chat.id].get_invite_code()))
             else:
@@ -792,7 +994,8 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :(. Попробуйте снова.")
             edit(message)
 
-    def enter_team_name(self, message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
+    def enter_team_name(self,
+                        message):  # функция, где запрашивается название продукта и сохраняется в бд имя команды
         if message.chat.id not in self.user_dict:
             self.update(message)
 
@@ -823,7 +1026,8 @@ class StudHelperBot:
             self.team_registration(message)
 
     def enter_product_name(self, message):
-        msg = self.bot.send_message(message.chat.id, "Введите название продукта: ", reply_markup=ReplyKeyboardRemove())
+        msg = self.bot.send_message(message.chat.id, "Введите название продукта: ",
+                                    reply_markup=ReplyKeyboardRemove())
         self.bot.register_next_step_handler(msg, self.after_product)
 
     def set_product_name(self, message, product_name):

@@ -135,6 +135,42 @@ class Team:
             connection.close()
 
     @staticmethod
+    def get_count_reviews_every_teammate():
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `users`.`name`, COUNT(`team_members_ratings`.`assessor_user_id`) as count_reviews " \
+                              "FROM `users`" \
+                              "LEFT JOIN `team_members_ratings` " \
+                              "ON `users`.`user_id` = `team_members_ratings`.`assessor_user_id` " \
+                              "GROUP BY `users`.`user_id`"  # строка для SQL-запроса
+                cursor.execute(sql_request)
+                result = cursor.fetchall()
+                connection.commit()
+
+                return result
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_count_reports_every_teammate():
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `users`.`name`, COUNT(`sprint_reports`.`user_id`) as count_reports " \
+                              "FROM `users`" \
+                              "LEFT JOIN `sprint_reports` " \
+                              "ON `users`.`user_id` = `sprint_reports`.`user_id` " \
+                              "GROUP BY `users`.`user_id`"  # строка для SQL-запроса
+                cursor.execute(sql_request)
+                result = cursor.fetchall()
+                connection.commit()
+
+                return result
+        finally:
+            connection.close()
+
+    @staticmethod
     def get_admin_of_team(code):
         connection = connect_to_db()
         try:

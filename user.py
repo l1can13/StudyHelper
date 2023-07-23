@@ -250,6 +250,33 @@ class User:
         finally:
             connection.close()
 
+    def get_id_by_invite_code(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                insert_user = "SELECT `user_id` " \
+                              "FROM `team_members`" \
+                              "WHERE `invite_code` = %s"
+                cursor.execute(insert_user, self.invite_code)
+                result = cursor.fetchone()
+                connection.commit()
+
+                return result['user_id']
+        finally:
+            connection.close()
+
+    @staticmethod
+    def delete_user_from_users_by_id(user_id):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                insert_user = "DELETE FROM `users`" \
+                              "WHERE `user_id` = %s"
+                cursor.execute(insert_user, user_id)
+                connection.commit()
+        finally:
+            connection.close()
+
     def delete_user(self):
         connection = connect_to_db()
         try:
@@ -412,6 +439,9 @@ class User:
         return True
 
     def is_admin(self):
+        if self.db_id is None:
+            self.set_db_id()
+
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -419,6 +449,20 @@ class User:
                 user_from_db = "SELECT `team_name` FROM `teams` WHERE `admin_user_id` = %s"
                 cursor.execute(user_from_db, self.db_id)
                 check = cursor.fetchall()
+                connection.commit()
+        finally:
+            connection.close()
+        if not check:
+            return False
+        return True
+
+    def is_exists(self):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                user_from_db = "SELECT `user_id` FROM `users` WHERE `tg_id` = %s"
+                cursor.execute(user_from_db, self.tg_id)
+                check = cursor.fetchone()
                 connection.commit()
         finally:
             connection.close()
@@ -525,6 +569,27 @@ class User:
         finally:
             connection.close()
 
+    def get_count_teammates(self):
+        if self.team_id is None:
+            self.set_team_id()
+        if self.db_id is None:
+            self.set_db_id()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT COUNT(`users`.`user_id`) as count_teammates " \
+                              "FROM `users` " \
+                              "INNER JOIN `team_members` ON `users`.`user_id` = `team_members`.`user_id` " \
+                              "WHERE `team_members`.`team_id` = %s and `team_members`.`user_id` != %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.team_id, self.db_id))
+                count_teammates = cursor.fetchone()
+                connection.commit()
+
+            return count_teammates
+        finally:
+            connection.close()
+
     @staticmethod
     def get_name_by_id(user_id):
         connection = connect_to_db()
@@ -535,5 +600,42 @@ class User:
                 user_result = cursor.fetchone()
                 connection.commit()
                 return user_result['name']
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_id_by_name(name):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `user_id` FROM `users` WHERE `name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, name)
+                user_result = cursor.fetchone()
+                connection.commit()
+                return user_result['user_id']
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_tg_id_by_user_id(user_id):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `tg_id` FROM `users` WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, user_id)
+                user_result = cursor.fetchone()
+                connection.commit()
+                return user_result['tg_id']
+        finally:
+            connection.close()
+
+    @staticmethod
+    def delete_user_from_team(user_id):
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "DELETE FROM `team_members` WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, user_id)
+                connection.commit()
         finally:
             connection.close()
