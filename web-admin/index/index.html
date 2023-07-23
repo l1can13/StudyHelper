@@ -3,15 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Команда</title>
-    <link rel="shortcut icon" href="#">
-    <link rel="stylesheet" href="reset.css">
-    <link rel="stylesheet" href="team_list.css">
+    <title>Админка</title>
+    <link rel="stylesheet" href="../common/reset.css">
+    <link rel="stylesheet" href="index/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-    <script src="team_list.js" defer></script>
+    <script src="index/teams.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </head>
 
@@ -19,7 +17,6 @@
 
     <div class="container">
         <div class="header">
-
             <div class="hamburger">
                 <div class="spans">
                     <span></span>
@@ -27,12 +24,10 @@
                     <span></span>
                 </div>
             </div>
-
             <div class="title">StudHelper</div>
         </div>
 
         <div class="main">
-
             <div class="side_menu">
                 <button class="show_teams">Список команд</button>
                 <button class="show_final_report">Итоговый отчёт</button>
@@ -40,27 +35,11 @@
                 <a href="/dbinterface" target="_blank"><button class="manage_db">Управление базой данных</button></a>
             </div>
 
-            <div class="info_window">
-                <div class="nav_div">
-                    <div class="team_info_div">
-                        <div class="team_and_product_name_info">
-                            <span class="team_name"></span>
-                            <span class="product_name"></span>
-                        </div>
-
-                        <div class="admin_info">
-                            <span class="administrator">Администратор: </span>
-                            <span class="admin"></span>
-                        </div>
-                    </div>
-
-                    <div class="table_div">
-                        <div class="rectangle table_title">Участники команды</div>
-                        <table class="table"></table>
-                    </div>
+            <div class="table_window">
+                <div class="table_div">
+                    <table class="table"></table>
                 </div>
             </div>
-
         </div>
 
     </div>

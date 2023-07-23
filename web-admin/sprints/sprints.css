@@ -1,0 +1,107 @@
+* {
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+html, body {
+    overflow: auto;
+    min-height: 100vh;
+}
+
+.container {
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    height: 100vh;
+}
+
+.header {
+    width: 100%;
+    height: 80px;
+    background: #28293d;
+    display: flex;
+}
+
+.title {
+    font-family: 'Montserrat', sans-serif;
+    color: #6fd489;
+    font-size: 30px;
+    font-weight: bold;
+    margin-left: 25px;
+    margin-right: auto;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.main {
+    display: flex;
+    width: 100%;
+    min-height: calc(100% - 80px);
+}
+
+.table_window {
+    width: 100%;
+}
+
+.excel_button {
+    display: flex;
+    padding: 18px 31px;
+    font-size: 20px;
+    font-family: 'Montserrat', sans-serif;
+    color: #feffff;
+    background: #28293d;
+    width: auto;
+    margin-left: 25px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.table_div {
+    width: 100%;
+    text-align: left;
+}
+
+.table {
+	width: 100%;
+	border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+}
+
+.table thead th {
+	border: none;
+	padding: 10px 15px;
+	background: #d8d8d8;
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+}
+
+.table tbody th {
+	padding: 10px 15px
+}
+
+.table tbody td {
+	border-left: 1px solid #ddd;
+	border-right: 1px solid #ddd;
+	padding: 10px 15px
+}
+
+.table thead tr th:first-child, .table tbody tr td:first-child {
+	border-left: none;
+}
+
+.table thead tr th:last-child, .table tbody tr td:last-child {
+	border-right: none;
+}
+
+.table tbody tr:nth-child(even){
+	background: #f3f3f3;
+}
+
+.table tbody tr:hover {
+    background: #a3edb5;
+}

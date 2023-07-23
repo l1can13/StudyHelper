@@ -59,8 +59,8 @@ groupName.textContent = textt[2];
 teamName.textContent = textt[3];
 roleName.textContent = textt[4];
 
-nameAndId = ajaxRequest("name_by_id.php");
-arrUserInfo = ajaxRequest("one_person_info.php?username=" + userId);
+nameAndId = ajaxRequest("../php/name_by_id.php");
+arrUserInfo = ajaxRequest("../php/one_person_info.php?username=" + userId);
 arrUserInfo.unshift(helpArr[2]);
 
 for (var i = 1; i < arrUserInfo.length; ++i) {
@@ -76,7 +76,7 @@ let temp = document.querySelector('.table');
 temp.innerHTML = table;
 marksDiv.appendChild(temp);
 
-arrReports = ajaxRequest("user_reports.php?userid=" + userId);
+arrReports = ajaxRequest("../php/user_reports.php?userid=" + userId);
 arrReports.unshift(helpArr[3]);
 let sprints = createTable(arrReports);
 let sprintsTable = document.querySelector('.sprints_table');
@@ -120,13 +120,13 @@ hamburgerButton.addEventListener('click', () => {
 });
 
 showTeams.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = '../index/index.html';
 });
 
 showFinalReport.addEventListener('click', () => {
-    window.location.href = 'final_report.html';
+    window.location.href = '../final_report/final_report.html';
 });
 
 manageBot.addEventListener('click', () => {
-    window.location.href = 'manage_bot.html';
+    window.location.href = '../manage_bot/manage_bot.html';
 });

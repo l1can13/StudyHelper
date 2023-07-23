@@ -46,11 +46,11 @@ teamName.textContent = textt[0];
 productName.textContent = textt[1];
 admin.textContent = textt[2];
 var userId = textt[3];
-idd = ajaxRequest("team_by_admin.php?admin=" + userId);
+idd = ajaxRequest("../php/team_by_admin.php?admin=" + userId);
 id = idd[0][0];
 
-arrTeams = ajaxRequest("teams.php");
-arrOneTeamUsers = ajaxRequest("one_team_users.php?team=" + id);
+arrTeams = ajaxRequest("../php/teams.php");
+arrOneTeamUsers = ajaxRequest("../php/one_team_users.php?team=" + id);
 arrTeams.unshift(helpArr[0]);
 arrOneTeamUsers.unshift(helpArr[1]);
 
@@ -67,9 +67,9 @@ for (var i = 0; i < trs.length; ++i) {
         var input_name = this.getElementsByTagName("th")[0].innerHTML;
         var input_group = this.getElementsByTagName("th")[1].innerHTML;
         var input_role = this.getElementsByTagName("th")[2].innerHTML;
-        idFromInfo = ajaxRequest("id_from_info.php?name=" + input_name + "&group=" + input_group + "&role=" + input_role + "&team=" + id);
+        idFromInfo = ajaxRequest("../php/id_from_info.php?name=" + input_name + "&group=" + input_group + "&role=" + input_role + "&team=" + id);
         var input_id = idFromInfo[0][0];
-        var url = 'person_list.html?'+ input_name  + '&' + input_id + '&' + input_group + '&' + textt[0] + '&' + input_role;
+        var url = '../person_list/person_list.html?'+ input_name  + '&' + input_id + '&' + input_group + '&' + textt[0] + '&' + input_role;
         window.location.href = url; 
     });
 }
@@ -84,13 +84,13 @@ hamburgerButton.addEventListener('click', () => {
 });
 
 showTeams.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = '../index/index.html';
 });
 
 showFinalReport.addEventListener('click', () => {
-    window.location.href = 'final_report.html';
+    window.location.href = '../final_report/final_report.html';
 });
 
 manageBot.addEventListener('click', () => {
-    window.location.href = 'manage_bot.html';
+    window.location.href = '../manage_bot/manage_bot.html';
 });

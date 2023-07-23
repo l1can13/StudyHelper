@@ -25,34 +25,15 @@ function ajaxRequest(phpName) {
     return arr;
 }
 
-let hamburgerButton = document.querySelector('.spans');
 let container = document.querySelector('.container');
-let sideMenu = document.querySelector('.side_menu');
-let showTeams = document.querySelector('.show_teams');
-let showFinalReport = document.querySelector('.show_final_report');
-let manageBot = document.querySelector('.manage_bot');
-let manageDb = document.querySelector('.manage_db');
-let excelBut = document.querySelector('.excel_button');
 let tableDiv = document.querySelector('.table_div');
-let infoDiv = document.querySelector('.info_div');
 
-let arrFinalReport = [], arrIdAndRole = [];
-let helpArr = ["Название команды", "Роль", "Имя", "Номер спринта", "Текст отчета"];
+let helpArr = ["Имя", "Команда", "Количество отчетов", "Количество отзывов", "Необходимое количество отзывов"];
 
-arrFinalReport = ajaxRequest("sprints.php");
+arrFinalReport = ajaxRequest("../php/debtors.php");
 arrFinalReport.unshift(helpArr);
 
 let table = createTable(arrFinalReport);
 let temp = document.querySelector('.table');
 temp.innerHTML = table;
 tableDiv.appendChild(temp);
-
-let trs = document.querySelectorAll('tr');
-
-showTeams.addEventListener('click', () => {
-    window.location.href = 'index.html';
-});
-
-manageBot.addEventListener('click', () => {
-    window.location.href = 'manage_bot.html';
-});
