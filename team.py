@@ -40,11 +40,14 @@ class Team:
             self.admin_id = 0
             self.team_id = None
 
+    def get_team_id(self):
+        return self.team_id
+
     def set_team_id(self):
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `team_id` FROM teams where `team_name` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `team_id` FROM teams WHERE `team_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 result = cursor.fetchone()
                 connection.commit()
@@ -77,6 +80,7 @@ class Team:
                 cursor.execute(sql_request, (self.teamname, self.product, self.admin_id))
                 connection.commit()
 
+            self.set_team_id()
         finally:
             connection.close()
 

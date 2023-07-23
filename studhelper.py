@@ -101,10 +101,6 @@ class StudHelperBot:
 
                 for row in rows:
                     markup.row(*row)
-
-                self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
-                                                       self.user_dict[message.chat.id].get_db_id())
-                self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
             elif self.user_dict[message.chat.id].is_in_team():
                 if self.user_dict[message.chat.id].get_teamname() is None:
                     self.user_dict[message.chat.id].set_teamname(self.user_dict[message.chat.id].get_teamname_from_bd())
@@ -714,6 +710,7 @@ class StudHelperBot:
                 self.user_dict[message.chat.id].set_username(message.from_user.username)
 
             if self.user_dict[message.chat.id].get_invite_code() == 'admin':
+                self.user_dict[message.chat.id].set_team_id(self.team_dict[message.chat.id].get_team_id())
                 self.user_dict[
                     message.chat.id].add_user_to_team_members()  # добавляем пользователя в таблицу team_members.
             else:

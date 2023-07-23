@@ -1,4 +1,4 @@
-import traceback
+import requests
 
 import telebot
 from telebot.types import ReplyKeyboardRemove
@@ -27,6 +27,20 @@ def continue_cancel_buttons(button1='Продолжить', button2='Измен�
     markup.add(item3)
 
     return markup
+
+
+def send_message(chat_id, text):
+    # token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"  # prod
+    token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ"  # dev
+
+    base_url = 'https://api.telegram.org/bot{}'.format(token)
+
+    params = {
+        'chat_id': chat_id,
+        'text': text,
+    }
+    response = requests.get(base_url + '/sendMessage', params=params)
+    return response.json()
 
 
 class StudHelperBot:
@@ -1145,6 +1159,15 @@ class StudHelperBot:
 
         self.bot.register_next_step_handler(msg, self.confirm_enter, self.set_report_text, report)
 
+
+all_users = User.get_all_tg_ids()
+
+message_text = 'В боте произошло обновление!\n\n' \
+               'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
+               'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
+
+for chat_id in all_users:
+    send_message(chat_id['telegram_id'], message_text)
 
 bot = StudHelperBot()
 bot.start()

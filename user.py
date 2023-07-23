@@ -155,8 +155,11 @@ class User:
     def get_username(self):
         return self.username
 
-    def set_team_id(self):
+    def set_team_id_by_db(self):
         self.team_id = self.get_team_id_from_db()
+
+    def set_team_id(self, team_id):
+        self.team_id = team_id
 
     def get_team_id(self):
         return self.team_id
@@ -210,6 +213,10 @@ class User:
                 connection.commit()
 
                 self.set_db_id()
+
+                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s);"
+                cursor.execute(insert_user, self.tg_id)
+                connection.commit()
         finally:
             connection.close()
 
@@ -228,7 +235,9 @@ class User:
             connection.close()
 
     def add_user_to_team_members(self):
-        self.set_team_id()
+        if self.team_id is None:
+            self.set_team_id_by_db()
+
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -366,7 +375,7 @@ class User:
 
     def get_teammates(self):
         if self.team_id is None:
-            self.set_team_id()
+            self.set_team_id_by_db()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -384,7 +393,7 @@ class User:
 
     def get_teammates_excludes_me(self):
         if self.team_id is None:
-            self.set_team_id()
+            self.set_team_id_by_db()
         if self.db_id is None:
             self.set_db_id()
 
@@ -571,7 +580,7 @@ class User:
 
     def get_count_teammates(self):
         if self.team_id is None:
-            self.set_team_id()
+            self.set_team_id_by_db()
         if self.db_id is None:
             self.set_db_id()
 
@@ -637,5 +646,18 @@ class User:
                 sql_request = "DELETE FROM `team_members` WHERE `user_id` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, user_id)
                 connection.commit()
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_all_tg_ids():
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `telegram_id` FROM `all_bot_identifiers`"  # строка для SQL-запроса
+                cursor.execute(sql_request)
+                ids = cursor.fetchall()
+                connection.commit()
+                return ids
         finally:
             connection.close()
