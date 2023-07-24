@@ -231,18 +231,18 @@ class StudHelperBot:
 
             reviewed_names.append(self.user_dict[message.chat.id].get_name())
 
-            result = [teammate for teammate in all_teammates_excludes_me_list if teammate['name'] not in reviewed_names]
+            result_list = [teammate for teammate in all_teammates_excludes_me_list if teammate['name'] not in reviewed_names]
 
+            reviewed_names_str = '\n'.join([f"{review['name']}" for review in reviews_list])
+            result_str = '\n'.join([f"{result['name']}" for result in result_list])
             team_str = '\n'.join([f"{teammate['name']}" for teammate in all_teammates_excludes_me_list])
 
-            reviews_str = \
-                '\n'.join([f"*Вас оценили:*\n"
-                           f"{review['name']}\n\n"
-                           f"*Вас не оценили:*\n"
-                           f"{result}\n"
-                           f"*Моя команда:*\n"
-                           f"{team_str}"
-                           for review in reviews_list])
+            reviews_str = f"*Вас оценили:*\n" \
+                          f"{reviewed_names_str}\n\n" \
+                          f"*Вас не оценили:*\n" \
+                          f"{result_str}\n\n" \
+                          f"*Моя команда:*\n" \
+                          f"{team_str}"
 
             self.bot.send_message(message.chat.id,
                                   reviews_str,

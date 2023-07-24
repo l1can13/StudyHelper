@@ -25,15 +25,23 @@ function ajaxRequest(phpName) {
     return arr;
 }
 
-let container = document.querySelector('.container');
-let tableDiv = document.querySelector('.table_div');
+let tableDiv = document.querySelectorAll('.table_div');
 
-let helpArr = ["Имя", "Команда", "Количество отчетов", "Количество отзывов", "Необходимое количество отзывов"];
+let notInBotArr = ["Имя", "Группа"];
+let helpArr = ["Имя", "Группа", "Команда", "Количество отчетов", "Количество оценок", "Необходимое количество оценок"];
 
-arrFinalReport = ajaxRequest("../php/debtors.php");
+let notInBot = ajaxRequest("../php/not_in_bot.php");
+let arrFinalReport = ajaxRequest("../php/debtors.php");
+notInBot.unshift(notInBotArr);
 arrFinalReport.unshift(helpArr);
 
-let table = createTable(arrFinalReport);
-let temp = document.querySelector('.table');
-temp.innerHTML = table;
-tableDiv.appendChild(temp);
+console.log(notInBot);
+
+let table = createTable(notInBot);
+let temp = document.querySelectorAll('.table');
+temp[0].innerHTML = table;
+tableDiv[0].appendChild(temp[0]);
+
+table = createTable(arrFinalReport);
+temp[1].innerHTML = table;
+tableDiv[1].appendChild(temp[1]);
