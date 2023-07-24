@@ -98,7 +98,7 @@ class StudHelperBot:
 
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-        if " " in message.text and not self.first_hello_dict[message.chat.id] and message.text != 'Отмена регистрации':
+        if message.text.startswith('/start ') and message.text != 'Отмена регистрации':
             message.text = message.text.split()[1]
             self.accept_invitation(message)
         else:
@@ -106,13 +106,13 @@ class StudHelperBot:
                 buttons = [
                     types.KeyboardButton("Добавить участника"),
                     types.KeyboardButton("Удалить участника"),
-                    types.KeyboardButton("Отправить отчёт"),
-                    types.KeyboardButton("Помощь"),
                     types.KeyboardButton("Моя команда"),
                     types.KeyboardButton("Мои отчёты"),
+                    types.KeyboardButton("Отправить отчёт"),
                     types.KeyboardButton("Удалить отчёт"),
                     types.KeyboardButton("Оценить участников команды"),
                     types.KeyboardButton("Кто меня оценил?"),
+                    types.KeyboardButton("Помощь"),
                     types.KeyboardButton("Отчёт о команде"),
                 ]
 
@@ -140,13 +140,13 @@ class StudHelperBot:
                     return
                 else:
                     buttons = [
-                        types.KeyboardButton("Отправить отчёт"),
-                        types.KeyboardButton("Помощь"),
                         types.KeyboardButton("Моя команда"),
                         types.KeyboardButton("Мои отчёты"),
+                        types.KeyboardButton("Отправить отчёт"),
                         types.KeyboardButton("Удалить отчёт"),
                         types.KeyboardButton("Оценить участников команды"),
                         types.KeyboardButton("Кто меня оценил?"),
+                        types.KeyboardButton("Помощь"),
                     ]
 
                     rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
@@ -174,11 +174,13 @@ class StudHelperBot:
             item1 = types.KeyboardButton("Отмена регистрации")
             item2 = types.KeyboardButton("Продолжить регистрацию")
             markup.add(item1, item2)
-            self.bot.send_message(message.chat.id,
-                                  "Внимание! Команду должен регистрировать Scrum Master! Если Вы не являетесь "
-                                  "Scrum Master'ом, то нажмите кнопку 'Отмена регистрации'. Если являетесь - "
-                                  "нажмите кнопку 'Продолжить регистрацию'",
-                                  reply_markup=markup)
+            msg = self.bot.send_message(message.chat.id,
+                                        "Внимание! Команду должен регистрировать Scrum Master! Если Вы не являетесь "
+                                        "Scrum Master'ом, то нажмите кнопку 'Отмена регистрации'. Если являетесь - "
+                                        "нажмите кнопку 'Продолжить регистрацию'",
+                                        reply_markup=markup)
+
+            self.bot.register_next_step_handler(msg, self.continue_registration)
         elif message.text == "Помощь":
             self.bot.send_message(message.chat.id,
                                   "Возникла проблема с ботом, или нашли баг?\n\nНапишите @l1can для получения "
@@ -194,11 +196,6 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
                                   reply_markup=ReplyKeyboardRemove())
             self.start_message(message)
-        elif message.text == "Отмена регистрации":
-            self.bot.send_message(message.chat.id, "Возврат к главному меню", reply_markup=ReplyKeyboardRemove())
-            self.start_message(message)
-        elif message.text == "Продолжить регистрацию":
-            self.team_registration(message)
         elif message.text == "Моя команда":
             self.team_information(message)
         elif message.text == "Мои отчёты":
@@ -231,7 +228,8 @@ class StudHelperBot:
 
             reviewed_names.append(self.user_dict[message.chat.id].get_name())
 
-            result_list = [teammate for teammate in all_teammates_excludes_me_list if teammate['name'] not in reviewed_names]
+            result_list = [teammate for teammate in all_teammates_excludes_me_list if
+                           teammate['name'] not in reviewed_names]
 
             reviewed_names_str = '\n'.join([f"{review['name']}" for review in reviews_list])
             result_str = '\n'.join([f"{result['name']}" for result in result_list])
@@ -290,30 +288,47 @@ class StudHelperBot:
 
         surname = message.text  # в surname лежит фамилия текущего пользователя
 
+        team_members = self.user_dict[message.chat.id].get_teammates_only_names()
+
+        arr_of_names = []
+        for elem in team_members:
+            arr_of_names.append(elem['name'])  # в arr_of_name(список) кладем только сами фамилии
+
+        if surname == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+            return
+        if surname == self.user_dict[message.chat.id].get_name_from_db():
+            self.bot.send_message(message.chat.id, "Себя нельзя оценить!")
+            self.evaluation(message)
+            return
+        elif surname not in arr_of_names:
+            self.bot.send_message(message.chat.id, "Член команды не найден!")
+            self.evaluation(message)
+            return
+
         try:
             if message.chat.id not in self.team_dict:
                 self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
                                                        self.user_dict[message.chat.id].get_db_id())
 
-            if surname != "Отмена":
-                self.temp_assessored_id_dict[message.chat.id] = self.team_dict[message.chat.id].find_db_id_by_surname(
-                    surname)
-                self.review_dict[message.chat.id] = Review()
-                self.review_dict[message.chat.id].set_assessored(self.temp_assessored_id_dict[message.chat.id])
+            self.temp_assessored_id_dict[message.chat.id] = self.team_dict[message.chat.id].find_db_id_by_surname(
+                surname)
+            self.review_dict[message.chat.id] = Review()
+            self.review_dict[message.chat.id].set_assessored(self.temp_assessored_id_dict[message.chat.id])
 
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-                for i in range(1, 11):
-                    item = types.KeyboardButton(str(i))
-                    markup.add(item)
+            for i in range(1, 6):
+                item1 = types.KeyboardButton(str(i))
+                item2 = types.KeyboardButton(str(i + 5))
+                markup.row(item1, item2)
 
-                self.bot.send_message(message.chat.id, "Оцените участника команды - " + surname)
-                estimation = self.bot.send_message(message.chat.id, "Общая оценка (1-10): ", reply_markup=markup)
-                self.bot.register_next_step_handler(estimation, self.get_advantages)
-            else:
-                self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
-                self.start_message(message)
-                return
+            markup.add(types.KeyboardButton('Отмена'))
+
+            self.bot.send_message(message.chat.id, "Оцените участника команды - " + surname)
+            estimation = self.bot.send_message(message.chat.id, "Общая оценка (1-10): ", reply_markup=markup)
+            self.bot.register_next_step_handler(estimation, self.get_advantages)
         except IntegrityError:
             self.bot.send_message(message.chat.id, "Кажется, информация о Вас отсутствует в боте!\n\n"
                                                    "Напишите в поддержку (@l1can), чтобы получить помощь!\n\n")
@@ -322,6 +337,16 @@ class StudHelperBot:
     def get_advantages(self, message):  # функция, где участникам пишут отзыв о положительных качествах участника
         if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
             self.update(message)
+
+        if message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
+            return
+
+        if message.text not in [str(i) for i in range(1, 11)]:
+            self.bot.send_message(message.chat.id, "Некорректный ввод, повторите снова")
+            self.start_message(message)
+            return
 
         try:
             general_mark = message.text  # в general_mark лежит общая оценка пользователя
@@ -406,9 +431,25 @@ class StudHelperBot:
             self.start_message(message)
 
     # endregion
+
+    def continue_registration(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        if message.text == "Отмена регистрации":
+            self.bot.send_message(message.chat.id, "Возврат к главному меню", reply_markup=ReplyKeyboardRemove())
+            self.start_message(message)
+        elif message.text == "Продолжить регистрацию":
+            self.team_registration(message)
+
     def teammate_selection(self, message):
         if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
             self.update(message)
+
+        if not self.user_dict[message.chat.id].is_admin():
+            self.bot.send_message(message.chat.id, "У Вас нет прав, чтобы отправить данную команду!")
+            self.start_message(message)
+            return
 
         markup = self.get_teammates_markup(message)
 
@@ -543,7 +584,7 @@ class StudHelperBot:
         return reports_str
 
     def get_sprint_numbers_list(self, message):
-        return [report['sprint_num'] for report in self.user_dict[message.chat.id].get_reports()]
+        return [''.join(f"Спринт №{report['sprint_num']}") for report in self.user_dict[message.chat.id].get_reports()]
 
     def get_sprint_numbers_markup(self, message):
         reports_list = self.user_dict[message.chat.id].get_reports()
@@ -604,6 +645,9 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.confirm_delete_report)
 
     def confirm_delete_report(self, message):
+        if len(message.text) == 0:
+            self.bot.send_message(message.chat.id, "Выберите спринт из предложенных в меню кнопок!")
+            self.number_selection(message)
         if message.text == 'Отмена':
             self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
             self.start_message(message)
@@ -623,7 +667,7 @@ class StudHelperBot:
             markup = continue_cancel_buttons('Да', 'Нет')
 
             msg = self.bot.send_message(message.chat.id,
-                                        'Вы уверены, что хотите удалить спринт?',
+                                        f'Вы уверены, что хотите удалить отчёт по *спринту № {sprint_num[-1]}*?',
                                         reply_markup=markup,
                                         parse_mode="Markdown")
 
@@ -710,13 +754,12 @@ class StudHelperBot:
         buttons = [types.KeyboardButton(sprint) for sprint in self.sprints]
         cancel_button = types.KeyboardButton('Отмена')
 
-        rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
-        for row in rows:
-            markup.row(*row)
-
+        markup.row(buttons[0], buttons[3])
+        markup.row(buttons[1], buttons[4])
+        markup.row(buttons[2], buttons[5])
         markup.add(cancel_button)
 
-        msg = self.bot.send_message(message.chat.id, "Выберите спринт (меню с кнопками можно пролистать): ",
+        msg = self.bot.send_message(message.chat.id, "Выберите спринт: ",
                                     reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.set_sprint)
 
@@ -897,8 +940,8 @@ class StudHelperBot:
             markup = continue_cancel_buttons()
 
             msg = self.bot.send_message(message.chat.id,
-                                        f"Проверьте правильность ввода\n\n"
-                                        f"Ваше ФИО: {name}",
+                                        f"Проверьте правильность ввода. Формат должен быть таким: Фамилия Имя\n\n"
+                                        f"Ваше Фамилия Имя:\n{name}",
                                         reply_markup=markup)
 
             self.bot.register_next_step_handler(msg, self.confirm_enter, self.set_user_name, name)
@@ -928,6 +971,7 @@ class StudHelperBot:
                 self.user_dict[message.chat.id].set_username(message.from_user.username)
 
             if self.user_dict[message.chat.id].get_invite_code() == 'admin':
+                self.user_dict[message.chat.id].set_team_id(self.team_dict[message.chat.id].get_team_id())
                 self.user_dict[
                     message.chat.id].add_user_to_team_members()  # добавляем пользователя в таблицу team_members.
             else:
@@ -1045,6 +1089,9 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.after_product)
 
     def set_product_name(self, message, product_name):
+        if message.chat.id not in self.user_dict:
+            self.update(message)
+
         self.team_dict[message.chat.id].set_product(product_name)
 
         self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
@@ -1052,7 +1099,33 @@ class StudHelperBot:
         self.bot.send_message(message.chat.id,
                               "Команда \"" + self.team_dict[
                                   message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
-        self.enter_user_name(message)
+
+        if self.user_dict[message.chat.id].is_exists():
+            markup = continue_cancel_buttons()
+
+            msg = self.bot.send_message(message.chat.id,
+                                        f"Информация о Вас найдена, проверьте её правильность\n\n"
+                                        f"Ваше имя: {self.user_dict[message.chat.id].get_name_from_db()}\n"
+                                        f"Ваша группа: {self.user_dict[message.chat.id].get_group_from_db()}",
+                                        reply_markup=markup)
+
+            self.bot.register_next_step_handler(msg, self.confirm_existed_user_info)
+        else:
+            self.enter_user_name(message)
+
+    def confirm_existed_user_info(self, message):
+        if message.chat.id not in self.user_dict:
+            self.update(message)
+
+        if message.text == 'Изменить':
+            self.enter_user_name(message)
+            return
+        elif message.text == 'Продолжить':
+            self.start_message(message)
+            return
+        elif message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
 
     def after_product(self, message):
         if message.chat.id not in self.user_dict:
@@ -1136,6 +1209,14 @@ class StudHelperBot:
             self.update(message)
 
         report = message.text  # в report лежит отчет о проделанной работе
+
+        if len(report) < 30:
+            self.bot.send_message(message.chat.id,
+                                  "Минимальная длина отчета - 30 символов!\n"
+                                  "Пожалуйста, отправьте отчёт снова.")
+            self.start_message(message)
+            return
+
         sprint_num = int(self.sprint_now[len(self.sprint_now) - 1])
 
         if report.startswith('/start'):
@@ -1160,14 +1241,14 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.confirm_enter, self.set_report_text, report)
 
 
-all_users = User.get_all_tg_ids()
-
-message_text = 'В боте произошло обновление!\n\n' \
-               'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
-               'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
-
-for chat_id in all_users:
-    send_message(chat_id['telegram_id'], message_text)
+# all_users = User.get_all_tg_ids()
+#
+# message_text = 'В боте произошло обновление!\n\n' \
+#                'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
+#                'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
+#
+# for chat_id in all_users:
+#     send_message(chat_id['telegram_id'], message_text)
 
 bot = StudHelperBot()
 bot.start()

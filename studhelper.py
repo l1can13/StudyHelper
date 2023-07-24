@@ -81,7 +81,7 @@ class StudHelperBot:
 
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
 
-        if message.text.startswith('/start ') and not self.first_hello_dict[message.chat.id] and message.text != 'Отмена регистрации':
+        if message.text.startswith('/start ') and message.text != 'Отмена регистрации':
             message.text = message.text.split()[1]
             self.accept_invitation(message)
         else:
@@ -89,11 +89,11 @@ class StudHelperBot:
                 buttons = [
                     types.KeyboardButton("Добавить участника"),
                     types.KeyboardButton("Удалить участника"),
-                    types.KeyboardButton("Отправить отчёт"),
-                    types.KeyboardButton("Помощь"),
                     types.KeyboardButton("Моя команда"),
                     types.KeyboardButton("Мои отчёты"),
+                    types.KeyboardButton("Отправить отчёт"),
                     types.KeyboardButton("Удалить отчёт"),
+                    types.KeyboardButton("Помощь"),
                     types.KeyboardButton("Отчёт о команде"),
                 ]
 
@@ -117,11 +117,11 @@ class StudHelperBot:
                     return
                 else:
                     buttons = [
-                        types.KeyboardButton("Отправить отчёт"),
-                        types.KeyboardButton("Помощь"),
                         types.KeyboardButton("Моя команда"),
                         types.KeyboardButton("Мои отчёты"),
+                        types.KeyboardButton("Отправить отчёт"),
                         types.KeyboardButton("Удалить отчёт"),
+                        types.KeyboardButton("Помощь"),
                     ]
 
                     rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
@@ -149,11 +149,13 @@ class StudHelperBot:
             item1 = types.KeyboardButton("Отмена регистрации")
             item2 = types.KeyboardButton("Продолжить регистрацию")
             markup.add(item1, item2)
-            self.bot.send_message(message.chat.id,
-                                  "Внимание! Команду должен регистрировать Scrum Master! Если Вы не являетесь "
-                                  "Scrum Master'ом, то нажмите кнопку 'Отмена регистрации'. Если являетесь - "
-                                  "нажмите кнопку 'Продолжить регистрацию'",
-                                  reply_markup=markup)
+            msg = self.bot.send_message(message.chat.id,
+                                        "Внимание! Команду должен регистрировать Scrum Master! Если Вы не являетесь "
+                                        "Scrum Master'ом, то нажмите кнопку 'Отмена регистрации'. Если являетесь - "
+                                        "нажмите кнопку 'Продолжить регистрацию'",
+                                        reply_markup=markup)
+
+            self.bot.register_next_step_handler(msg, self.continue_registration)
         elif message.text == "Помощь":
             self.bot.send_message(message.chat.id,
                                   "Возникла проблема с ботом, или нашли баг?\n\nНапишите @l1can для получения "
@@ -169,11 +171,6 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Обновляю состояние бота...",
                                   reply_markup=ReplyKeyboardRemove())
             self.start_message(message)
-        elif message.text == "Отмена регистрации":
-            self.bot.send_message(message.chat.id, "Возврат к главному меню", reply_markup=ReplyKeyboardRemove())
-            self.start_message(message)
-        elif message.text == "Продолжить регистрацию":
-            self.team_registration(message)
         elif message.text == "Моя команда":
             self.team_information(message)
         elif message.text == "Мои отчёты":
@@ -188,11 +185,34 @@ class StudHelperBot:
             self.bot.send_message(message.chat.id, "Я вас не понимаю :( ")
             self.start_message(message)
 
+    def continue_registration(self, message):
+        if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
+            self.update(message)
+
+        if message.text == "Отмена регистрации":
+            self.bot.send_message(message.chat.id, "Возврат к главному меню", reply_markup=ReplyKeyboardRemove())
+            self.start_message(message)
+        elif message.text == "Продолжить регистрацию":
+            self.team_registration(message)
+
     def teammate_selection(self, message):
         if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
             self.update(message)
 
+        if not self.user_dict[message.chat.id].is_admin():
+            self.bot.send_message(message.chat.id, "У Вас нет прав, чтобы отправить данную команду!")
+            self.start_message(message)
+            return
+
         markup = self.get_teammates_markup(message)
+
+        if markup is None:
+            self.bot.send_message(message.chat.id,
+                                  "В Вашей команде нет людей кроме Вас.",
+                                  reply_markup=markup,
+                                  parse_mode="Markdown")
+            self.start_message(message)
+            return
 
         msg = self.bot.send_message(message.chat.id,
                                     "С помощью меню кнопок выберите кого Вы хотите удалить из команды",
@@ -325,7 +345,7 @@ class StudHelperBot:
         return reports_str
 
     def get_sprint_numbers_list(self, message):
-        return [report['sprint_num'] for report in self.user_dict[message.chat.id].get_reports()]
+        return [''.join(f"Спринт №{report['sprint_num']}") for report in self.user_dict[message.chat.id].get_reports()]
 
     def get_sprint_numbers_markup(self, message):
         reports_list = self.user_dict[message.chat.id].get_reports()
@@ -386,6 +406,9 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.confirm_delete_report)
 
     def confirm_delete_report(self, message):
+        if len(message.text) == 0:
+            self.bot.send_message(message.chat.id, "Выберите спринт из предложенных в меню кнопок!")
+            self.number_selection(message)
         if message.text == 'Отмена':
             self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
             self.start_message(message)
@@ -405,7 +428,7 @@ class StudHelperBot:
             markup = continue_cancel_buttons('Да', 'Нет')
 
             msg = self.bot.send_message(message.chat.id,
-                                        'Вы уверены, что хотите удалить спринт?',
+                                        f'Вы уверены, что хотите удалить отчёт по *спринту № {sprint_num[-1]}*?',
                                         reply_markup=markup,
                                         parse_mode="Markdown")
 
@@ -492,13 +515,12 @@ class StudHelperBot:
         buttons = [types.KeyboardButton(sprint) for sprint in self.sprints]
         cancel_button = types.KeyboardButton('Отмена')
 
-        rows = [buttons[i:i + 2] for i in range(0, len(buttons), 2)]
-        for row in rows:
-            markup.row(*row)
-
+        markup.row(buttons[0], buttons[3])
+        markup.row(buttons[1], buttons[4])
+        markup.row(buttons[2], buttons[5])
         markup.add(cancel_button)
 
-        msg = self.bot.send_message(message.chat.id, "Выберите спринт (меню с кнопками можно пролистать): ",
+        msg = self.bot.send_message(message.chat.id, "Выберите спринт: ",
                                     reply_markup=markup)
         self.bot.register_next_step_handler(msg, self.set_sprint)
 
@@ -679,8 +701,8 @@ class StudHelperBot:
             markup = continue_cancel_buttons()
 
             msg = self.bot.send_message(message.chat.id,
-                                        f"Проверьте правильность ввода\n\n"
-                                        f"Ваше ФИО: {name}",
+                                        f"Проверьте правильность ввода. Формат должен быть таким: Фамилия Имя\n\n"
+                                        f"Ваше Фамилия Имя:\n{name}",
                                         reply_markup=markup)
 
             self.bot.register_next_step_handler(msg, self.confirm_enter, self.set_user_name, name)
@@ -828,6 +850,9 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.after_product)
 
     def set_product_name(self, message, product_name):
+        if message.chat.id not in self.user_dict:
+            self.update(message)
+
         self.team_dict[message.chat.id].set_product(product_name)
 
         self.user_dict[message.chat.id].set_teamname(self.team_dict[message.chat.id].get_teamname())
@@ -835,7 +860,33 @@ class StudHelperBot:
         self.bot.send_message(message.chat.id,
                               "Команда \"" + self.team_dict[
                                   message.chat.id].get_teamname() + "\" успешно зарегистрирована!")  # в message.text хранится то, что написал человек
-        self.enter_user_name(message)
+
+        if self.user_dict[message.chat.id].is_exists():
+            markup = continue_cancel_buttons()
+
+            msg = self.bot.send_message(message.chat.id,
+                                        f"Информация о Вас найдена, проверьте её правильность\n\n"
+                                        f"Ваше имя: {self.user_dict[message.chat.id].get_name_from_db()}\n"
+                                        f"Ваша группа: {self.user_dict[message.chat.id].get_group_from_db()}",
+                                        reply_markup=markup)
+
+            self.bot.register_next_step_handler(msg, self.confirm_existed_user_info)
+        else:
+            self.enter_user_name(message)
+
+    def confirm_existed_user_info(self, message):
+        if message.chat.id not in self.user_dict:
+            self.update(message)
+
+        if message.text == 'Изменить':
+            self.enter_user_name(message)
+            return
+        elif message.text == 'Продолжить':
+            self.start_message(message)
+            return
+        elif message.text == 'Отмена':
+            self.bot.send_message(message.chat.id, "Отменяю действие и возвращаюсь в основное меню...")
+            self.start_message(message)
 
     def after_product(self, message):
         if message.chat.id not in self.user_dict:
@@ -919,6 +970,14 @@ class StudHelperBot:
             self.update(message)
 
         report = message.text  # в report лежит отчет о проделанной работе
+
+        if len(report) < 30:
+            self.bot.send_message(message.chat.id,
+                                  "Минимальная длина отчета - 30 символов!\n"
+                                  "Пожалуйста, отправьте отчёт снова.")
+            self.start_message(message)
+            return
+
         sprint_num = int(self.sprint_now[len(self.sprint_now) - 1])
 
         if report.startswith('/start'):

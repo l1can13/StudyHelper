@@ -214,7 +214,7 @@ class User:
 
                 self.set_db_id()
 
-                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s);"
+                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s) ON DUPLICATE KEY UPDATE telegram_id=VALUES(telegram_id);"
                 cursor.execute(insert_user, self.tg_id)
                 connection.commit()
         finally:
@@ -556,6 +556,10 @@ class User:
                               "WHERE `user_id` = %s"
                 cursor.execute(sql_request, (self.name, self.group, self.tg_id, user_id))
                 connection.commit()
+
+                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s);"
+                cursor.execute(insert_user, self.tg_id)
+                connection.commit()
         finally:
             connection.close()
 
@@ -659,5 +663,37 @@ class User:
                 ids = cursor.fetchall()
                 connection.commit()
                 return ids
+        finally:
+            connection.close()
+
+    def get_name_from_db(self):
+        if self.db_id is None:
+            self.set_db_id()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `name` FROM `users`" \
+                              "WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                user_result = cursor.fetchone()
+                connection.commit()
+                return user_result['name']
+        finally:
+            connection.close()
+
+    def get_group_from_db(self):
+        if self.db_id is None:
+            self.set_db_id()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `group_num` FROM `users`" \
+                              "WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                group_num = cursor.fetchone()
+                connection.commit()
+                return group_num['group_num']
         finally:
             connection.close()
