@@ -557,7 +557,7 @@ class User:
                 cursor.execute(sql_request, (self.name, self.group, self.tg_id, user_id))
                 connection.commit()
 
-                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s);"
+                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s) ON DUPLICATE KEY UPDATE telegram_id=VALUES(telegram_id);"
                 cursor.execute(insert_user, self.tg_id)
                 connection.commit()
         finally:

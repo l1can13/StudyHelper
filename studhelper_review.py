@@ -453,6 +453,14 @@ class StudHelperBot:
 
         markup = self.get_teammates_markup(message)
 
+        if markup is None:
+            self.bot.send_message(message.chat.id,
+                                  "В Вашей команде нет людей кроме Вас.",
+                                  reply_markup=markup,
+                                  parse_mode="Markdown")
+            self.start_message(message)
+            return
+
         msg = self.bot.send_message(message.chat.id,
                                     "С помощью меню кнопок выберите кого Вы хотите удалить из команды",
                                     reply_markup=markup,
@@ -603,7 +611,9 @@ class StudHelperBot:
         return markup
 
     def get_teammates_markup(self, message):
-        teammates = self.user_dict[message.chat.id].get_teammates_excludes_me()
+        teammates = [teammate for teammate in self.user_dict[message.chat.id].get_teammates_excludes_me() if
+                     teammate['name'] != 'invited_user']
+
         cancel = types.KeyboardButton("Отмена")
 
         if teammates:
@@ -618,7 +628,8 @@ class StudHelperBot:
         return markup
 
     def get_teammates_list(self, message):
-        return [teammate['name'] for teammate in self.user_dict[message.chat.id].get_teammates_excludes_me()]
+        teammates_list = self.user_dict[message.chat.id].get_teammates_excludes_me()
+        return [teammate['name'] for teammate in teammates_list if teammate['name'] != 'invited_user']
 
     def number_selection(self, message):
         if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
@@ -730,7 +741,8 @@ class StudHelperBot:
                 if self.team_dict[message.chat.id].get_product() is not None \
                 else self.user_dict[message.chat.id].get_product_from_db()
 
-            teammates_list = self.user_dict[message.chat.id].get_teammates()
+            teammates_list = [teammate for teammate in self.user_dict[message.chat.id].get_teammates() if
+                              teammate['name'] != 'invited_user']
             teammates_str = '\n'.join([f"{teammate['name']} - {teammate['role']}" for teammate in teammates_list])
 
             self.bot.send_message(message.chat.id,
@@ -854,7 +866,12 @@ class StudHelperBot:
             if message.chat.id not in self.user_dict:
                 self.update(message)
 
-            elif message.text != 'admin' \
+            if self.user_dict[message.chat.id].is_in_team():
+                self.bot.send_message(message.chat.id, "Вы уже находитесь в команде!")
+                self.start_message(message)
+                return
+
+            if message.text != 'admin' \
                     and self.user_dict[message.chat.id].is_exists():
                 self.user_dict[message.chat.id].set_invite_code(message.text)
 
