@@ -37,6 +37,8 @@ let teamName = document.querySelector('.team_name');
 let productName = document.querySelector('.product_name');
 let admin = document.querySelector('.admin');
 let tableDiv = document.querySelector('.table_div');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
 let arrTeams = [], arrAllUser = [], arrOneTeamUsers = [], usernameAndId = [];
 let helpArr = [["Название", "Продукт", "Администратор", "Ид"], ["Имя", "Группа", "Роль"]];
@@ -81,6 +83,8 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 showTeams.addEventListener('click', () => {

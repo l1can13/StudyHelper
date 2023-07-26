@@ -63,6 +63,8 @@ let getBotStatusButton = document.querySelector('.get_bot_status');
 let statusText = document.querySelector('.status_text');
 let checkboxBot = document.querySelector('#checkbox_bot');
 let checkboxReview = document.querySelector('#checkbox_review');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
 switch (getBotStatus()) {
     case '1':
@@ -90,6 +92,8 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 getBotStatusButton.addEventListener('click', () => {
@@ -114,7 +118,7 @@ checkboxReview.addEventListener('change', (event) => {
 });
 
 showTeams.addEventListener('click', () => {
-    window.location.href = '../index/index.html';
+    window.location.href = '../../';
 });
 
 showFinalReport.addEventListener('click', () => {

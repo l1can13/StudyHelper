@@ -34,6 +34,8 @@ let manageDb = document.querySelector('.manage_db');
 let excelBut = document.querySelector('.excel_button');
 let tableDiv = document.querySelector('.table_div');
 let infoDiv = document.querySelector('.info_div');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
 let arrFinalReport = [], arrIdAndRole = [];
 let helpArr = [["Имя", "Группа", "Команда", "СО", "КО", "Количество отчетов"], ["Имя", "Группа", "Команда"]];
@@ -70,6 +72,8 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 excelBut.addEventListener('click', () => {
@@ -79,7 +83,7 @@ excelBut.addEventListener('click', () => {
 })
 
 showTeams.addEventListener('click', () => {
-    window.location.href = '../index/index.html';
+    window.location.href = '../../';
 });
 
 manageBot.addEventListener('click', () => {

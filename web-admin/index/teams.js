@@ -33,6 +33,8 @@ let manageBot = document.querySelector('.manage_bot');
 let manageDb = document.querySelector('.manage_db');
 let tableDiv = document.querySelector('.table_div');
 let infoDiv = document.querySelector('.info_div');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
 let arrTeams = [], ids = [];
 let helpArr = [["Команда", "Продукт", "Администратор"], ["Имя", "Группа", "Команда"]];
@@ -76,6 +78,8 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 manageBot.addEventListener('click', () => {

@@ -43,6 +43,8 @@ let reportsText = document.querySelector('.reports_text');
 let marksDiv = document.querySelector('.marks');
 let reportsDiv = document.querySelector('.reports');
 let getReports = document.querySelector('.get_reports');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
 let arrOneTeamUsers = [], arrOnePerson = [], arrReports = [], nameAndId = [];
 let helpArr = [["Название", "Продукт", "Администратор", "Ид"],
@@ -78,9 +80,9 @@ marksDiv.appendChild(temp);
 
 arrReports = ajaxRequest("../php/user_reports.php?userid=" + userId);
 arrReports.unshift(helpArr[3]);
-let sprints = createTable(arrReports);
+let sprintsTableHtml = createTable(arrReports);
 let sprintsTable = document.querySelector('.sprints_table');
-sprintsTable.innerHTML = sprints;
+sprintsTable.innerHTML = sprintsTableHtml;
 $(sprintsTable).hide()
 
 // let reports = "";
@@ -117,6 +119,8 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 showTeams.addEventListener('click', () => {
