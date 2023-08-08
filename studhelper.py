@@ -114,14 +114,18 @@ class StudHelperBot:
                 item5 = types.KeyboardButton("Помощь")
                 markup.add(item1)
                 markup.add(item5)
-            if not self.first_hello_dict[message.chat.id]:
-                if self.user_dict[message.chat.id].get_username() is not None:
-                    self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(),
-                                          reply_markup=markup)
+            try:
+                if not self.first_hello_dict[message.chat.id]:
+                    if self.user_dict[message.chat.id].get_username() is not None:
+                        self.bot.send_message(message.chat.id,
+                                              "Привет, " + self.user_dict[message.chat.id].get_username(),
+                                              reply_markup=markup)
+                    else:
+                        self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
+                    self.first_hello_dict[message.chat.id] = True
                 else:
-                    self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
-                self.first_hello_dict[message.chat.id] = True
-            else:
+                    self.bot.send_message(message.chat.id, "Что вы хотите сделать?", reply_markup=markup)
+            except KeyError:
                 self.bot.send_message(message.chat.id, "Что вы хотите сделать?", reply_markup=markup)
 
     def message_reply(self, message):
