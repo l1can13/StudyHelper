@@ -352,7 +352,8 @@ class StudHelperBot:
             general_mark = message.text  # в general_mark лежит общая оценка пользователя
             self.review_dict[message.chat.id].set_general_mark(general_mark)
             feedback = self.bot.send_message(message.chat.id,
-                                             "Напишите о всех положительных качествах данного участника: ",
+                                             "Напишите о том, что понравилось в работе участника команды, "
+                                             "положительные моменты: ",
                                              reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(feedback, self.get_disadvantages)
         except IntegrityError:
@@ -368,7 +369,8 @@ class StudHelperBot:
             advantages = message.text  # в advantages лежит отзыв об ответственности пользователя
             self.review_dict[message.chat.id].set_advantages(advantages)
             feedback2 = self.bot.send_message(message.chat.id,
-                                              "Напишите о всех негативных качествах данного участника: ",
+                                              "Напишите о том, что не понравилось в работе участника команды, "
+                                              "что можно улучшить:",
                                               reply_markup=ReplyKeyboardRemove())
             self.bot.register_next_step_handler(feedback2, self.confirm_evaluation)
         except IntegrityError:
@@ -390,8 +392,8 @@ class StudHelperBot:
                                         f"Проверьте правильность ввода\n\n"
                                         f"Оцениваемый: {User.get_name_by_id(self.review_dict[message.chat.id].get_assessored())}\n"
                                         f"Общая оценка: {self.review_dict[message.chat.id].get_general_mark()}\n\n"
-                                        f"Положительные качества: {self.review_dict[message.chat.id].get_advantages()}\n\n"
-                                        f"Негативные качества: {self.review_dict[message.chat.id].get_disadvantages()}",
+                                        f"Что понравилось в работе участника команды, положительные моменты: {self.review_dict[message.chat.id].get_advantages()}\n\n"
+                                        f"Что не понравилось, что можно улучшить: {self.review_dict[message.chat.id].get_disadvantages()}",
                                         reply_markup=markup)
 
             self.bot.register_next_step_handler(msg, self.end_of_evaluation)

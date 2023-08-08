@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Управление ботом</title>
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="../common/reset.css">
+    <link rel="stylesheet" href="manage_bot.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    <script src="manage_bot.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="header">
+
+            <div class="hamburger">
+                <div class="spans">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <div class="title">StudHelper</div>
+        </div>
+
+        <div class="main">
+
+            <div class="side_menu">
+                <button class="show_teams">Список команд</button>
+                <button class="show_final_report">Итоговый отчёт</button>
+                <button class="manage_bot">Управление ботом</button>
+                <a href="/dbinterface" target="_blank"><button class="manage_db">Управление базой данных</button></a>
+                <a href="/sprints"><button class="sprints">Отчёты по спринтам</button></a>
+                <a href="/debtors"><button class="debtors">Должники</button></a>
+            </div>
+
+            <div class="info_window">
+                <div class="nav_div">
+                    <div class="buttons_div">
+                        <div class="on_off_button">
+                            <span class="on_off_title">Включить/выключить бота:</span>
+                            <label class="switch">
+                                <input type="checkbox" id="checkbox_bot">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+        
+                        <div class="on_off_review_button">
+                            <span class="on_off_review_title">Включить/выключить возможность оценивания:</span>
+                            <label class="switch">
+                                <input type="checkbox" id="checkbox_review">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="status_div">
+                        <button class="get_bot_status">Получить статус бота</button>
+                        <span class="result_title">Результат запроса:</span>
+                        <span class="status_text"></span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+</body>
+
+</html>
