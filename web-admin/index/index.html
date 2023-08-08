@@ -4,14 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <title>Админка</title>
-    <link rel="stylesheet" href="reset.css">
-    <link rel="stylesheet" href="final_report.css">
+    <link rel="stylesheet" href="../common/reset.css">
+    <link rel="stylesheet" href="index/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400" rel="stylesheet">
-    <script src="final_report.js" defer></script>
+    <script src="index/teams.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/xlsx@0.15.1/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -34,12 +33,11 @@
                 <button class="show_final_report">Итоговый отчёт</button>
                 <button class="manage_bot">Управление ботом</button>
                 <a href="/dbinterface" target="_blank"><button class="manage_db">Управление базой данных</button></a>
+                <a href="/sprints"><button class="sprints">Отчёты по спринтам</button></a>
+                <a href="/debtors"><button class="debtors">Должники</button></a>
             </div>
 
-
             <div class="table_window">
-                <button class="excel_button">Скачать в Excel формате</button>
-
                 <div class="table_div">
                     <table class="table"></table>
                 </div>

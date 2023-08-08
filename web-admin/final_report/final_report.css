@@ -7,9 +7,9 @@ a {
     color: inherit;
 }
 
-body {
+html, body {
     overflow: auto;
-    height: 100%;
+    min-height: 100vh;
 }
 
 .container {
@@ -99,7 +99,7 @@ body {
     visibility: visible;
 }
 
-.manage_bot.show, .manage_db.show {
+.manage_bot.show, .manage_db.show, .sprints.show, .debtors.show {
     width: 100%;
     opacity: 1;
     visibility: visible;
@@ -134,7 +134,7 @@ body {
     visibility: hidden;
 }
 
-.manage_bot, .manage_db {
+.manage_bot, .manage_db, .sprints, .debtors {
     width: 0;
     height: 60px;
     opacity: 0;
@@ -142,129 +142,41 @@ body {
     padding-left: 25px;
     color: #28293d;
     transition: 0.15s;
+    visibility: hidden;
 }
 
-.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover {
+.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover, .sprints:hover, .debtors:hover {
     background: #28293d;
     color: #feffff;
 }
 
-.info_window {
+.table_window {
     width: 100%;
-    min-height: 100%;
-    transition: 0.25s;
-    font-family: 'Montserrat', sans-serif;
-    margin-right: 80px;
 }
 
-.nav_div {
+.excel_button {
     display: flex;
-    flex-direction: row;
-    margin: 50px 0 0 100px;
-}
-
-.team_info_div {
-    display: flex;
-    flex-direction: column;
-}
-
-.team_and_product_name_info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 38px;
-}
-
-.team_name {
+    padding: 18px 31px;
+    font-size: 20px;
     font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 40px;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-.product_name {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 24px;
-    font-weight: bold;
-    margin-bottom: 8px;
-    margin-left: 2px;
-}
-
-.team_id_info {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    margin-left: 4px;
-}
-
-.team_id {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-    margin-bottom: 8px;
-}
-
-.id {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-    margin-bottom: 8px;
-    margin-left: 10px;
-}
-
-.admin_info {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    margin-left: 4px;
-}
-
-.administrator {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-    margin-bottom: 8px;
-}
-
-.admin {
-    font-family: 'Montserrat', sans-serif;
-    color:#000000;
-    font-size: 22px;
-    margin-bottom: 8px;
-    margin-left: 10px;
+    color: #feffff;
+    background: #28293d;
+    width: auto;
+    margin-left: 25px;
+    margin-top: 25px;
+    margin-bottom: 25px;
 }
 
 .table_div {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    margin-left: 300px;
-}
-
-.rectangle {
-    height: 55px;
-    border: 1px solid;
-    background: #28293D;
-}
-
-.table_title {
-    font-family: 'Montserrat', sans-serif;
-    color:#FEFFFF;
-    font-size: 30px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 50px;
+    text-align: left;
 }
 
 .table {
 	width: 100%;
 	border: none;
     font-family: 'Montserrat', sans-serif;
-    font-size: 16px;
-    margin-top: 8px;
+    font-size: 14px;
 }
 
 .table thead th {

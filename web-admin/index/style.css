@@ -99,7 +99,7 @@ html, body {
     visibility: visible;
 }
 
-.manage_bot.show, .manage_db.show {
+.manage_bot.show, .manage_db.show, .sprints.show, .debtors.show {
     width: 100%;
     opacity: 1;
     visibility: visible;
@@ -134,7 +134,7 @@ html, body {
     visibility: hidden;
 }
 
-.manage_bot, .manage_db {
+.manage_bot, .manage_db, .sprints, .debtors {
     width: 0;
     height: 60px;
     opacity: 0;
@@ -145,26 +145,13 @@ html, body {
     visibility: hidden;
 }
 
-.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover {
+.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover, .sprints:hover, .debtors:hover {
     background: #28293d;
     color: #feffff;
 }
 
 .table_window {
     width: 100%;
-}
-
-.excel_button {
-    display: flex;
-    padding: 18px 31px;
-    font-size: 20px;
-    font-family: 'Montserrat', sans-serif;
-    color: #feffff;
-    background: #28293d;
-    width: auto;
-    margin-left: 25px;
-    margin-top: 25px;
-    margin-bottom: 25px;
 }
 
 .table_div {

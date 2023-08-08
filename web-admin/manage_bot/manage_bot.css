@@ -7,9 +7,9 @@ a {
     color: inherit;
 }
 
-html, body {
+body {
     overflow: auto;
-    min-height: 100vh;
+    height: 100%;
 }
 
 .container {
@@ -99,7 +99,7 @@ html, body {
     visibility: visible;
 }
 
-.manage_bot.show, .manage_db.show {
+.manage_bot.show, .manage_db.show, .sprints.show, .debtors.show {
     width: 100%;
     opacity: 1;
     visibility: visible;
@@ -134,7 +134,7 @@ html, body {
     visibility: hidden;
 }
 
-.manage_bot, .manage_db {
+.manage_bot, .manage_db, .sprints, .debtors {
     width: 0;
     height: 60px;
     opacity: 0;
@@ -145,57 +145,134 @@ html, body {
     visibility: hidden;
 }
 
-.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover {
+.show_teams:hover, .manage_bot:hover, .manage_db:hover, .show_final_report:hover, .sprints:hover, .debtors:hover {
     background: #28293d;
     color: #feffff;
 }
 
-.table_window {
-    width: 100%;
+.nav_div {
+    display: flex;
+    flex-direction: row;
+    margin: 36px 0 0 44px;
 }
 
-.table_div {
-    width: 100%;
-    text-align: left;
+.buttons_div {
+    display: flex;
+    flex-direction: column;
 }
 
-.table {
-	width: 100%;
-	border: none;
+.on_off_button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 38px;
+}
+
+.on_off_review_button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.on_off_title,
+.on_off_review_title {
     font-family: 'Montserrat', sans-serif;
-    font-size: 14px;
+    font-size: 20px;
+    margin-bottom: 8px;
 }
 
-.table thead th {
-	border: none;
-	padding: 10px 15px;
-	background: #d8d8d8;
-	border-left: 1px solid #ddd;
-	border-right: 1px solid #ddd;
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 80px;
+    height: 37px;
+    align-self: start;
 }
 
-.table tbody th {
-	padding: 10px 15px
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
 }
 
-.table tbody td {
-	border-left: 1px solid #ddd;
-	border-right: 1px solid #ddd;
-	padding: 10px 15px
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #28293D;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
-.table thead tr th:first-child, .table tbody tr td:first-child {
-	border-left: none;
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 6px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
 
-.table thead tr th:last-child, .table tbody tr td:last-child {
-	border-right: none;
+input:checked+.slider {
+    background-color: #6FD489;
 }
 
-.table tbody tr:nth-child(even){
-	background: #f3f3f3;
+input:focus+.slider {
+    box-shadow: 0 0 1px #6FD489;
 }
 
-.table tbody tr:hover {
-    background: #a3edb5;
+input:checked+.slider:before {
+    -webkit-transform: translateX(46px);
+    -ms-transform: translateX(46px);
+    transform: translateX(46px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+.status_div {
+    display: flex;
+    flex-direction: column;
+    margin-left: 265px;
+}
+
+.get_bot_status {
+    padding: 18px 31px;
+    font-size: 20px;
+    font-family: 'Montserrat', sans-serif;
+    color: #FEFFFF;
+    background: #28293D;
+    max-width: 286px;
+}
+
+.get_bot_status:active,
+.get_bot_status:focus {
+    background: #A1A7B2;
+}
+
+.result_title {
+    margin-top: 24px;
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-family: 'Montserrat', sans-serif;
+    color: #28293D;
+}
+
+.status_div {
+    max-width: 750px;
 }

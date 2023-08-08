@@ -72,14 +72,16 @@ class User:
             self.username = None
             self.teamname = None
             self.role = None
-            self.tg_id = 0
+            self.tg_id = None
+            self.db_id = None
+            self.team_id = None
             self.counter_of_people = 0
 
-    def set_db_id(self):
+    def set_db_id_from_db(self):
         self.db_id = self.get_db_id_from_db()
 
     def get_team_id_from_db(self):
-        self.set_db_id()
+        self.set_db_id_from_db()
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
@@ -119,6 +121,9 @@ class User:
         finally:
             connection.close()
 
+    def set_db_id(self, db_id):
+        self.db_id = db_id
+
     def set_invite_code(self, invite_code):
         self.invite_code = invite_code
 
@@ -155,8 +160,11 @@ class User:
     def get_username(self):
         return self.username
 
-    def set_team_id(self):
+    def set_team_id_by_db(self):
         self.team_id = self.get_team_id_from_db()
+
+    def set_team_id(self, team_id):
+        self.team_id = team_id
 
     def get_team_id(self):
         return self.team_id
@@ -209,7 +217,11 @@ class User:
                                 self.tg_id))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
 
-                self.set_db_id()
+                self.set_db_id_from_db()
+
+                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s) ON DUPLICATE KEY UPDATE telegram_id=VALUES(telegram_id);"
+                cursor.execute(insert_user, self.tg_id)
+                connection.commit()
         finally:
             connection.close()
 
@@ -223,45 +235,20 @@ class User:
                                self.tg_id)  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
                 connection.commit()
 
-                self.set_db_id()
+                self.set_db_id_from_db()
         finally:
             connection.close()
 
     def add_user_to_team_members(self):
-        self.set_team_id()
+        if self.team_id is None:
+            self.set_team_id_by_db()
+
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                insert_user = "INSERT INTO `team_members` (`team_id`, `user_id`, `role`, `invite_code`) VALUES (%s, %s, %s, %s);"
-                cursor.execute(insert_user, (self.team_id, self.db_id, self.role,
-                                             self.invite_code))  # cursor.execute(insert_user, (Сюда переменные через запятую, которые надо добавть в таблицу.))
+                insert_user = "INSERT INTO `team_members` (`team_id`, `user_id`, `role`) VALUES (%s, %s, %s);"
+                cursor.execute(insert_user, (self.team_id, self.db_id, self.role))
                 connection.commit()
-        finally:
-            connection.close()
-
-    def update_user_id_in_team_members(self):
-        self.set_db_id()
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                insert_user = "UPDATE `team_members` SET `user_id` = %s WHERE `invite_code` = %s"
-                cursor.execute(insert_user, (self.db_id, self.invite_code))
-                connection.commit()
-        finally:
-            connection.close()
-
-    def get_id_by_invite_code(self):
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                insert_user = "SELECT `user_id` " \
-                              "FROM `team_members`" \
-                              "WHERE `invite_code` = %s"
-                cursor.execute(insert_user, self.invite_code)
-                result = cursor.fetchone()
-                connection.commit()
-
-                return result['user_id']
         finally:
             connection.close()
 
@@ -303,17 +290,6 @@ class User:
         finally:
             connection.close()
 
-    def add_username(self):
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                # sql_request = "UPDATE `Пользователи` SET `User_name` = %s WHERE `Ид` = %s"  # строка для SQL-запроса
-                sql_request = "UPDATE `users` SET `tg_username` = %s WHERE `user_id` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.username, self.db_id))
-                connection.commit()
-        finally:
-            connection.close()
-
     def add_group(self):
         connection = connect_to_db()
         try:
@@ -338,7 +314,7 @@ class User:
             connection.close()
 
     def get_teamname_from_bd(self):
-        self.set_db_id()
+        self.set_db_id_from_db()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -352,7 +328,7 @@ class User:
             connection.close()
 
     def get_product_from_db(self):
-        self.set_db_id()
+        self.set_db_id_from_db()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -366,7 +342,7 @@ class User:
 
     def get_teammates(self):
         if self.team_id is None:
-            self.set_team_id()
+            self.set_team_id_by_db()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -382,11 +358,30 @@ class User:
         finally:
             connection.close()
 
+    def get_team_code(self):
+        if self.team_id is None:
+            self.set_team_id_by_db()
+        if self.db_id is None:
+            self.set_db_id_from_db()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = ("SELECT `code` from `teams` "
+                               "WHERE team_id = %s")
+                cursor.execute(sql_request, self.team_id)
+                code = cursor.fetchone()
+                connection.commit()
+
+            return code['code'] if code is not None else None
+        finally:
+            connection.close()
+
     def get_teammates_excludes_me(self):
         if self.team_id is None:
-            self.set_team_id()
+            self.set_team_id_by_db()
         if self.db_id is None:
-            self.set_db_id()
+            self.set_db_id_from_db()
 
         connection = connect_to_db()
         try:
@@ -405,7 +400,7 @@ class User:
 
     def get_reports(self):
         if self.db_id is None:
-            self.set_db_id()
+            self.set_db_id_from_db()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
@@ -423,11 +418,10 @@ class User:
     # Метод для проверки наличия пользователя в команде
     def is_in_team(self):
         if self.db_id is None:
-            self.set_db_id()
+            self.set_db_id_from_db()
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                # user_from_db = "SELECT `Команда` FROM `Пользователи` WHERE `Ид` = %s or `User_name` = %s"
                 user_from_db = "SELECT `team_id` FROM `team_members` WHERE `user_id` = %s"
                 cursor.execute(user_from_db, self.db_id)
                 check = cursor.fetchall()
@@ -440,7 +434,7 @@ class User:
 
     def is_admin(self):
         if self.db_id is None:
-            self.set_db_id()
+            self.set_db_id_from_db()
 
         connection = connect_to_db()
         try:
@@ -469,48 +463,6 @@ class User:
         if not check:
             return False
         return True
-
-    def check_team_with_code(self, code):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `team_id` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
-                result = cursor.fetchall()
-                connection.commit()
-                if result:
-                    return True
-                return False
-        finally:
-            connection.close()
-
-    def get_team_using_code(self, code):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                # sql_request = "SELECT `Команда` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
-                sql_request = "SELECT `team_name` FROM `teams` WHERE `team_id` IN (SELECT `team_id` FROM `team_members` WHERE `invite_code` = %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
-                result = cursor.fetchall()
-                connection.commit()
-                for row in result:
-                    return row['team_name']
-        finally:
-            connection.close()
-
-    def get_role_using_code(self, code):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                # sql_request = "SELECT `Роль` FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
-                sql_request = "SELECT `role` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
-                result = cursor.fetchall()
-                connection.commit()
-                for row in result:
-                    return row['role']
-        finally:
-            connection.close()
 
     def update_id_in_bd(self):
         connection = connect_to_db()
@@ -547,12 +499,16 @@ class User:
                               "WHERE `user_id` = %s"
                 cursor.execute(sql_request, (self.name, self.group, self.tg_id, user_id))
                 connection.commit()
+
+                insert_user = "INSERT INTO `all_bot_identifiers` VALUES (%s) ON DUPLICATE KEY UPDATE telegram_id=VALUES(telegram_id);"
+                cursor.execute(insert_user, self.tg_id)
+                connection.commit()
         finally:
             connection.close()
 
     def get_who_evaluated_me(self):
         if self.db_id is None:
-            self.set_db_id()
+            self.set_db_id_from_db()
 
         connection = connect_to_db()
         try:
@@ -571,9 +527,9 @@ class User:
 
     def get_count_teammates(self):
         if self.team_id is None:
-            self.set_team_id()
+            self.set_team_id_by_db()
         if self.db_id is None:
-            self.set_db_id()
+            self.set_db_id_from_db()
 
         connection = connect_to_db()
         try:
@@ -637,5 +593,86 @@ class User:
                 sql_request = "DELETE FROM `team_members` WHERE `user_id` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, user_id)
                 connection.commit()
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_all_tg_ids():
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `telegram_id` FROM `all_bot_identifiers`"  # строка для SQL-запроса
+                cursor.execute(sql_request)
+                ids = cursor.fetchall()
+                connection.commit()
+                return ids
+        finally:
+            connection.close()
+
+    def get_name_from_db(self):
+        if self.db_id is None:
+            self.set_db_id_from_db()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `name` FROM `users`" \
+                              "WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                user_result = cursor.fetchone()
+                connection.commit()
+                return user_result['name']
+        finally:
+            connection.close()
+
+    def get_group_from_db(self):
+        if self.db_id is None:
+            self.set_db_id_from_db()
+
+        connection = connect_to_db()
+        try:
+            with connection.cursor() as cursor:
+                sql_request = "SELECT `group_num` FROM `users`" \
+                              "WHERE `user_id` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, self.db_id)
+                group_num = cursor.fetchone()
+                connection.commit()
+                return group_num['group_num']
+        finally:
+            connection.close()
+
+    @staticmethod
+    def get_user_from_db(tg_id):
+        connection = connect_to_db()
+
+        try:
+            with connection.cursor() as cursor:
+                sql_request = ("SELECT `users`.`user_id`, `users`.`name`, `users`.`group_num`, `team_members`.team_id, `team_members`.role, `teams`.team_name "
+                               "FROM `users` "
+                               "LEFT JOIN `team_members` ON `users`.user_id = `team_members`.user_id "
+                               "LEFT JOIN `teams` ON `team_members`.team_id = `teams`.team_id "
+                               "WHERE `users`.`tg_id` = %s")
+                cursor.execute(sql_request, tg_id)
+
+                user_from_users = cursor.fetchone()
+                connection.commit()
+
+                if user_from_users is None:
+                    user_result = User()
+                    user_result.set_tg_id(tg_id)
+
+                    return user_result
+
+                user_result = User()
+
+                user_result.set_tg_id(tg_id)
+                user_result.set_db_id(user_from_users['user_id'])
+                user_result.set_name(user_from_users['name'])
+                user_result.set_group(user_from_users['group_num'])
+                user_result.set_team_id(user_from_users['team_id'])
+                user_result.set_role(user_from_users['role'])
+                user_result.set_teamname(user_from_users['team_name'])
+
+                return user_result
         finally:
             connection.close()

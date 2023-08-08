@@ -1,1 +1,7 @@
-AddDefaultCharset utf-8
+AuthType Basic
+AuthName "Thats protected Area!"
+AuthUserFile /home/web-site/web-site.site/www/.htpasswd
+Require valid-user
+<Files .htpasswd>
+   deny from all
+</Files>

@@ -1,6 +1,7 @@
+import uuid
+
 import pymysql.cursors
 from config import host, user, password, db_name
-from user import User
 
 
 # Функция для подключения к базе данных
@@ -20,6 +21,10 @@ def connect_to_db():
         print("Connection error!", ex)
 
 
+def create_unique_inv_code():
+    return str(uuid.uuid1())[:8]
+
+
 class Team:
     # Конструктор
     def __init__(self, *args):
@@ -28,7 +33,7 @@ class Team:
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
-            self.team_codes = []
+            self.code = ''
             self.admin_id = args[1]
             self.team_id = None
         else:
@@ -36,34 +41,22 @@ class Team:
             self.size_of_team = None
             self.product = None
             self.counter_of_people = 0
-            self.team_codes = []
+            self.code = ''
             self.admin_id = 0
             self.team_id = None
 
-    def set_team_id(self):
+    def get_team_id(self):
+        return self.team_id
+
+    def set_team_id_by_db(self):
         connection = connect_to_db()
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                sql_request = "SELECT `team_id` FROM teams where `team_name` = %s"  # строка для SQL-запроса
+                sql_request = "SELECT `team_id` FROM teams WHERE `team_name` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, self.teamname)
                 result = cursor.fetchone()
                 connection.commit()
                 self.team_id = result['team_id']
-        finally:
-            connection.close()
-
-    def check_team_with_code(self, code):
-        connection = connect_to_db()
-        try:
-            with connection.cursor(pymysql.cursors.DictCursor) as cursor:
-                # sql_request = "SELECT `Название` FROM `Команды` WHERE `Код` = %s"  # строка для SQL-запроса
-                sql_request = "SELECT `user_id` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
-                result = cursor.fetchall()
-                connection.commit()
-                if result:
-                    return True
-                return False
         finally:
             connection.close()
 
@@ -72,11 +65,11 @@ class Team:
         connection = connect_to_db()
         try:
             with connection.cursor() as cursor:
-                # sql_request = "INSERT INTO `Команды` (`Название`, `Администратор`, `Ид`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
-                sql_request = "INSERT INTO `teams` (`team_name`, `product_name`, `admin_user_id`) VALUES (%s, %s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.teamname, self.product, self.admin_id))
+                sql_request = "INSERT INTO `teams` (`team_name`, `product_name`, `admin_user_id`, `code`) VALUES (%s, %s, %s, %s)"  # строка для SQL-запроса
+                cursor.execute(sql_request, (self.teamname, self.product, self.admin_id, self.code))
                 connection.commit()
 
+            self.set_team_id_by_db()
         finally:
             connection.close()
 
@@ -101,18 +94,6 @@ class Team:
                 # sql_request = "UPDATE `Команды` SET Продукт = (%s) WHERE Название = (%s)"  # строка для SQL-запроса
                 sql_request = "UPDATE `teams` SET `product_name` = (%s) WHERE `team_name` = (%s)"  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.product, self.teamname))
-                connection.commit()
-        finally:
-            connection.close()
-
-    # Метод для заполнения поля 'Код команды'
-    def add_team_code(self, user_id, role, code):  # СЮДА ПЕРЕДАВАЛОСЬ НАЗВАНИЕ КОМАНДЫ, А НУЖНО, ЧТОБЫ ПЕРЕДАВАЛСЯ АЙДИ
-        self.set_team_id()
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                sql_request = "INSERT INTO `team_members` (`team_id`, `user_id`, `role`, `invite_code`) VALUES (%s, %s, %s, %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, (self.team_id, user_id, role, code))
                 connection.commit()
         finally:
             connection.close()
@@ -171,23 +152,6 @@ class Team:
             connection.close()
 
     @staticmethod
-    def get_admin_of_team(code):
-        connection = connect_to_db()
-        try:
-            with connection.cursor() as cursor:
-                # sql_request = "SELECT Команда FROM `Коды` WHERE `Код` = %s"  # строка для SQL-запроса
-                # cursor.execute(sql_request, code)
-
-                # sql_request = "SELECT Ид FROM `Команды` WHERE `Название` = (SELECT Команда FROM `Коды` WHERE `Код` = %s)"  # строка для SQL-запроса
-                sql_request = "SELECT `admin_user_id` FROM `teams` WHERE `team_id` IN (SELECT `team_id` FROM `team_members` WHERE `invite_code` = %s)"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
-                result = cursor.fetchone()
-                connection.commit()
-                return result['admin_user_id']
-        finally:
-            connection.close()
-
-    @staticmethod
     def check_teamname_for_unique(teamname):
         connection = connect_to_db()
         try:
@@ -227,28 +191,28 @@ class Team:
         try:
             with connection.cursor() as cursor:
                 sql_request = "SELECT `team_name` FROM `teams` " \
-                              "INNER JOIN `team_members` ON `teams`.`team_id` = `team_members`.`team_id`" \
-                              "WHERE `team_members`.`invite_code` = %s"  # строка для SQL-запроса
+                              "WHERE `code` = %s"  # строка для SQL-запроса
                 cursor.execute(sql_request, code)
                 result = cursor.fetchone()
                 connection.commit()
 
-                return result['team_name']
+                return result['team_name'] if result is not None else None
         finally:
             connection.close()
 
     @staticmethod
-    def get_user_id_by_code(code):
+    def get_team_id_by_teamname(teamname):
         connection = connect_to_db()
 
         try:
             with connection.cursor() as cursor:
-                sql_request = "SELECT `user_id` FROM `team_members` WHERE `invite_code` = %s"  # строка для SQL-запроса
-                cursor.execute(sql_request, code)
+                sql_request = "SELECT `team_id` FROM `teams` " \
+                              "WHERE `team_name` = %s"  # строка для SQL-запроса
+                cursor.execute(sql_request, teamname)
                 result = cursor.fetchone()
                 connection.commit()
 
-                return result['user_id']
+                return result['team_id'] if result is not None else -1
         finally:
             connection.close()
 
@@ -271,6 +235,9 @@ class Team:
     def set_size_of_team(self, size):
         self.size_of_team = size
 
+    def set_team_id(self, team_id):
+        self.team_id = team_id
+
     def get_counter_of_people(self):
         return self.counter_of_people
 
@@ -278,13 +245,53 @@ class Team:
         self.counter_of_people = counter
 
     def set_team_code(self, code):
-        self.team_codes.insert(0, code)
+        self.code = code
+
+    def create_team_code(self):
+        self.code = create_unique_inv_code()
 
     def get_team_code(self):
-        return self.team_codes[0]
+        return self.code
 
     def get_admin(self):
         return self.admin_id
 
     def set_admin(self, admin_id):
         self.admin_id = admin_id
+
+    @staticmethod
+    def get_team_from_db(tg_id):
+        # self.teamname = None +
+        # self.product = None +
+        # self.code = '' +
+        # self.admin_id = 0 +
+        # self.team_id = None +
+
+        connection = connect_to_db()
+
+        try:
+            with connection.cursor() as cursor:
+                sql_request = (
+                    "SELECT `teams`.`team_id`, `teams`.team_name, `teams`.product_name, `teams`.admin_user_id, `teams`.code "
+                    "FROM `teams` "
+                    "LEFT JOIN `team_members` ON `teams`.team_id = `team_members`.team_id "
+                    "LEFT JOIN `users` ON `team_members`.user_id = `users`.user_id "
+                    "WHERE `users`.`tg_id` = %s")
+                cursor.execute(sql_request, tg_id)
+
+                result = cursor.fetchone()
+
+                if result is None:
+                    return Team()
+
+                team_result = Team()
+
+                team_result.set_team_id(result['team_id'])
+                team_result.set_teamname(result['team_name'])
+                team_result.set_product(result['product_name'])
+                team_result.set_admin(result['admin_user_id'])
+                team_result.set_team_code(result['code'])
+
+                return team_result
+        finally:
+            connection.close()

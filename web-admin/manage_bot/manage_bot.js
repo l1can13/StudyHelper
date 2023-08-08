@@ -1,7 +1,7 @@
 function getBotStatusText() {
     let result;
     $.ajax({
-        url: 'get_bot_status.php',
+        url: '../php/get_bot_status.php',
         method: 'GET',
         async: false,
     }).done(function (data, textStatus, jqXHR) {
@@ -14,7 +14,7 @@ function getBotStatusText() {
 function getBotStatus() {
     let result;
     $.ajax({
-        url: 'is_bot_active.php',
+        url: '../php/is_bot_active.php',
         method: 'GET',
         async: false,
     }).done(function (data, textStatus, jqXHR) {
@@ -27,7 +27,7 @@ function getBotStatus() {
 function getReviewStatus() {
     let result;
     $.ajax({
-        url: 'is_review_active.php',
+        url: '../php/is_review_active.php',
         method: 'GET',
         async: false,
     }).done(function (data, textStatus, jqXHR) {
@@ -39,7 +39,7 @@ function getReviewStatus() {
 
 function changeBotStatus(status) {
     $.ajax({
-        url: (status === 'off') ? 'turn_off_bot.php' : 'turn_on_bot.php',
+        url: (status === 'off') ? '../php/turn_off_bot.php' : '../php/turn_on_bot.php',
         method: 'POST',
         async: false,
     });
@@ -47,7 +47,7 @@ function changeBotStatus(status) {
 
 function changeReviewVisibility(review) {
     $.ajax({
-        url: review ? 'turn_on_review.php' : 'turn_off_review.php',
+        url: review ? '../php/turn_on_review.php' : '../php/turn_off_review.php',
         method: 'POST',
         async: false,
     });
@@ -63,6 +63,8 @@ let getBotStatusButton = document.querySelector('.get_bot_status');
 let statusText = document.querySelector('.status_text');
 let checkboxBot = document.querySelector('#checkbox_bot');
 let checkboxReview = document.querySelector('#checkbox_review');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
 switch (getBotStatus()) {
     case '1':
@@ -90,6 +92,8 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 getBotStatusButton.addEventListener('click', () => {
@@ -114,9 +118,9 @@ checkboxReview.addEventListener('change', (event) => {
 });
 
 showTeams.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = '../../';
 });
 
 showFinalReport.addEventListener('click', () => {
-    window.location.href = 'final_report.html';
+    window.location.href = '../final_report/final_report.html';
 });

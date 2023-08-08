@@ -39,7 +39,7 @@ let infoDiv = document.querySelector('.info_div');
 let arrFinalReport = [], arrIdAndRole = [];
 let helpArr = ["Название команды", "Роль", "Имя", "Номер спринта", "Текст отчета"];
 
-arrFinalReport = ajaxRequest("sprints.php");
+arrFinalReport = ajaxRequest("../php/sprints.php");
 arrFinalReport.unshift(helpArr);
 
 let table = createTable(arrFinalReport);
@@ -50,9 +50,9 @@ tableDiv.appendChild(temp);
 let trs = document.querySelectorAll('tr');
 
 showTeams.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = '../index/index.html';
 });
 
 manageBot.addEventListener('click', () => {
-    window.location.href = 'manage_bot.html';
+    window.location.href = '../manage_bot/manage_bot.html';
 });

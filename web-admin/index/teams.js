@@ -31,18 +31,28 @@ let showTeams = document.querySelector('.show_teams');
 let showFinalReport = document.querySelector('.show_final_report');
 let manageBot = document.querySelector('.manage_bot');
 let manageDb = document.querySelector('.manage_db');
-let excelBut = document.querySelector('.excel_button');
 let tableDiv = document.querySelector('.table_div');
 let infoDiv = document.querySelector('.info_div');
+let sprints = document.querySelector('.sprints');
+let debtors = document.querySelector('.debtors');
 
-let arrFinalReport = [], arrIdAndRole = [];
-let helpArr = [["Имя", "Группа", "Команда", "СО", "КО", "Количество отчетов"], ["Имя", "Группа", "Команда"]];
+let arrTeams = [], ids = [];
+let helpArr = [["Команда", "Продукт", "Администратор"], ["Имя", "Группа", "Команда"]];
 
-arrFinalReport = ajaxRequest("final_report.php");
-console.log(arrFinalReport);
-arrFinalReport.unshift(helpArr[0]);
+arrTeams = ajaxRequest("../php/teams.php");
+namesByIds = ajaxRequest("../php/name_by_id.php");
 
-let table = createTable(arrFinalReport);
+for (var i = 0; i < arrTeams.length; ++i) {
+    ids.push(arrTeams[i][2]);
+    for (var j = 0; j < namesByIds.length; ++j) {
+        if (namesByIds[j][0] == arrTeams[i][2]) {
+            arrTeams[i][2] = namesByIds[j][1];
+        }
+    }
+}
+arrTeams.unshift(helpArr[0]);
+
+let table = createTable(arrTeams);
 let temp = document.querySelector('.table');
 temp.innerHTML = table;
 tableDiv.appendChild(temp);
@@ -53,12 +63,10 @@ for (var i = 0; i < trs.length; ++i) {
     trs[i].style.cursor = 'pointer';
     trs[i].addEventListener('click', function() {
         var input_name = this.getElementsByTagName("th")[0].innerHTML;
-        var input_group = this.getElementsByTagName("th")[1].innerHTML;
-        var input_team = this.getElementsByTagName("th")[2].innerHTML;
-        arrIdAndRole = ajaxRequest("find_id_and_role.php?name=" + input_name + '&group=' + input_group +'&team=' + input_team);
-        var input_role = arrIdAndRole[0][1];
-        var input_id = arrIdAndRole[0][0];
-        var url = 'person_list.html?'+ input_name  + '&' + input_id + '&' + input_group + '&' + input_team + '&' + input_role;
+        var input_product = this.getElementsByTagName("th")[1].innerHTML;
+        var input_admin = this.getElementsByTagName("th")[2].innerHTML;
+        var input_id = ids[this.rowIndex - 1];
+        var url = '../team_list/team_list.html?'+ input_name + '&' + input_product + '&' + input_admin + '&' + input_id;
         window.location.href = url; 
     });
 }
@@ -70,18 +78,14 @@ hamburgerButton.addEventListener('click', () => {
     showFinalReport.classList.toggle('show');
     manageBot.classList.toggle('show');
     manageDb.classList.toggle('show');
-});
-
-excelBut.addEventListener('click', () => {
-    var excelFile = XLSX.utils.table_to_book(tableDiv, {sheet: "sheet1"});
-    XLSX.write(excelFile, { bookType: 'xlsx', bookSST: true, type: 'base64' });
-    XLSX.writeFile(excelFile, 'ExportedFile:HTMLTableToExcel' + '.xlsx');
-})
-
-showTeams.addEventListener('click', () => {
-    window.location.href = 'index.html';
+    sprints.classList.toggle('show');
+    debtors.classList.toggle('show');
 });
 
 manageBot.addEventListener('click', () => {
-    window.location.href = 'manage_bot.html';
+    window.location.href = '../manage_bot/manage_bot.html';
+});
+
+showFinalReport.addEventListener('click', () => {
+    window.location.href = '../final_report/final_report.html';
 });
