@@ -1,0 +1,230 @@
+* {
+    box-sizing: border-box;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+html, body {
+    overflow: auto;
+    min-height: 100vh;
+}
+
+.container {
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    height: 100vh;
+}
+
+.header {
+    width: 100%;
+    height: 80px;
+    background: #28293d;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-left: 120px;
+}
+
+.links-ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.links-ul li {
+    transition: .2s;
+}
+
+.links-ul li:hover {
+    color: #6fd489;
+}
+
+.links-ul li:not(:last-child) {
+    margin-right: 25px;
+}
+
+.title {
+    font-family: 'Montserrat', sans-serif;
+    color: #6fd489;
+    font-size: 30px;
+    font-weight: bold;
+    margin-left: 25px;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: calc(100% - 80px);
+}
+
+.main h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 32px;
+    font-weight: bold;
+
+    margin: 80px 0 0 50px;
+}
+
+/* region Меню с вопросами */
+
+.answers_menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    @media only screen and (min-width: 1200px) {
+        max-width: 70%;
+    }
+
+    @media only screen and (min-width: 980px) and (max-width: 1199px) {
+        max-width: 100%;
+    }
+
+    @media only screen and (min-width: 769px) and (max-width: 979px) {
+        max-width: 100%;
+    }
+
+    @media only screen and (min-width: 640px) and (max-width: 768px) {
+        max-width: 100%;
+    }
+
+    @media only screen and (max-width: 639px) {
+        max-width: 100%;
+    }
+}
+
+.answers_parent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+
+    line-height: 30px;
+    letter-spacing: 1px;
+
+    padding: 80px 110px;
+}
+
+.answer_div {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.answer_div svg {
+    margin: 7px 40px 0 0;
+    align-self: flex-start;
+    transition: transform 0.5s ease; /* Анимация переворота */
+    min-width: 40px;
+    max-width: 40px;
+    cursor: pointer;
+}
+
+.answer_div svg path {
+    fill: #28293d;
+    transition: fill 0.5s ease; /* Анимация изменения цвета заливки */
+}
+
+.answer_div.active svg path {
+    fill: #6fd489; /* Изменение цвета заливки на белый */
+}
+
+.answer_div.active svg {
+    transform: rotate(180deg); /* Поворот на 180 градусов */
+    fill: #6fd489; /* Изменение цвета на белый */
+}
+
+.spans {
+    color: black;
+    font-family: 'Montserrat', sans-serif;
+
+    display: flex;
+    flex-direction: column;
+
+    @media only screen and (min-width: 1200px) {
+        font-size: 30px;
+    }
+
+    @media only screen and (min-width: 980px) and (max-width: 1199px) {
+        font-size: 25px;
+    }
+
+    @media only screen and (min-width: 769px) and (max-width: 979px) {
+        font-size: 25px;
+    }
+
+    @media only screen and (min-width: 640px) and (max-width: 768px) {
+        font-size: 25px;
+    }
+
+    @media only screen and (max-width: 639px) {
+        font-size: 25px;
+    }
+}
+
+.answer_span {
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+.response_span {
+    display: flex;
+    flex-direction: column;
+    max-height: 0; /* Изначально задаем высоту 0 */
+    overflow: hidden; /* Скрываем содержимое, выходящее за пределы высоты */
+    transition: max-height 0.5s ease; /* Анимация изменения высоты */
+    margin-top: 20px;
+    margin-bottom: 25px;
+
+    @media only screen and (min-width: 1200px) {
+        font-size: 20px;
+    }
+
+    @media only screen and (min-width: 980px) and (max-width: 1199px) {
+        font-size: 20px;
+    }
+
+    @media only screen and (min-width: 769px) and (max-width: 979px) {
+        font-size: 20px;
+    }
+
+    @media only screen and (min-width: 640px) and (max-width: 768px) {
+        font-size: 20px;
+    }
+
+    @media only screen and (max-width: 639px) {
+        font-size: 20px;
+    }
+}
+
+.response_span img {
+    margin: 15px 0;
+}
+
+.answer_div.active .response_span {
+    max-height: 2000px; /* Автоматический расчет высоты содержимого */
+}
+
+/* endregion Меню с вопросами */
+

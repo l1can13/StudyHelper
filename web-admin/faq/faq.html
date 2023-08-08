@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Спринты</title>
+    <link rel="stylesheet" href="../common/reset.css">
+    <link rel="stylesheet" href="faq.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400" rel="stylesheet">
+    <script src="faq.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">StudHelper</div>
+
+        <div class="links">
+            <ul class="links-ul">
+                <li><a href="/sprints">Отчеты по спринтам</a></li>
+                <li><a href="/debtors">Должники</a></li>
+                <li><a href="/faq">Инструкция к боту StudHelper</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main">
+        <h1>Инструкция для бота StudHelper</h1>
+
+        <div class="answers_menu">
+            <div class="answers_parent">
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Регистрация команды
+                        </span>
+                        <span class="response_span">
+                            Для того чтобы начать работу с ботом, необходимо,
+                            чтобы ScrumMaster (важно!) зарегистрировал команду.
+                            Это можно сделать нажатием кнопки “Регистрация команды”.
+
+                            <img src="source/team_registration/team_registration1.png">
+
+                            Затем необходимо ввести ее название, а также название разрабатываемого продукта
+
+                            <img src="source/team_registration/team_registration2.png">
+
+                            Следующим шагом, необходимо, чтобы администратор команды ввел данные о себе
+
+                            <img src="source/team_registration/team_registration3.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Приглашение других участников команды
+                        </span>
+                        <span class="response_span">
+                            Для того, чтобы другие участники команды могли пользоваться ботом и
+                            их данные интерпретировались верно, администратор команды (ScrumMaster)
+                            должен разослать ссылку-приглашение.
+                            Сделать это необходимо, нажав кнопку “Ссылка-приглашение”.
+
+
+                            <img src="source/invite_teammates/invite_teammates1.png">
+
+                            После перехода по ней, участник автоматически будет добавлен в команду
+                            и ему будет необходимо, также,
+                            как и администратору ранее, ввести имя, фамилию, группу и дополнительно выбрать свою роль.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Удаление участников команды (доступно только для ScrumMaster)
+                        </span>
+                        <span class="response_span">
+                            Чтобы удалить участника команды, необходимо нажать на кнопку
+                            "Удалить участника". Затем, выбрать пользователя из предложенного списка.
+
+                            <img src="source/delete_teammate/delete_teammate1.png">
+                            <img src="source/delete_teammate/delete_teammate2.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Вступление в команду
+                        </span>
+                        <span class="response_span">
+                            Чтобы вступить в команду, необходимо перейти по ссылке,
+                            которую Вам должен прислать администратор команды (ScrumMaster),
+                            команда определятся автоматически.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Отправка отчета по проделанной работе
+                        </span>
+                        <span class="response_span">
+                            Для отправки отчета о проделанной работе необходимо нажать кнопку
+                            “Отправить отчёт” (доступно как администратору, так и обычному члену команды),
+                            затем выбрать спринт, отчет по которому Вы хотите отправить, а затем ввести текст отчета.
+
+                            <img src="source/send_sprint_report/send_sprint_report1.png">
+                            <img src="source/send_sprint_report/send_sprint_report2.png">
+
+                            Отправлять отчет о проделанной работы необходимо
+                            только после окончания спринта или достижения даты ревью сервиса.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Оценивание членов команд
+                        </span>
+                        <span class="response_span">
+                            Возможность оценки сокомандников изначально отключена.
+                            Преподаватель имеет возможность в любой момент включать данную функцию.
+                            После включения данной функции, Вам придет уведомление от бота,
+                            после которого необходимо написать ему “Обновить”,
+                            чтобы произошла актуализация меню кнопок.
+                            После этого нажать на кнопку “Оценить участников команды”.
+                            Затем, необходимо выбрать участника, которого Вы хотите оценить, и следовать инструкциям бота.
+
+                            <img src="source/send_teammate_review/send_teammate_review1.png">
+                            <img src="source/send_teammate_review/send_teammate_review2.png">
+                            <img src="source/send_teammate_review/send_teammate_review3.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Список команды
+                        </span>
+                        <span class="response_span">
+                            Для получения списка команды
+                            необходимо нажать кнопку "Моя команда".
+                            Бот пришлет Вам список команды с именами и ролями членов Вашей команды.
+
+                            <img src="source/my_team/my_team.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Список отправленных отчётов
+                        </span>
+                        <span class="response_span">
+                            Для получения списка отправленных Вами отчётов
+                            необходимо нажать кнопку "Мои отчёты".
+                            Бот пришлет список отправленных Вами отчётов о проделанной работе.
+
+                            <img src="source/my_reports/my_reports.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Удаление отчёта по проделанной работе
+                        </span>
+                        <span class="response_span">
+                            Для удаления отчёта по проделанной работе, необходимо нажать на кнопку
+                            "Удалить отчёт".
+                            Затем, необходимо выбрать спринт, отчёт по которому Вы хотите удалить.
+
+                            <img src="source/delete_report/delete_report1.png">
+                            <img src="source/delete_report/delete_report2.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Изменение отчёта по проделанной работе
+                        </span>
+                        <span class="response_span">
+                            Изменение информации отчёта по проделанной работе происходит во время отправки нового. <br/> <br/>
+                            Например, чтобы изменить отчёт по спринту №1, необходимо начать отправлять отчёт по нему,
+                            и дать согласие на перезапись данного отчёта.
+
+                            <img src="source/rewrite_report/rewrite_report.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Как посмотреть, кто меня оценил?
+                        </span>
+                        <span class="response_span">
+                            Чтобы получить список членов команды, которые Вас оценили,
+                            необходимо нажать на кнопку "Кто меня оценил?".
+
+                            <img src="source/evaluations_of_me/evaluations_of_me.png">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="answer_div">
+                    <svg width="63" height="31" viewBox="0 0 57 31" fill="none" xmlns="http://www.w3.org/2000/svg" onclick="toggleResponse(this.parentNode)">
+                        <path id="arrow_up-[#337]" fill-rule="evenodd" clip-rule="evenodd"
+                              d="M0.822279 1.03179C-0.274646 2.17287 -0.274646 4.02043 0.822279 5.1586L24.0799 29.2906C26.2765 31.5698 29.8401 31.5698 32.0368 29.2906L55.4659 4.98384C56.5516 3.85446 56.5657 2.02991 55.4941 0.885932C54.4 -0.284343 52.5971 -0.295532 51.4861 0.854282L30.0483 23.1011C28.9485 24.2421 27.1681 24.2421 26.0684 23.1011L4.79933 1.03179C3.70241 -0.109284 1.9192 -0.109284 0.822279 1.03179Z"
+                              fill="#797979"/>
+                    </svg>
+
+                    <div class="spans">
+                        <span class="answer_span" onclick="toggleResponse(this.parentNode.parentNode)">
+                            Отчет о команде (доступно только для ScrumMaster)
+                        </span>
+                        <span class="response_span">
+                            Для получения отчёта о команде, необходимо нажать кнопку
+                            "Отчёт о команде", которая доступна только для ScrumMaster.
+
+                            <br/> <br/>
+
+                            После этого, бот пришлет информацию о количестве отчётов,
+                            отправленных каждым членом команды, а также информацию о количестве
+                            поставленных ими оценок.
+
+                            <img src="source/team_report/team_report.png">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
