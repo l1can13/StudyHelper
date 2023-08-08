@@ -24,6 +24,41 @@ html, body {
     height: 80px;
     background: #28293d;
     display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-left: 120px;
+}
+
+.links-ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.links-ul li {
+    transition: .2s;
+}
+
+.links-ul li:hover {
+    color: #6fd489;
+}
+
+.links-ul li:not(:last-child) {
+    margin-right: 25px;
 }
 
 .title {
@@ -32,9 +67,6 @@ html, body {
     font-size: 30px;
     font-weight: bold;
     margin-left: 25px;
-    margin-right: auto;
-    margin-top: auto;
-    margin-bottom: auto;
 }
 
 .main {
