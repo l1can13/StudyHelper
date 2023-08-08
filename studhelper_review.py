@@ -181,11 +181,14 @@ class StudHelperBot:
 
             self.bot.register_next_step_handler(msg, self.continue_registration)
         elif message.text == "Помощь":
-            self.bot.send_message(message.chat.id,
-                                  "Возникла проблема с ботом, или нашли баг?\n\nНапишите @l1can для получения "
-                                  "информации по боту, а также для решения любой проблемы (как создать команду, "
-                                  "переименование/удаление команды, удаление участников, "
-                                  "переименование/удаление продукта, и т.д)")
+            self.bot.send_message(
+                message.chat.id,
+                "Возникла проблема с ботом, или нашли баг?\n\nНапишите @l1can для получения "
+                "информации по боту, а также для решения любой проблемы (как создать команду, "
+                "переименование/удаление команды, удаление участников, "
+                "переименование/удаление продукта, и т.д)\n\n"
+                "Инструкция по боту находится по адресу: studhelper.online/faq"
+            )
             self.start_message(message)
         elif message.text == "Ссылка-приглашение":
             self.generate_or_get_team_code(message)
