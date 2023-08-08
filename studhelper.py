@@ -604,6 +604,7 @@ class StudHelperBot:
             teamname = Team.get_teamname_by_code(message.text)
             if teamname is not None:
                 if self.user_dict[message.chat.id].is_exists():
+                    self.user_dict[message.chat.id].set_teamname(teamname)
                     self.user_dict[message.chat.id].set_team_id(Team.get_team_id_by_teamname(teamname))
 
                     self.bot.send_message(

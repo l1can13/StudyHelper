@@ -100,7 +100,12 @@ class User:
         try:
             with connection.cursor(pymysql.cursors.DictCursor) as cursor:
                 # sql_request = "SELECT `Имя` FROM `Пользователи` WHERE `Команда` = %s"  # строка для SQL-запроса
-                sql_request = "SELECT `name` FROM `users` WHERE `user_id` IN (SELECT `user_id` FROM `team_members` WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s)) and `user_id` != %s and `user_id` not in (select `assessored_user_id` from `team_members_ratings` where `assessor_user_id` = %s)"  # строка для SQL-запроса
+                sql_request = ("SELECT `name` "
+                               "FROM `users` "
+                               "WHERE `user_id` IN "
+                               "(SELECT `user_id` "
+                               "FROM `team_members` "
+                               "WHERE `team_id` IN (SELECT `team_id` FROM `teams` WHERE `team_name` = %s)) and `user_id` != %s and `user_id` not in (select `assessored_user_id` from `team_members_ratings` where `assessor_user_id` = %s)")  # строка для SQL-запроса
                 cursor.execute(sql_request, (self.teamname, self.db_id, self.db_id))
                 result = cursor.fetchall()
                 connection.commit()

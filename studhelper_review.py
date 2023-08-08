@@ -65,28 +65,15 @@ class StudHelperBot:
         self.sprints = ["Спринт №1", "Спринт №2", "Спринт №3", "Спринт №4", "Спринт №5", "Спринт №6"]
 
     def update(self, message):
-        if message.text.startswith('/start'):
-            self.user_dict[message.chat.id] = User(None, None, None, message.from_user.username, None, None,
-                                                   message.from_user.id)
-            try:
-                self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
-                                                       self.user_dict[message.chat.id].get_db_id())
-            except TypeError:
-                self.team_dict[message.chat.id] = Team(None, None)
+        try:
+            self.user_dict[message.chat.id] = User.get_user_from_db(message.chat.id)
 
-            self.tg_name_of_user_dict[message.chat.id] = ''
-            self.first_hello_dict[message.chat.id] = self.user_dict[message.chat.id].is_in_team()
-        else:
-            self.user_dict[message.chat.id] = User(None, None, None, message.from_user.username, None, None,
-                                                   message.from_user.id)
-            try:
-                self.team_dict[message.chat.id] = Team(self.user_dict[message.chat.id].get_teamname_from_bd(),
-                                                       self.user_dict[message.chat.id].get_db_id())
-            except TypeError:
-                self.team_dict[message.chat.id] = Team(None, None)
+            self.team_dict[message.chat.id] = Team.get_team_from_db(message.chat.id)
+        except TypeError:
+            self.team_dict[message.chat.id] = Team(None, None)
 
-            self.tg_name_of_user_dict[message.chat.id] = ''
-            self.first_hello_dict[message.chat.id] = self.user_dict[message.chat.id].is_in_team()
+        self.tg_name_of_user_dict[message.chat.id] = ''
+        self.first_hello_dict[message.chat.id] = self.user_dict[message.chat.id].is_in_team()
 
     def start(self):
         self.bot.infinity_polling()
@@ -157,14 +144,14 @@ class StudHelperBot:
                 item5 = types.KeyboardButton("Помощь")
                 markup.add(item1)
                 markup.add(item5)
-            if not self.first_hello_dict[message.chat.id]:
+            try:
                 if self.user_dict[message.chat.id].get_username() is not None:
                     self.bot.send_message(message.chat.id, "Привет, " + self.user_dict[message.chat.id].get_username(),
                                           reply_markup=markup)
                 else:
                     self.bot.send_message(message.chat.id, "Привет!", reply_markup=markup)
                 self.first_hello_dict[message.chat.id] = True
-            else:
+            except KeyError:
                 self.bot.send_message(message.chat.id, "Что вы хотите сделать?", reply_markup=markup)
 
     def message_reply(self, message):
@@ -256,9 +243,6 @@ class StudHelperBot:
     def evaluation(self, message):  # функция для оценки участников команды
         if message.chat.id not in self.user_dict or message.chat.id not in self.team_dict:
             self.update(message)
-
-            self.user_dict[message.chat.id].set_role((self.user_dict[message.chat.id].get_role_from_bd()))
-            self.user_dict[message.chat.id].set_teamname((self.user_dict[message.chat.id].get_teamname_from_bd()))
 
         team_members = self.user_dict[
             message.chat.id].get_teammates_only_names()  # temp - словарь, где ключ - Фамилия, а значения - реальные фамилии
@@ -872,6 +856,7 @@ class StudHelperBot:
             teamname = Team.get_teamname_by_code(message.text)
             if teamname is not None:
                 if self.user_dict[message.chat.id].is_exists():
+                    self.user_dict[message.chat.id].set_teamname(teamname)
                     self.user_dict[message.chat.id].set_team_id(Team.get_team_id_by_teamname(teamname))
 
                     self.bot.send_message(
@@ -1256,14 +1241,14 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.confirm_enter, self.set_report_text, report)
 
 
-all_users = User.get_all_tg_ids()
-
-message_text = 'В боте произошло обновление!\n\n' \
-               'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
-               'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
-
-for chat_id in all_users:
-    send_message(chat_id['telegram_id'], message_text)
+# all_users = User.get_all_tg_ids()
+#
+# message_text = 'В боте произошло обновление!\n\n' \
+#                'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
+#                'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
+#
+# for chat_id in all_users:
+#     send_message(chat_id['telegram_id'], message_text)
 
 bot = StudHelperBot()
 bot.start()
