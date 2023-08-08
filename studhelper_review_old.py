@@ -160,7 +160,7 @@ class StudHelperBot:
             self.choose_sprint_on_review(message)
 
     def get_role_to_create_invitation(self, message):
-        self.team_dict[message.chat.id].set_team_code(create_unique_inv_code())
+        self.team_dict[message.chat.id].create_team_code(create_unique_inv_code())
         # self.invited_user_dict[message.chat.id] = User()
         # if self.tg_name_of_user_dict[message.chat.id] != 'Нет':
         #     self.tg_name_of_user_dict[message.chat.id] = message.text
