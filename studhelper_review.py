@@ -1244,14 +1244,14 @@ class StudHelperBot:
         self.bot.register_next_step_handler(msg, self.confirm_enter, self.set_report_text, report)
 
 
-# all_users = User.get_all_tg_ids()
-#
-# message_text = 'В боте произошло обновление!\n\n' \
-#                'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
-#                'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
-#
-# for chat_id in all_users:
-#     send_message(chat_id['telegram_id'], message_text)
+all_users = User.get_all_tg_ids()
+
+message_text = 'В боте произошло обновление!\n\n' \
+               'Пожалуйста, для корректной работы, напишите \"Обновить\".\n\n' \
+               'При возникновении проблем, просьба обратиться в поддержку (@l1can).'
+
+for chat_id in all_users:
+    send_message(chat_id['telegram_id'], message_text)
 
 bot = StudHelperBot()
 bot.start()
