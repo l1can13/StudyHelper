@@ -25,8 +25,8 @@ def continue_cancel_buttons(button1='Продолжить', button2='Измен�
 class StudHelperBot:
 
     def __init__(self):
-        # self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"  # prod
-        self.token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ"  # dev
+        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"  # prod
+        # self.token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ"  # dev
         self.bot = telebot.TeleBot(self.token)
         self.start_message = self.bot.message_handler(commands=['start'])(self.start_message)
         self.message_reply = self.bot.message_handler(content_types='text')(self.message_reply)
@@ -566,7 +566,8 @@ class StudHelperBot:
                     "Ссылка приглашение в вашу команду (отправьте ее участникам команды, чтобы они могли "
                     "присоединиться):"
                 )
-                self.bot.send_message(message.chat.id, f"https://t.me/StudHelperDevBot?start={team_code}")  # dev
+                # self.bot.send_message(message.chat.id, f"https://t.me/StudHelperDevBot?start={team_code}")  # dev
+                self.bot.send_message(message.chat.id, f"https://t.me/Helping_Student_bot?start={team_code}")  # prod
                 self.start_message(message)
                 return
         except IntegrityError:
