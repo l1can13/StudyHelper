@@ -1,4 +1,4 @@
 host = "studhelper.online"
 user = "studhelper"
-password = "admin123"
+password = "..."
 db_name = "studhelper"
