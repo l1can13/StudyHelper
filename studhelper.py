@@ -25,8 +25,8 @@ def continue_cancel_buttons(button1='Продолжить', button2='Измен�
 class StudHelperBot:
 
     def __init__(self):
-        self.token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"  # prod
-        # self.token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ"  # dev
+        self.token = "..."  # prod
+        # self.token = "..."  # dev
         self.bot = telebot.TeleBot(self.token)
         self.start_message = self.bot.message_handler(commands=['start'])(self.start_message)
         self.message_reply = self.bot.message_handler(content_types='text')(self.message_reply)
