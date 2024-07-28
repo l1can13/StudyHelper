@@ -30,8 +30,8 @@ def continue_cancel_buttons(button1='Продолжить', button2='Измен�
 
 
 def send_message(chat_id, text):
-    token = "5102428240:AAF-GZ5AbcbYVPlCnBG_qwFCrhLiWIPgXIE"  # prod
-    # token = "5954982537:AAFgZ5CIpv7HpfyqXXpyVJups0wCZWbCYFQ"  # dev
+    token = "..."  # prod
+    # token = "..."  # dev
 
     base_url = 'https://api.telegram.org/bot{}'.format(token)
 
